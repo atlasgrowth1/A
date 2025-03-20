@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Customization Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+    }
+    .header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .color-preview {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-left: 10px;
+      vertical-align: middle;
+      border: 1px solid #ddd;
+    }
+    .success-message {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #28a745;
+      color: white;
+      padding: 1rem;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      animation: fadeOut 3s forwards;
+      animation-delay: 2s;
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
+    }
+    .business-selector {
+      margin-bottom: 2rem;
+    }
+    .image-preview {
+      max-width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-top: 1rem;
+      border: 1px solid #ddd;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .preview-button {
+      margin-right: 1rem;
+    }
+    .section-header {
+      margin-top: 2rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+    .data-container {
+      margin-top: 2rem;
+      display: none;
+    }
+    .review-item {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: #f9f9f9;
+    }
+    .review-rating {
+      font-weight: bold;
+      color: #ff9800;
+    }
+    .review-author {
+      font-weight: bold;
+    }
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 1rem;
+    }
+    .photo-item {
+      border-radius: 4px;
+      overflow: hidden;
+      height: 150px;
+    }
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .fetch-status {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+    }
+    .fetch-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .fetch-error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .fetch-loading {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="admin-container">
+      <div class="header">
+        <h1>Website Customization Admin</h1>
+        <p class="text-muted">Customize website appearance for each business</p>
+      </div>
+
+      <div class="business-selector mb-4">
+        <label for="business-select" class="form-label">Select Business:</label>
+        <select class="form-select" id="business-select">
+          <option value="">Loading businesses...</option>
+        </select>
+      </div>
+
+      <!-- Business Customization Section -->
+      <h4 class="section-header">Website Customization</h4>
+      <form id="customization-form">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="heroImage" class="form-label">Hero Image URL:</label>
+              <input type="text" class="form-control" id="heroImage" placeholder="Enter hero image URL">
+              <img id="heroImagePreview" class="image-preview mt-2" src="" alt="Hero image preview">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="aboutImage" class="form-label">About Image URL:</label>
+              <input type="text" class="form-control" id="aboutImage" placeholder="Enter about image URL">
+              <img id="aboutImagePreview" class="image-preview mt-2" src="" alt="About image preview">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="primaryColor" class="form-label">Primary Color:</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="primaryColor" placeholder="#0072CE">
+                <input type="color" class="form-control form-control-color" id="primaryColorPicker" value="#0072CE">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="secondaryColor" class="form-label">Secondary Color:</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="secondaryColor" placeholder="#ff7a00">
+                <input type="color" class="form-control form-control-color" id="secondaryColorPicker" value="#ff7a00">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <div>
+            <button type="button" class="btn btn-outline-primary preview-button" id="previewBtn">
+              <i class="bi bi-eye"></i> Preview Changes
+            </button>
+            <button type="submit" class="btn btn-primary" id="saveBtn">
+              <i class="bi bi-save"></i> Save Changes
+            </button>
+          </div>
+          <button type="button" class="btn btn-outline-secondary" id="resetBtn">Reset to Defaults</button>
+        </div>
+      </form>
+      
+      <!-- Outscraper Data Section -->
+      <h4 class="section-header">Business Data</h4>
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Fetch Business Data from Google Maps</h5>
+              <p class="card-text">Get the latest reviews and photos for this business using Outscraper API.</p>
+              <p><strong>Place ID: </strong><span id="placeIdDisplay">-</span></p>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <div class="alert alert-info">
+                    <h5>Reviews Data</h5>
+                    <p>To import reviews data, you'll need to:</p>
+                    <ol>
+                      <li>Get reviews data from Outscraper as JSON</li>
+                      <li>Save it as <code>/public/data/{slug}-reviews.json</code></li>
+                      <li>Click the button below to import</li>
+                    </ol>
+                  </div>
+                  <button type="button" class="btn btn-primary" id="fetchReviewsBtn">
+                    <i class="bi bi-star-fill"></i> Import Reviews Data
+                  </button>
+                </div>
+                <div class="col-md-6">
+                  <div class="alert alert-info">
+                    <h5>Photos Data</h5>
+                    <p>To import photos data, you'll need to:</p>
+                    <ol>
+                      <li>Get photos data from Outscraper as JSON</li>
+                      <li>Save it as <code>/public/data/{slug}-photos.json</code></li>
+                      <li>Click the button below to import</li>
+                    </ol>
+                  </div>
+                  <button type="button" class="btn btn-success" id="fetchPhotosBtn">
+                    <i class="bi bi-image"></i> Import Photos Data
+                  </button>
+                </div>
+              </div>
+              
+              <div id="reviewsStatus" class="fetch-status"></div>
+              <div id="photosStatus" class="fetch-status"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Data Display Section -->
+      <div id="dataContainer" class="data-container">
+        <ul class="nav nav-tabs" id="dataTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="true">Reviews</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab" aria-controls="photos" aria-selected="false">Photos</button>
+          </li>
+        </ul>
+        <div class="tab-content mt-3" id="dataTabsContent">
+          <div class="tab-pane fade show active" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+            <div id="reviewsContainer">
+              <p>No reviews data available. Use the "Fetch Reviews & Photos" button to get the latest reviews.</p>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="photos" role="tabpanel" aria-labelledby="photos-tab">
+            <div id="photosContainer">
+              <p>No photos data available. Use the "Fetch Reviews & Photos" button to get the latest photos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-message" id="successMessage">
+    Changes saved successfully!
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Customization form elements
+      const businessSelect = document.getElementById('business-select');
+      const customizationForm = document.getElementById('customization-form');
+      const heroImageInput = document.getElementById('heroImage');
+      const aboutImageInput = document.getElementById('aboutImage');
+      const primaryColorInput = document.getElementById('primaryColor');
+      const secondaryColorInput = document.getElementById('secondaryColor');
+      const primaryColorPicker = document.getElementById('primaryColorPicker');
+      const secondaryColorPicker = document.getElementById('secondaryColorPicker');
+      const heroImagePreview = document.getElementById('heroImagePreview');
+      const aboutImagePreview = document.getElementById('aboutImagePreview');
+      const saveBtn = document.getElementById('saveBtn');
+      const previewBtn = document.getElementById('previewBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const successMessage = document.getElementById('successMessage');
+      
+      // Data fetching elements
+      const placeIdDisplay = document.getElementById('placeIdDisplay');
+      const fetchReviewsBtn = document.getElementById('fetchReviewsBtn');
+      const fetchPhotosBtn = document.getElementById('fetchPhotosBtn');
+      const reviewsStatus = document.getElementById('reviewsStatus');
+      const photosStatus = document.getElementById('photosStatus');
+      const dataContainer = document.getElementById('dataContainer');
+      const reviewsContainer = document.getElementById('reviewsContainer');
+      const photosContainer = document.getElementById('photosContainer');
+      
+      // Default values
+      const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
+      const DEFAULT_ABOUT_IMAGE = 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+      const DEFAULT_PRIMARY_COLOR = '#0072CE';
+      const DEFAULT_SECONDARY_COLOR = '#ff7a00';
+      
+      let businesses = [];
+      let currentBusiness = null;
+
+      // Load all businesses
+      async function loadBusinesses() {
+        try {
+          const response = await fetch('/businesses.json');
+          businesses = await response.json();
+          
+          // Clear the select
+          businessSelect.innerHTML = '';
+          
+          // Add options for each business
+          businesses.forEach(business => {
+            const option = document.createElement('option');
+            option.value = business.slug;
+            option.textContent = business.name;
+            businessSelect.appendChild(option);
+          });
+          
+          // If there are businesses, load the first one
+          if (businesses.length > 0) {
+            businessSelect.value = businesses[0].slug;
+            loadBusinessCustomization(businesses[0].slug);
+          }
+        } catch (error) {
+          console.error('Error loading businesses:', error);
+        }
+      }
+
+      // Load customization options for a specific business
+      function loadBusinessCustomization(slug) {
+        currentBusiness = businesses.find(b => b.slug === slug);
+        
+        if (currentBusiness && currentBusiness.customization) {
+          // Set form values
+          heroImageInput.value = currentBusiness.customization.heroImage || DEFAULT_HERO_IMAGE;
+          aboutImageInput.value = currentBusiness.customization.aboutImage || DEFAULT_ABOUT_IMAGE;
+          primaryColorInput.value = currentBusiness.customization.primaryColor || DEFAULT_PRIMARY_COLOR;
+          secondaryColorInput.value = currentBusiness.customization.secondaryColor || DEFAULT_SECONDARY_COLOR;
+          
+          // Set color pickers
+          primaryColorPicker.value = currentBusiness.customization.primaryColor || DEFAULT_PRIMARY_COLOR;
+          secondaryColorPicker.value = currentBusiness.customization.secondaryColor || DEFAULT_SECONDARY_COLOR;
+          
+          // Update image previews
+          heroImagePreview.src = heroImageInput.value;
+          aboutImagePreview.src = aboutImageInput.value;
+        } else {
+          resetToDefaults();
+        }
+      }
+
+      // Reset form to default values
+      function resetToDefaults() {
+        heroImageInput.value = DEFAULT_HERO_IMAGE;
+        aboutImageInput.value = DEFAULT_ABOUT_IMAGE;
+        primaryColorInput.value = DEFAULT_PRIMARY_COLOR;
+        secondaryColorInput.value = DEFAULT_SECONDARY_COLOR;
+        primaryColorPicker.value = DEFAULT_PRIMARY_COLOR;
+        secondaryColorPicker.value = DEFAULT_SECONDARY_COLOR;
+        heroImagePreview.src = DEFAULT_HERO_IMAGE;
+        aboutImagePreview.src = DEFAULT_ABOUT_IMAGE;
+      }
+
+      // Save changes to the server
+      async function saveChanges() {
+        if (!currentBusiness) return;
+        
+        // Update current business customization
+        if (!currentBusiness.customization) {
+          currentBusiness.customization = {};
+        }
+        
+        currentBusiness.customization.heroImage = heroImageInput.value;
+        currentBusiness.customization.aboutImage = aboutImageInput.value;
+        currentBusiness.customization.primaryColor = primaryColorInput.value;
+        currentBusiness.customization.secondaryColor = secondaryColorInput.value;
+        
+        try {
+          // Send updated businesses to the server
+          const response = await fetch('/api/save-customization', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              slug: currentBusiness.slug,
+              customization: currentBusiness.customization
+            })
+          });
+          
+          if (response.ok) {
+            // Show success message
+            successMessage.style.display = 'block';
+            
+            // Hide message after animation completes
+            setTimeout(() => {
+              successMessage.style.display = 'none';
+            }, 5000);
+          } else {
+            alert('Error saving changes. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error saving customization:', error);
+          alert('Error saving changes. Please try again.');
+        }
+      }
+
+      // Preview changes
+      function previewChanges() {
+        if (!currentBusiness) return;
+        
+        const previewUrl = `/${currentBusiness.slug}`;
+        window.open(previewUrl, '_blank');
+      }
+
+      // Event listeners
+      businessSelect.addEventListener('change', function() {
+        loadBusinessCustomization(this.value);
+      });
+      
+      customizationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveChanges();
+      });
+      
+      previewBtn.addEventListener('click', previewChanges);
+      
+      resetBtn.addEventListener('click', resetToDefaults);
+      
+      // Sync color inputs with color pickers
+      primaryColorPicker.addEventListener('input', function() {
+        primaryColorInput.value = this.value;
+      });
+      
+      secondaryColorPicker.addEventListener('input', function() {
+        secondaryColorInput.value = this.value;
+      });
+      
+      primaryColorInput.addEventListener('input', function() {
+        primaryColorPicker.value = this.value;
+      });
+      
+      secondaryColorInput.addEventListener('input', function() {
+        secondaryColorPicker.value = this.value;
+      });
+      
+      // Update image previews when inputs change
+      heroImageInput.addEventListener('input', function() {
+        heroImagePreview.src = this.value;
+      });
+      
+      aboutImageInput.addEventListener('input', function() {
+        aboutImagePreview.src = this.value;
+      });
+      
+      // Fetch reviews from local file
+      async function fetchReviews() {
+        if (!currentBusiness) return;
+        
+        // Show loading status
+        reviewsStatus.textContent = 'Importing reviews data from file...';
+        reviewsStatus.className = 'fetch-status fetch-loading';
+        reviewsStatus.style.display = 'block';
+        fetchReviewsBtn.disabled = true;
+        
+        try {
+          const response = await fetch('/api/fetch-reviews', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              slug: currentBusiness.slug
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            // Update the current business object with the fetched data
+            currentBusiness.reviewsData = data.reviews;
+            
+            // Show success message
+            reviewsStatus.textContent = `Successfully fetched ${data.reviews.length} reviews!`;
+            reviewsStatus.className = 'fetch-status fetch-success';
+            
+            // Display the data
+            displayBusinessData();
+          } else {
+            reviewsStatus.textContent = `Error: ${data.error || 'Failed to fetch reviews'}`;
+            reviewsStatus.className = 'fetch-status fetch-error';
+          }
+        } catch (error) {
+          console.error('Error fetching reviews:', error);
+          reviewsStatus.textContent = 'Error: Failed to fetch reviews. Check console for details.';
+          reviewsStatus.className = 'fetch-status fetch-error';
+        } finally {
+          fetchReviewsBtn.disabled = false;
+        }
+      }
+      
+      // Fetch photos from local file
+      async function fetchPhotos() {
+        if (!currentBusiness) return;
+        
+        // Show loading status
+        photosStatus.textContent = 'Importing photos data from file...';
+        photosStatus.className = 'fetch-status fetch-loading';
+        photosStatus.style.display = 'block';
+        fetchPhotosBtn.disabled = true;
+        
+        try {
+          const response = await fetch('/api/fetch-photos', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              slug: currentBusiness.slug
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            // Update the current business object with the fetched data
+            currentBusiness.photosData = data.photos;
+            
+            // Show success message
+            photosStatus.textContent = `Successfully fetched ${data.photos.length} photos!`;
+            photosStatus.className = 'fetch-status fetch-success';
+            
+            // Display the data
+            displayBusinessData();
+          } else {
+            photosStatus.textContent = `Error: ${data.error || 'Failed to fetch photos'}`;
+            photosStatus.className = 'fetch-status fetch-error';
+          }
+        } catch (error) {
+          console.error('Error fetching photos:', error);
+          photosStatus.textContent = 'Error: Failed to fetch photos. Check console for details.';
+          photosStatus.className = 'fetch-status fetch-error';
+        } finally {
+          fetchPhotosBtn.disabled = false;
+        }
+      }
+      
+      // Display business data (reviews and photos)
+      function displayBusinessData() {
+        if (!currentBusiness) return;
+        
+        // Show the data container
+        dataContainer.style.display = 'block';
+        
+        // Display reviews
+        if (currentBusiness.reviewsData && currentBusiness.reviewsData.length > 0) {
+          reviewsContainer.innerHTML = '';
+          
+          currentBusiness.reviewsData.forEach(review => {
+            const reviewElement = document.createElement('div');
+            reviewElement.className = 'review-item';
+            
+            reviewElement.innerHTML = `
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <span class="review-author">${review.author_name || 'Anonymous'}</span>
+                  <small class="text-muted ms-2">${new Date(review.date || Date.now()).toLocaleDateString()}</small>
+                </div>
+                <span class="review-rating">${'★'.repeat(review.rating || 0)}${'☆'.repeat(5 - (review.rating || 0))}</span>
+              </div>
+              <p>${review.text || 'No review text'}</p>
+            `;
+            
+            reviewsContainer.appendChild(reviewElement);
+          });
+        } else {
+          reviewsContainer.innerHTML = '<p>No reviews data available.</p>';
+        }
+        
+        // Display photos
+        if (currentBusiness.photosData && currentBusiness.photosData.length > 0) {
+          photosContainer.innerHTML = '<div class="photos-grid"></div>';
+          const photosGrid = photosContainer.querySelector('.photos-grid');
+          
+          currentBusiness.photosData.forEach(photo => {
+            if (photo.photo_url) {
+              const photoElement = document.createElement('div');
+              photoElement.className = 'photo-item';
+              
+              photoElement.innerHTML = `
+                <img src="${photo.photo_url}" alt="Business photo">
+              `;
+              
+              photosGrid.appendChild(photoElement);
+            }
+          });
+        } else {
+          photosContainer.innerHTML = '<p>No photos data available.</p>';
+        }
+      }
+      
+      // Event listeners for the fetch buttons
+      fetchReviewsBtn.addEventListener('click', fetchReviews);
+      fetchPhotosBtn.addEventListener('click', fetchPhotos);
+      
+      // When the business changes, update the Place ID display
+      businessSelect.addEventListener('change', function() {
+        const slug = this.value;
+        loadBusinessCustomization(slug);
+        
+        // Clear the data display
+        dataContainer.style.display = 'none';
+        
+        // Reset status displays
+        reviewsStatus.style.display = 'none';
+        photosStatus.style.display = 'none';
+        
+        // Update Place ID display
+        const business = businesses.find(b => b.slug === slug);
+        if (business && business.place_id) {
+          placeIdDisplay.textContent = business.place_id;
+        } else {
+          placeIdDisplay.textContent = 'Not available';
+        }
+        
+        // Display data if already available
+        if (business && (business.reviewsData || business.photosData)) {
+          displayBusinessData();
+        }
+      });
+      
+      // Initial load
+      loadBusinesses();
+    });
+  </script>
+</body>
+</html>

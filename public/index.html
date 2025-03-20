@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HVAC Pro - Modern Cooling & Heating Services</title>
+  <meta name="description" content="Professional HVAC services, air conditioning repair, heating solutions, and more.">
+  <!-- Modern CSS framework -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@2.0.0/modern-normalize.min.css">
+  <!-- Custom styles -->
+  <style>
+    :root {
+      --primary: #0072CE;
+      --primary-dark: #005b9f; 
+      --secondary: #ff7a00;
+      --dark: #212529;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      --transition: all 0.3s ease;
+    }
+
+    /* Base Styles */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-main);
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: var(--light);
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    a:hover {
+      color: var(--primary-dark);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+      user-select: none;
+      border: 1px solid transparent;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      border-radius: 0.25rem;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      color: white;
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary);
+      filter: brightness(90%);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-secondary {
+      color: white;
+      background-color: var(--secondary);
+      border-color: var(--secondary);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--secondary);
+      filter: brightness(90%);
+      border-color: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .mb-1 { margin-bottom: 0.5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    .mb-3 { margin-bottom: 1.5rem; }
+    .mb-4 { margin-bottom: 2rem; }
+    .mb-5 { margin-bottom: 3rem; }
+
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .mt-4 { margin-top: 2rem; }
+    .mt-5 { margin-top: 3rem; }
+
+    .py-1 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-2 { padding-top: 1rem; padding-bottom: 1rem; }
+    .py-3 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+    .py-4 { padding-top: 2rem; padding-bottom: 2rem; }
+    .py-5 { padding-top: 3rem; padding-bottom: 3rem; }
+
+    .px-1 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-2 { padding-left: 1rem; padding-right: 1rem; }
+    .px-3 { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .px-4 { padding-left: 2rem; padding-right: 2rem; }
+    .px-5 { padding-left: 3rem; padding-right: 3rem; }
+
+    /* Header Styles */
+    header {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    header.scrolled {
+      padding: 0.5rem 0;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-icon {
+      margin-right: 0.5rem;
+      color: var(--secondary);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links li {
+      margin-left: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--dark);
+      font-weight: 500;
+      position: relative;
+    }
+
+    .nav-links a:after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -5px;
+      left: 0;
+      background-color: var(--primary);
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover:after {
+      width: 100%;
+    }
+
+    .contact-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .phone-number {
+      font-weight: 600;
+      margin-left: 1rem;
+      color: var(--primary);
+    }
+
+    .contact-icon {
+      color: var(--secondary);
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: var(--dark);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      height: 80vh;
+      min-height: 600px;
+      display: flex;
+      align-items: center;
+      margin-top: 4rem;
+      overflow: hidden;
+    }
+
+    .hero-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .hero-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.7);
+      transform: scale(1);
+      transition: transform 10s ease;
+    }
+
+    .hero.loaded .hero-image {
+      transform: scale(1.05);
+    }
+
+    .hero-content {
+      color: white;
+      max-width: 700px;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+      animation: fadeInUp 1s ease-out;
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(5px);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      font-weight: 800;
+      line-height: 1.2;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      color: white;
+    }
+
+    .hero-subtitle {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      color: white;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 1rem;
+    }
+
+    /* Services Section */
+    .services {
+      padding: 5rem 0;
+      background-color: white;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      color: var(--dark);
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+
+    .section-title:after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background-color: var(--secondary);
+      margin: 1rem auto 0;
+      border-radius: 2px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .service-card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+    }
+
+    .service-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .service-icon {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      display: block;
+      text-align: center;
+    }
+
+    .service-title {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .service-description {
+      color: var(--gray);
+      text-align: center;
+      padding: 0 1.5rem 2rem;
+    }
+
+    /* About Section */
+    .about {
+      padding: 5rem 0;
+      background-color: #f9f9f9;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .about::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .about-image {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+      position: relative;
+      transform: perspective(1000px) rotateY(-5deg);
+      transition: transform 0.5s ease;
+    }
+    
+    .about-image:hover {
+      transform: perspective(1000px) rotateY(0deg);
+    }
+    
+    .about-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .about-image:hover img {
+      transform: scale(1.05);
+    }
+
+    .about-content h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.8rem;
+    }
+    
+    .about-content h2:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 80px;
+      height: 4px;
+      background-color: var(--secondary);
+      border-radius: 2px;
+    }
+
+    .about-content p {
+      margin-bottom: 1.5rem;
+      color: var(--gray);
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .highlight {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .about-features {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .about-feature {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .feature-icon {
+      color: var(--secondary);
+      font-size: 1.2rem;
+    }
+
+    /* Reviews Section */
+    .reviews {
+      padding: 5rem 0;
+      background-color: white;
+      position: relative;
+    }
+    
+    .reviews::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.3' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.3;
+      z-index: 0;
+    }
+
+    .reviews-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+    }
+    
+    .review-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .review-link:hover {
+      transform: translateX(3px);
+    }
+    
+    .review-link i {
+      transition: transform 0.3s ease;
+    }
+    
+    .review-link:hover i {
+      transform: translateX(3px);
+    }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .review-card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .review-card::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 10px;
+      font-size: 120px;
+      color: rgba(0, 0, 0, 0.03);
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    .review-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .stars {
+      color: var(--warning);
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 2px;
+    }
+
+    .review-text {
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      color: var(--gray);
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .reviewer {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .reviewer-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    
+    .review-date {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+
+    /* CTA Section */
+    .cta {
+      position: relative;
+      padding: 5rem 0;
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      overflow: hidden;
+    }
+    
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .cta h2::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -10px;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background-color: var(--secondary);
+      border-radius: 2px;
+    }
+
+    .cta p {
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 1.5rem auto 2rem;
+      opacity: 0.9;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .financing-box {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      backdrop-filter: blur(5px);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .financing-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: white;
+      font-weight: 600;
+    }
+    
+    .financing-text {
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 1rem;
+    }
+
+    /* Location Section */
+    .location {
+      padding: 5rem 0;
+      background-color: #f8f8f8;
+      position: relative;
+    }
+    
+    .location-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    
+    .location-map {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      position: relative;
+      height: 400px;
+      background-color: #e9e9e9;
+    }
+    
+    .map-container {
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+    
+    .static-map {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .map-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .map-overlay:hover {
+      background-color: rgba(0, 0, 0, 0.15);
+    }
+    
+    .map-btn {
+      background-color: white;
+      color: var(--dark);
+      padding: 0.75rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .map-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .location-content h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.8rem;
+    }
+    
+    .location-content h2:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 80px;
+      height: 4px;
+      background-color: var(--secondary);
+      border-radius: 2px;
+    }
+    
+    .location-info {
+      margin-top: 2rem;
+    }
+    
+    .location-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+    
+    .location-icon {
+      color: var(--primary);
+      font-size: 1.2rem;
+      margin-right: 1rem;
+      margin-top: 0.2rem;
+    }
+    
+    .location-text h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .location-text p {
+      color: var(--gray);
+      line-height: 1.6;
+    }
+    
+    .service-areas {
+      margin-top: 2rem;
+    }
+    
+    .service-areas h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .areas-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .area-tag {
+      background-color: #f0f0f0;
+      color: var(--dark);
+      padding: 0.3rem 0.8rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .area-tag:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--dark);
+      color: white;
+      padding: 4rem 0 2rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-column h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .footer-column h3:after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background-color: var(--secondary);
+      margin-top: 0.5rem;
+    }
+
+    .footer-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.7);
+      transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .contact-icon {
+      margin-right: 1rem;
+      font-size: 1.2rem;
+      color: var(--secondary);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .social-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      transition: var(--transition);
+    }
+
+    .social-icon:hover {
+      background-color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    .copyright {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      .hero-title {
+        font-size: 2.7rem;
+      }
+      
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      
+      .about-image {
+        order: -1;
+        max-height: 400px;
+      }
+      
+      .about-image img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-container {
+        padding: 1rem;
+      }
+      
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 70%;
+        height: 100vh;
+        background-color: white;
+        flex-direction: column;
+        padding: 5rem 2rem 2rem;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 999;
+      }
+      
+      .nav-links.active {
+        right: 0;
+      }
+      
+      .nav-links li {
+        margin: 1.5rem 0;
+      }
+      
+      .mobile-toggle {
+        display: block;
+        z-index: 1000;
+      }
+      
+      .hero-title {
+        font-size: 2.2rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+      
+      .hero-btns {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .hero-btns .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 0 1rem;
+      }
+      
+      .section-title {
+        font-size: 2rem;
+      }
+      
+      .hero-content {
+        padding: 1rem;
+        text-align: center;
+      }
+      
+      .service-card, .review-card {
+        max-width: 100%;
+      }
+    }
+  </style>
+  <!-- Load Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Load Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header id="header">
+    <div class="header-container">
+      <a href="#" class="logo">
+        <i class="fa-solid fa-snowflake logo-icon"></i>
+        <span id="business-name-header">HVAC Pro</span>
+      </a>
+      
+      <button class="mobile-toggle" id="mobile-toggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      
+      <div class="contact-info">
+        <i class="fa-solid fa-phone contact-icon"></i>
+        <a href="tel:" class="phone-number" id="phone-number-header">(205) 123-4567</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-background">
+      <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" alt="HVAC Services" class="hero-image" id="hero-image">
+    </div>
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title"><span id="business-name-hero">HVAC Pro</span></h1>
+        <h2 class="hero-subtitle">Professional Heating & Cooling Services in <span id="city-name">Birmingham</span></h2>
+        <div class="hero-btns">
+          <a href="tel:" class="btn btn-secondary" id="phone-btn">
+            <i class="fa-solid fa-phone"></i> Call Now
+          </a>
+          <a href="#contact" class="btn btn-primary">
+            <i class="fa-solid fa-calendar-check"></i> Schedule Service
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="services py-5" id="services">
+    <div class="container">
+      <h2 class="section-title fade-in">Our Professional Services</h2>
+      <div class="services-grid">
+        <div class="service-card fade-in">
+          <div class="px-3 py-4">
+            <i class="fa-solid fa-snowflake service-icon"></i>
+            <h3 class="service-title">AC Repair & Service</h3>
+            <p class="service-description">
+              Our certified technicians provide expert AC repair, maintenance, and installation services to keep your home comfortable year-round.
+            </p>
+          </div>
+        </div>
+        
+        <div class="service-card fade-in">
+          <div class="px-3 py-4">
+            <i class="fa-solid fa-fire service-icon"></i>
+            <h3 class="service-title">Heating Services</h3>
+            <p class="service-description">
+              From furnace repair to heating system installation, we ensure your home stays warm and efficient during the cold months.
+            </p>
+          </div>
+        </div>
+        
+        <div class="service-card fade-in">
+          <div class="px-3 py-4">
+            <i class="fa-solid fa-wind service-icon"></i>
+            <h3 class="service-title">Air Quality Solutions</h3>
+            <p class="service-description">
+              Improve your indoor air quality with our advanced filtration systems, duct cleaning, and air purification services.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="about py-5" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-content fade-in">
+          <h2>Trusted HVAC Experts in <span id="city-state">Birmingham, AL</span></h2>
+          <p>
+            At <span class="highlight" id="business-name-about">HVAC Pro</span>, we provide reliable heating and cooling services with a commitment to quality and customer satisfaction. Our team of certified technicians brings years of experience to every job.
+          </p>
+          <p>
+            Whether you need emergency AC repair, regular maintenance, or a complete system installation, we deliver excellent service at competitive prices. We understand the importance of a comfortable home and will work tirelessly to achieve it.
+          </p>
+          <p>
+            Our dedication to using quality parts, providing honest recommendations, and standing behind our work has earned us a reputation as one of the most trusted HVAC companies in the area.
+          </p>
+          
+          <div class="about-features">
+            <div class="about-feature">
+              <i class="fa-solid fa-certificate feature-icon"></i>
+              <span>Licensed & Insured</span>
+            </div>
+            <div class="about-feature">
+              <i class="fa-solid fa-clock feature-icon"></i>
+              <span>24/7 Emergency Service</span>
+            </div>
+            <div class="about-feature">
+              <i class="fa-solid fa-thumbs-up feature-icon"></i>
+              <span>100% Satisfaction Guarantee</span>
+            </div>
+            <div class="about-feature">
+              <i class="fa-solid fa-tools feature-icon"></i>
+              <span>Experienced Technicians</span>
+            </div>
+          </div>
+          
+          <a href="#contact" class="btn btn-primary mt-4">
+            Contact Us Today
+          </a>
+        </div>
+        <div class="about-image fade-in">
+          <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Our HVAC Team" id="about-image">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews Section -->
+  <section class="reviews py-5" id="reviews">
+    <div class="container">
+      <div class="reviews-header">
+        <h2 class="section-title fade-in">What Our Customers Say</h2>
+        <a href="#" class="review-link" id="google-reviews-link">
+          See all reviews on Google <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="reviews-grid" id="reviews-container">
+        <!-- Reviews will be populated dynamically -->
+        <div class="review-card fade-in">
+          <div class="stars">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <p class="review-text">
+            "Outstanding service! The technician arrived promptly, diagnosed our AC issue quickly, and had everything fixed within an hour. Highly recommend!"
+          </p>
+          <div class="reviewer">
+            <div class="reviewer-img">J</div>
+            <div>
+              <div>James D.</div>
+              <div class="review-date">3 months ago</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="review-card fade-in">
+          <div class="stars">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <p class="review-text">
+            "Professional, knowledgeable, and efficient. They replaced our entire HVAC system and the difference in air quality and efficiency is remarkable."
+          </p>
+          <div class="reviewer">
+            <div class="reviewer-img">S</div>
+            <div>
+              <div>Sarah M.</div>
+              <div class="review-date">1 month ago</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="review-card fade-in">
+          <div class="stars">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <p class="review-text">
+            "I've been using their maintenance service for years and my AC has never run better. The technicians are always courteous and thorough."
+          </p>
+          <div class="reviewer">
+            <div class="reviewer-img">R</div>
+            <div>
+              <div>Robert J.</div>
+              <div class="review-date">2 months ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta py-5" id="contact">
+    <div class="container">
+      <div class="cta-content">
+        <h2 class="fade-in">Ready for Professional HVAC Service?</h2>
+        <p class="fade-in">
+          Contact us today for a free estimate and experience the difference professional service makes.
+        </p>
+        
+        <div class="cta-buttons">
+          <a href="tel:" class="btn btn-secondary fade-in" id="cta-phone-btn">
+            <i class="fa-solid fa-phone"></i> <span id="phone-number-cta">(205) 123-4567</span>
+          </a>
+          
+          <a href="#contact" class="btn btn-primary fade-in">
+            <i class="fa-solid fa-calendar-check"></i> Schedule Service
+          </a>
+        </div>
+        
+        <div class="financing-box fade-in">
+          <div class="financing-title">
+            <i class="fa-solid fa-money-bill-wave"></i> Flexible Financing Available
+          </div>
+          <p class="financing-text">
+            We offer convenient financing options to help you get the HVAC system your home needs. Apply online and get approved quickly with competitive rates and flexible terms.
+          </p>
+          <a href="#" class="btn btn-secondary btn-sm">
+            Learn More About Financing
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Location Section -->
+  <section class="location py-5" id="location">
+    <div class="container">
+      <div class="location-grid">
+        <div class="location-content fade-in">
+          <h2>Our Location</h2>
+          <p>
+            Proudly serving <span id="location-city-state">Birmingham, AL</span> and surrounding areas with reliable HVAC services.
+          </p>
+          
+          <div class="location-info">
+            <div class="location-item">
+              <i class="fa-solid fa-location-dot location-icon"></i>
+              <div class="location-text">
+                <h3>Address</h3>
+                <p id="location-address">123 Main St, Birmingham, AL 35201</p>
+              </div>
+            </div>
+            
+            <div class="location-item">
+              <i class="fa-solid fa-phone location-icon"></i>
+              <div class="location-text">
+                <h3>Phone</h3>
+                <p><a href="tel:" id="location-phone">(205) 123-4567</a></p>
+              </div>
+            </div>
+            
+            <div class="location-item">
+              <i class="fa-solid fa-clock location-icon"></i>
+              <div class="location-text">
+                <h3>Hours</h3>
+                <p id="location-hours">Monday - Friday: 8am - 5pm</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="service-areas">
+            <h3>Service Areas</h3>
+            <div class="areas-list">
+              <span class="area-tag" id="main-service-area">Birmingham</span>
+              <span class="area-tag">Hoover</span>
+              <span class="area-tag">Vestavia Hills</span>
+              <span class="area-tag">Mountain Brook</span>
+              <span class="area-tag">Homewood</span>
+              <span class="area-tag">Trussville</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="location-map fade-in">
+          <div class="map-container">
+            <img src="" alt="Map of our location" class="static-map" id="static-map">
+            <div class="map-overlay">
+              <a href="#" class="map-btn" id="directions-link" target="_blank">
+                <i class="fa-solid fa-directions"></i> Get Directions
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-column">
+          <h3 id="business-name-footer">HVAC Pro</h3>
+          <p>
+            Professional heating and cooling services you can trust. Our experienced technicians provide quality solutions for all your HVAC needs.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-icon" id="facebook-link">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="social-icon" id="instagram-link">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="social-icon" id="linkedin-link">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div class="footer-column">
+          <h3>Our Services</h3>
+          <ul class="footer-links">
+            <li><a href="#services">AC Repair & Service</a></li>
+            <li><a href="#services">Heating Services</a></li>
+            <li><a href="#services">Air Quality Solutions</a></li>
+            <li><a href="#services">HVAC Maintenance</a></li>
+            <li><a href="#services">New System Installation</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h3>Contact Us</h3>
+          <div class="contact-item">
+            <i class="fa-solid fa-location-dot contact-icon"></i>
+            <div id="full-address">123 Main St, Birmingham, AL 35201</div>
+          </div>
+          <div class="contact-item">
+            <i class="fa-solid fa-phone contact-icon"></i>
+            <div><a href="tel:" id="phone-number-footer">(205) 123-4567</a></div>
+          </div>
+          <div class="contact-item">
+            <i class="fa-solid fa-envelope contact-icon"></i>
+            <div><a href="mailto:" id="email-footer">info@hvacpro.com</a></div>
+          </div>
+          <div class="contact-item">
+            <i class="fa-solid fa-clock contact-icon"></i>
+            <div id="working-hours">Mon-Fri: 8AM-5PM</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="copyright">
+        <p>&copy; <span id="current-year">2025</span> <span id="business-name-copyright">HVAC Pro</span>. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Get the business data based on URL slug
+    async function getBusinessData() {
+      try {
+        const response = await fetch('/businesses.json');
+        const businesses = await response.json();
+        
+        // Get slug from URL (everything after the last /)
+        let slug = window.location.pathname.split('/').pop();
+        
+        // If no slug or empty slug (homepage), show first business by default
+        if (!slug || slug === '' || slug === 'index.html') {
+          slug = businesses[0].slug;
+        }
+        
+        // Find the business with matching slug
+        const business = businesses.find(b => b.slug === slug) || businesses[0];
+        
+        // Use the business data to populate the page
+        populatePage(business);
+      } catch (error) {
+        console.error('Error loading business data:', error);
+      }
+    }
+    
+    // Populate the page with business data
+    function populatePage(business) {
+      // Apply custom colors if available
+      if (business.customization) {
+        const root = document.documentElement;
+        if (business.customization.primaryColor) {
+          root.style.setProperty('--primary', business.customization.primaryColor);
+          // Calculate a darker shade for primary-dark
+          const primaryDark = adjustColor(business.customization.primaryColor, -20);
+          root.style.setProperty('--primary-dark', primaryDark);
+        }
+        if (business.customization.secondaryColor) {
+          root.style.setProperty('--secondary', business.customization.secondaryColor);
+        }
+      }
+
+      // Set business name in various places
+      document.querySelectorAll('#business-name-header, #business-name-hero, #business-name-about, #business-name-footer, #business-name-copyright').forEach(el => {
+        el.textContent = business.name || 'HVAC Pro';
+      });
+      
+      // Set phone number in various places and update href
+      const phone = business.phone || '(555) 123-4567';
+      document.querySelectorAll('#phone-number-header, #phone-number-cta, #phone-number-footer').forEach(el => {
+        el.textContent = phone;
+      });
+      
+      // Update phone links
+      document.querySelectorAll('a[href^="tel:"]').forEach(el => {
+        el.href = `tel:${phone.replace(/[^0-9]/g, '')}`;
+      });
+      
+      // Set city/location information
+      const city = business.city || 'Birmingham';
+      const state = business.state || 'AL';
+      document.getElementById('city-name').textContent = city;
+      document.getElementById('city-state').textContent = `${city}, ${state}`;
+      document.getElementById('location-city-state').textContent = `${city}, ${state}`;
+      document.getElementById('main-service-area').textContent = city;
+      
+      // Set address
+      const address = business.street ? `${business.street}, ${city}, ${state} ${business.postal_code}` : `123 Main St, ${city}, ${state} 35201`;
+      document.getElementById('full-address').textContent = address;
+      document.getElementById('location-address').textContent = address;
+      
+      // Set email if available
+      const email = business.email || 'info@hvacpro.com';
+      document.getElementById('email-footer').textContent = email;
+      document.getElementById('email-footer').href = `mailto:${email}`;
+      
+      // Set working hours
+      let workingHours = 'Mon-Fri: 8AM-5PM';
+      if (business.working_hours) {
+        try {
+          const hoursObj = JSON.parse(business.working_hours);
+          if (Object.keys(hoursObj).length > 0) {
+            workingHours = Object.entries(hoursObj)
+              .map(([day, hours]) => `${day}: ${hours}`)
+              .join('<br>');
+          }
+        } catch (e) {
+          // Fall back to default format
+          workingHours = 'Mon-Fri: 8AM-5PM';
+        }
+      }
+      document.getElementById('working-hours').innerHTML = workingHours;
+      
+      // Set social media links if available
+      if (business.facebook) {
+        document.getElementById('facebook-link').href = business.facebook;
+      }
+      
+      // Set Google Reviews link
+      if (business.reviews_link) {
+        document.getElementById('google-reviews-link').href = business.reviews_link;
+      } else {
+        document.getElementById('google-reviews-link').href = 'https://www.google.com/maps';
+      }
+      
+      // Set location phone
+      document.getElementById('location-phone').textContent = phone;
+      
+      // Set location hours
+      let locationHours = 'Monday - Friday: 8am - 5pm';
+      if (business.working_hours) {
+        try {
+          const hoursObj = JSON.parse(business.working_hours);
+          if (Object.keys(hoursObj).length > 0) {
+            locationHours = Object.entries(hoursObj)
+              .slice(0, 3) // Just show first 3 days for location section
+              .map(([day, hours]) => `${day}: ${hours}`)
+              .join('<br>');
+          }
+        } catch (e) {
+          // Use default
+        }
+      }
+      document.getElementById('location-hours').innerHTML = locationHours;
+      
+      // Set map image and directions link
+      const mapImg = document.getElementById('static-map');
+      const directionsLink = document.getElementById('directions-link');
+      
+      if (business.latitude && business.longitude) {
+        // Create a static map using OpenStreetMap
+        const lat = business.latitude;
+        const lng = business.longitude;
+        mapImg.src = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=14&size=600x400&markers=color:red%7C${lat},${lng}&key=YOUR_API_KEY`;
+        
+        // Fallback to OpenStreetMap if you don't have a Google Maps API key
+        mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=14&size=600x400&markers=${lat},${lng}`;
+        
+        // Set directions link
+        if (business.location_link) {
+          directionsLink.href = business.location_link;
+        } else {
+          directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        }
+      } else {
+        // Fallback map
+        mapImg.src = "https://maps.googleapis.com/maps/api/staticmap?center=Birmingham,AL&zoom=12&size=600x400&key=YOUR_API_KEY";
+        directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+      }
+      
+      // Set hero image from customization
+      const heroImg = document.getElementById('hero-image');
+      if (business.customization && business.customization.heroImage) {
+        heroImg.src = business.customization.heroImage;
+      } else {
+        // Default hero image
+        heroImg.src = 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
+      }
+      
+      // Set about image if available
+      const aboutImg = document.getElementById('about-image');
+      if (business.customization && business.customization.aboutImage) {
+        aboutImg.src = business.customization.aboutImage;
+      }
+      
+      // Set current year in copyright
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+      
+      // If we have reviews, populate them
+      if (business.reviews && parseInt(business.reviews) > 0) {
+        const reviewsContainer = document.getElementById('reviews-container');
+        
+        // Clear existing reviews
+        reviewsContainer.innerHTML = '';
+        
+        // We don't have actual review content, so we'll create generic ones based on rating
+        const rating = parseFloat(business.rating) || 5;
+        const reviewCount = Math.min(parseInt(business.reviews), 3); // Show max 3 reviews
+        
+        // Example reviews based on rating
+        const reviewTemplates = [
+          {
+            text: "Professional service! They fixed our AC quickly and were very knowledgeable. Highly recommend!",
+            name: "James D."
+          },
+          {
+            text: "Fantastic service from start to finish. The technicians were on time, professional, and completed the work efficiently.",
+            name: "Sarah M."
+          },
+          {
+            text: "Been using their services for years. Always reliable, always professional, and always fair pricing.",
+            name: "Robert J."
+          }
+        ];
+        
+        // Create review cards
+        for (let i = 0; i < reviewCount; i++) {
+          const review = reviewTemplates[i];
+          const starsHTML = Array(5).fill(`<i class="fa-solid fa-star"></i>`).join('');
+          
+          const reviewCard = document.createElement('div');
+          reviewCard.className = 'review-card fade-in';
+          reviewCard.innerHTML = `
+            <div class="stars">${starsHTML}</div>
+            <p class="review-text">"${review.text}"</p>
+            <p class="reviewer">- ${review.name}</p>
+          `;
+          
+          reviewsContainer.appendChild(reviewCard);
+        }
+      }
+      
+      // Animate the hero image
+      setTimeout(() => {
+        document.getElementById('hero').classList.add('loaded');
+      }, 100);
+    }
+    
+    // Helper function to adjust color brightness
+    function adjustColor(color, amount) {
+      // Remove the leading # if it exists
+      color = color.replace(/^#/, '');
+      
+      // Parse the color components
+      let r = parseInt(color.slice(0, 2), 16);
+      let g = parseInt(color.slice(2, 4), 16);
+      let b = parseInt(color.slice(4, 6), 16);
+      
+      // Adjust the brightness
+      r = Math.max(0, Math.min(255, r + amount));
+      g = Math.max(0, Math.min(255, g + amount));
+      b = Math.max(0, Math.min(255, b + amount));
+      
+      // Convert back to hex
+      return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    }
+    
+    // Scroll effects for header
+    function handleScroll() {
+      const header = document.getElementById('header');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+      
+      // Animate elements when they come into view
+      document.querySelectorAll('.fade-in').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        
+        if (rect.top <= windowHeight * 0.8 && rect.bottom >= 0) {
+          el.classList.add('visible');
+        }
+      });
+    }
+    
+    // Mobile menu toggle
+    function setupMobileMenu() {
+      const mobileToggle = document.getElementById('mobile-toggle');
+      const navLinks = document.getElementById('nav-links');
+      
+      mobileToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        
+        // Change icon based on menu state
+        const icon = mobileToggle.querySelector('i');
+        if (navLinks.classList.contains('active')) {
+          icon.classList.remove('fa-bars');
+          icon.classList.add('fa-xmark');
+        } else {
+          icon.classList.remove('fa-xmark');
+          icon.classList.add('fa-bars');
+        }
+      });
+      
+      // Close mobile menu when a nav link is clicked
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          navLinks.classList.remove('active');
+          const icon = mobileToggle.querySelector('i');
+          icon.classList.remove('fa-xmark');
+          icon.classList.add('fa-bars');
+        });
+      });
+    }
+    
+    // Initialize everything when the DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load business data based on URL
+      getBusinessData();
+      
+      // Set up scroll effects
+      window.addEventListener('scroll', handleScroll);
+      
+      // Set up mobile menu
+      setupMobileMenu();
+      
+      // Trigger initial scroll effects
+      handleScroll();
+    });
+  </script>
+</body>
+</html>

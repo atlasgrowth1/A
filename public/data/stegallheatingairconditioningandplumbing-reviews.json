@@ -1,0 +1,20 @@
+[
+  {
+    "author_name": "John Doe",
+    "rating": 5,
+    "date": "2023-12-15",
+    "text": "Excellent service! The technicians were professional and fixed our AC in no time."
+  },
+  {
+    "author_name": "Jane Smith",
+    "rating": 4,
+    "date": "2023-11-20",
+    "text": "Good service overall. They were a bit late but did a great job on the installation."
+  },
+  {
+    "author_name": "Michael Johnson",
+    "rating": 5,
+    "date": "2023-10-05",
+    "text": "Very impressed with their knowledge and efficiency. Would recommend to anyone needing HVAC work."
+  }
+]

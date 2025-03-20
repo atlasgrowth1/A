@@ -1,0 +1,16 @@
+{
+  "name": "hvac-website-generator",
+  "version": "1.0.0",
+  "description": "Modern website generator for HVAC contractors",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "convert": "node generate-custom-json.js",
+    "setup": "npm install && node generate-custom-json.js && node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "csvtojson": "^2.0.10",
+    "express": "^4.18.2"
+  }
+}
