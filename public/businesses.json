@@ -169,9 +169,10 @@
     "customization": {
       "heroImage": "https://lh5.googleusercontent.com/p/AF1QipNXAf5pNQ6K09WNb4uyPWJExcxXNHWZ7vqnKweT=w800-h500-k-no",
       "aboutImage": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      "primaryColor": "#0072CE",
+      "primaryColor": "#cc0000",
       "secondaryColor": "#ff7a00"
-    }
+    },
+    "reviewsData": []
   },
   {
     "slug": "grissombrotherservicecompanyhvac",

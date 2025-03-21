@@ -74,58 +74,6 @@
       border-bottom: 1px solid #eee;
       padding-bottom: 0.5rem;
     }
-    .data-container {
-      margin-top: 2rem;
-      display: none;
-    }
-    .review-item {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      background-color: #f9f9f9;
-    }
-    .review-rating {
-      font-weight: bold;
-      color: #ff9800;
-    }
-    .review-author {
-      font-weight: bold;
-    }
-    .photos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 10px;
-      margin-top: 1rem;
-    }
-    .photo-item {
-      border-radius: 4px;
-      overflow: hidden;
-      height: 150px;
-    }
-    .photo-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .fetch-status {
-      display: none;
-      margin-top: 1rem;
-      padding: 0.5rem;
-      border-radius: 4px;
-    }
-    .fetch-success {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .fetch-error {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    .fetch-loading {
-      background-color: #cce5ff;
-      color: #004085;
-    }
   </style>
 </head>
 <body>
@@ -196,78 +144,6 @@
           <button type="button" class="btn btn-outline-secondary" id="resetBtn">Reset to Defaults</button>
         </div>
       </form>
-      
-      <!-- Outscraper Data Section -->
-      <h4 class="section-header">Business Data</h4>
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Fetch Business Data from Google Maps</h5>
-              <p class="card-text">Get the latest reviews and photos for this business using Outscraper API.</p>
-              <p><strong>Place ID: </strong><span id="placeIdDisplay">-</span></p>
-              
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <div class="alert alert-info">
-                    <h5>Reviews Data</h5>
-                    <p>To import reviews data, you'll need to:</p>
-                    <ol>
-                      <li>Get reviews data from Outscraper as JSON</li>
-                      <li>Save it as <code>/public/data/{slug}-reviews.json</code></li>
-                      <li>Click the button below to import</li>
-                    </ol>
-                  </div>
-                  <button type="button" class="btn btn-primary" id="fetchReviewsBtn">
-                    <i class="bi bi-star-fill"></i> Import Reviews Data
-                  </button>
-                </div>
-                <div class="col-md-6">
-                  <div class="alert alert-info">
-                    <h5>Photos Data</h5>
-                    <p>To import photos data, you'll need to:</p>
-                    <ol>
-                      <li>Get photos data from Outscraper as JSON</li>
-                      <li>Save it as <code>/public/data/{slug}-photos.json</code></li>
-                      <li>Click the button below to import</li>
-                    </ol>
-                  </div>
-                  <button type="button" class="btn btn-success" id="fetchPhotosBtn">
-                    <i class="bi bi-image"></i> Import Photos Data
-                  </button>
-                </div>
-              </div>
-              
-              <div id="reviewsStatus" class="fetch-status"></div>
-              <div id="photosStatus" class="fetch-status"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Data Display Section -->
-      <div id="dataContainer" class="data-container">
-        <ul class="nav nav-tabs" id="dataTabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="true">Reviews</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab" aria-controls="photos" aria-selected="false">Photos</button>
-          </li>
-        </ul>
-        <div class="tab-content mt-3" id="dataTabsContent">
-          <div class="tab-pane fade show active" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-            <div id="reviewsContainer">
-              <p>No reviews data available. Use the "Fetch Reviews & Photos" button to get the latest reviews.</p>
-            </div>
-          </div>
-          <div class="tab-pane fade" id="photos" role="tabpanel" aria-labelledby="photos-tab">
-            <div id="photosContainer">
-              <p>No photos data available. Use the "Fetch Reviews & Photos" button to get the latest photos.</p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -293,16 +169,6 @@
       const previewBtn = document.getElementById('previewBtn');
       const resetBtn = document.getElementById('resetBtn');
       const successMessage = document.getElementById('successMessage');
-      
-      // Data fetching elements
-      const placeIdDisplay = document.getElementById('placeIdDisplay');
-      const fetchReviewsBtn = document.getElementById('fetchReviewsBtn');
-      const fetchPhotosBtn = document.getElementById('fetchPhotosBtn');
-      const reviewsStatus = document.getElementById('reviewsStatus');
-      const photosStatus = document.getElementById('photosStatus');
-      const dataContainer = document.getElementById('dataContainer');
-      const reviewsContainer = document.getElementById('reviewsContainer');
-      const photosContainer = document.getElementById('photosContainer');
       
       // Default values
       const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
@@ -426,7 +292,7 @@
         const previewUrl = `/${currentBusiness.slug}`;
         window.open(previewUrl, '_blank');
       }
-
+      
       // Event listeners
       businessSelect.addEventListener('change', function() {
         loadBusinessCustomization(this.value);
@@ -465,182 +331,6 @@
       
       aboutImageInput.addEventListener('input', function() {
         aboutImagePreview.src = this.value;
-      });
-      
-      // Fetch reviews from local file
-      async function fetchReviews() {
-        if (!currentBusiness) return;
-        
-        // Show loading status
-        reviewsStatus.textContent = 'Importing reviews data from file...';
-        reviewsStatus.className = 'fetch-status fetch-loading';
-        reviewsStatus.style.display = 'block';
-        fetchReviewsBtn.disabled = true;
-        
-        try {
-          const response = await fetch('/api/fetch-reviews', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              slug: currentBusiness.slug
-            })
-          });
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            // Update the current business object with the fetched data
-            currentBusiness.reviewsData = data.reviews;
-            
-            // Show success message
-            reviewsStatus.textContent = `Successfully fetched ${data.reviews.length} reviews!`;
-            reviewsStatus.className = 'fetch-status fetch-success';
-            
-            // Display the data
-            displayBusinessData();
-          } else {
-            reviewsStatus.textContent = `Error: ${data.error || 'Failed to fetch reviews'}`;
-            reviewsStatus.className = 'fetch-status fetch-error';
-          }
-        } catch (error) {
-          console.error('Error fetching reviews:', error);
-          reviewsStatus.textContent = 'Error: Failed to fetch reviews. Check console for details.';
-          reviewsStatus.className = 'fetch-status fetch-error';
-        } finally {
-          fetchReviewsBtn.disabled = false;
-        }
-      }
-      
-      // Fetch photos from local file
-      async function fetchPhotos() {
-        if (!currentBusiness) return;
-        
-        // Show loading status
-        photosStatus.textContent = 'Importing photos data from file...';
-        photosStatus.className = 'fetch-status fetch-loading';
-        photosStatus.style.display = 'block';
-        fetchPhotosBtn.disabled = true;
-        
-        try {
-          const response = await fetch('/api/fetch-photos', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              slug: currentBusiness.slug
-            })
-          });
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            // Update the current business object with the fetched data
-            currentBusiness.photosData = data.photos;
-            
-            // Show success message
-            photosStatus.textContent = `Successfully fetched ${data.photos.length} photos!`;
-            photosStatus.className = 'fetch-status fetch-success';
-            
-            // Display the data
-            displayBusinessData();
-          } else {
-            photosStatus.textContent = `Error: ${data.error || 'Failed to fetch photos'}`;
-            photosStatus.className = 'fetch-status fetch-error';
-          }
-        } catch (error) {
-          console.error('Error fetching photos:', error);
-          photosStatus.textContent = 'Error: Failed to fetch photos. Check console for details.';
-          photosStatus.className = 'fetch-status fetch-error';
-        } finally {
-          fetchPhotosBtn.disabled = false;
-        }
-      }
-      
-      // Display business data (reviews and photos)
-      function displayBusinessData() {
-        if (!currentBusiness) return;
-        
-        // Show the data container
-        dataContainer.style.display = 'block';
-        
-        // Display reviews
-        if (currentBusiness.reviewsData && currentBusiness.reviewsData.length > 0) {
-          reviewsContainer.innerHTML = '';
-          
-          currentBusiness.reviewsData.forEach(review => {
-            const reviewElement = document.createElement('div');
-            reviewElement.className = 'review-item';
-            
-            reviewElement.innerHTML = `
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <div>
-                  <span class="review-author">${review.author_name || 'Anonymous'}</span>
-                  <small class="text-muted ms-2">${new Date(review.date || Date.now()).toLocaleDateString()}</small>
-                </div>
-                <span class="review-rating">${'★'.repeat(review.rating || 0)}${'☆'.repeat(5 - (review.rating || 0))}</span>
-              </div>
-              <p>${review.text || 'No review text'}</p>
-            `;
-            
-            reviewsContainer.appendChild(reviewElement);
-          });
-        } else {
-          reviewsContainer.innerHTML = '<p>No reviews data available.</p>';
-        }
-        
-        // Display photos
-        if (currentBusiness.photosData && currentBusiness.photosData.length > 0) {
-          photosContainer.innerHTML = '<div class="photos-grid"></div>';
-          const photosGrid = photosContainer.querySelector('.photos-grid');
-          
-          currentBusiness.photosData.forEach(photo => {
-            if (photo.photo_url) {
-              const photoElement = document.createElement('div');
-              photoElement.className = 'photo-item';
-              
-              photoElement.innerHTML = `
-                <img src="${photo.photo_url}" alt="Business photo">
-              `;
-              
-              photosGrid.appendChild(photoElement);
-            }
-          });
-        } else {
-          photosContainer.innerHTML = '<p>No photos data available.</p>';
-        }
-      }
-      
-      // Event listeners for the fetch buttons
-      fetchReviewsBtn.addEventListener('click', fetchReviews);
-      fetchPhotosBtn.addEventListener('click', fetchPhotos);
-      
-      // When the business changes, update the Place ID display
-      businessSelect.addEventListener('change', function() {
-        const slug = this.value;
-        loadBusinessCustomization(slug);
-        
-        // Clear the data display
-        dataContainer.style.display = 'none';
-        
-        // Reset status displays
-        reviewsStatus.style.display = 'none';
-        photosStatus.style.display = 'none';
-        
-        // Update Place ID display
-        const business = businesses.find(b => b.slug === slug);
-        if (business && business.place_id) {
-          placeIdDisplay.textContent = business.place_id;
-        } else {
-          placeIdDisplay.textContent = 'Not available';
-        }
-        
-        // Display data if already available
-        if (business && (business.reviewsData || business.photosData)) {
-          displayBusinessData();
-        }
       });
       
       // Initial load
