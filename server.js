@@ -270,6 +270,315 @@ app.get('/api/business-info', requireAuth, (req, res) => {
   });
 });
 
+// Deployment endpoints
+const { Octokit } = require('@octokit/rest');
+const axios = require('axios');
+
+// Initialize GitHub and Vercel clients
+const githubToken = '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';
+const vercelToken = 'xGNyNr4cnjxCEGSIpnRLUhaT';
+const octokit = new Octokit({ auth: githubToken });
+
+// Store active deployments
+const deployments = new Map();
+
+// API endpoint to deploy a client site
+app.post('/api/deploy-client-site', async (req, res) => {
+  try {
+    const { slug } = req.body;
+    
+    if (!slug) {
+      return res.status(400).json({ error: 'Business slug is required' });
+    }
+    
+    // Generate a unique deployment ID
+    const deploymentId = Date.now().toString();
+    
+    // Store deployment info
+    deployments.set(deploymentId, {
+      slug,
+      status: 'started',
+      progress: 10,
+      message: 'Deployment started',
+      timestamp: new Date().toISOString()
+    });
+    
+    // Start the deployment process in the background
+    deployClientSite(deploymentId, slug).catch(error => {
+      console.error(`Deployment error for ${slug}:`, error);
+      deployments.set(deploymentId, {
+        ...deployments.get(deploymentId),
+        status: 'failed',
+        error: error.message
+      });
+    });
+    
+    // Return the deployment ID
+    res.json({ 
+      success: true, 
+      deploymentId 
+    });
+  } catch (error) {
+    console.error('Error starting deployment:', error);
+    res.status(500).json({ error: 'Failed to start deployment' });
+  }
+});
+
+// API endpoint to check deployment status
+app.get('/api/deployment-status/:deploymentId', (req, res) => {
+  try {
+    const { deploymentId } = req.params;
+    
+    // Get deployment info
+    const deployment = deployments.get(deploymentId);
+    
+    if (!deployment) {
+      return res.status(404).json({ error: 'Deployment not found' });
+    }
+    
+    // Return deployment status
+    res.json(deployment);
+  } catch (error) {
+    console.error('Error checking deployment status:', error);
+    res.status(500).json({ error: 'Failed to check deployment status' });
+  }
+});
+
+// Function to deploy a client site
+async function deployClientSite(deploymentId, slug) {
+  try {
+    // Get the deployment
+    const deployment = deployments.get(deploymentId);
+    
+    // Update deployment status
+    deployments.set(deploymentId, {
+      ...deployment,
+      progress: 20,
+      message: 'Loading business data...'
+    });
+    
+    // Read the businesses.json file
+    const businessesPath = path.join(__dirname, 'public', 'businesses.json');
+    const businessesData = fs.readFileSync(businessesPath, 'utf8');
+    const businesses = JSON.parse(businessesData);
+    
+    // Find the business with the matching slug
+    const business = businesses.find(b => b.slug === slug);
+    
+    if (!business) {
+      throw new Error('Business not found');
+    }
+    
+    // Update deployment status
+    deployments.set(deploymentId, {
+      ...deployments.get(deploymentId),
+      progress: 30,
+      message: 'Creating GitHub branch...'
+    });
+    
+    // Create a new branch for the client site
+    const branchName = `client-site-${slug}`;
+    
+    // Get GitHub repository details from environment
+    const githubRepo = process.env.GITHUB_REPOSITORY || 'A';
+    const repoOwner = githubRepo.split('/')[0] || 'placeholder';
+    const repoName = githubRepo.split('/')[1] || 'A';
+    
+    console.log(`Deploying from GitHub repository: ${repoOwner}/${repoName}`);
+    
+    // Check if the repo exists
+    try {
+      await octokit.repos.get({
+        owner: repoOwner,
+        repo: repoName
+      });
+    } catch (error) {
+      throw new Error('GitHub repository not found');
+    }
+    
+    // Get the default branch
+    const repoInfo = await octokit.repos.get({
+      owner: repoOwner,
+      repo: repoName
+    });
+    
+    const defaultBranch = repoInfo.data.default_branch;
+    
+    // Get the latest commit on the default branch
+    const refData = await octokit.git.getRef({
+      owner: repoOwner,
+      repo: repoName,
+      ref: `heads/${defaultBranch}`
+    });
+    
+    const latestCommitSha = refData.data.object.sha;
+    
+    // Create a new branch from the latest commit
+    try {
+      await octokit.git.createRef({
+        owner: repoOwner,
+        repo: repoName,
+        ref: `refs/heads/${branchName}`,
+        sha: latestCommitSha
+      });
+    } catch (error) {
+      // If the branch already exists, delete it and create it again
+      if (error.status === 422) {
+        await octokit.git.deleteRef({
+          owner: repoOwner,
+          repo: repoName,
+          ref: `heads/${branchName}`
+        });
+        
+        await octokit.git.createRef({
+          owner: repoOwner,
+          repo: repoName,
+          ref: `refs/heads/${branchName}`,
+          sha: latestCommitSha
+        });
+      } else {
+        throw error;
+      }
+    }
+    
+    // Update deployment status
+    deployments.set(deploymentId, {
+      ...deployments.get(deploymentId),
+      progress: 40,
+      message: 'Creating client site files...'
+    });
+    
+    // Create client-specific index.html with hardcoded business data
+    const indexHtmlPath = path.join(__dirname, 'public', 'index.html');
+    let indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+    
+    // Modify the index.html to hardcode the business data
+    indexHtml = indexHtml.replace(
+      /fetch\('\/businesses\.json'\)[\s\S]*?businesses\.find\(b => b\.slug === slug\);/g,
+      `// Hardcoded business data for ${business.name}
+      const currentBusiness = ${JSON.stringify(business, null, 2)};`
+    );
+    
+    // Remove admin-related code
+    indexHtml = indexHtml.replace(
+      /<div class="login-button[\s\S]*?<\/div>/g,
+      ''
+    );
+    
+    // Commit the modified index.html
+    await octokit.repos.createOrUpdateFileContents({
+      owner: repoOwner,
+      repo: repoName,
+      path: 'public/index.html',
+      message: `Create client site for ${business.name}`,
+      content: Buffer.from(indexHtml).toString('base64'),
+      branch: branchName
+    });
+    
+    // Create a simplified server.js without admin features
+    let serverJs = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
+    
+    // Remove admin routes and middleware
+    serverJs = serverJs.replace(
+      /\/\/ Session middleware[\s\S]*?}}\);/g,
+      '// Session middleware removed for client site'
+    );
+    
+    serverJs = serverJs.replace(
+      /\/\/ Authentication middleware[\s\S]*?}\n}/g,
+      '// Authentication middleware removed for client site'
+    );
+    
+    serverJs = serverJs.replace(
+      /\/\/ API endpoint to get leads[\s\S]*?}\n}\);/g,
+      '// Admin API endpoints removed for client site'
+    );
+    
+    serverJs = serverJs.replace(
+      /\/\/ Login route[\s\S]*?}\);/g,
+      '// Login routes removed for client site'
+    );
+    
+    serverJs = serverJs.replace(
+      /\/\/ Dashboard route[\s\S]*?}\);/g,
+      '// Dashboard route removed for client site'
+    );
+    
+    serverJs = serverJs.replace(
+      /\/\/ Admin route[\s\S]*?}\);/g,
+      '// Admin route removed for client site'
+    );
+    
+    // Remove the deployment code (to avoid token exposure)
+    serverJs = serverJs.replace(
+      /\/\/ Deployment endpoints[\s\S]*?\/\/ IMPORTANT: Define specific routes/g,
+      '// IMPORTANT: Define specific routes'
+    );
+    
+    // Commit the modified server.js
+    await octokit.repos.createOrUpdateFileContents({
+      owner: repoOwner,
+      repo: repoName,
+      path: 'server.js',
+      message: `Simplify server for ${business.name} client site`,
+      content: Buffer.from(serverJs).toString('base64'),
+      branch: branchName
+    });
+    
+    // Update deployment status
+    deployments.set(deploymentId, {
+      ...deployments.get(deploymentId),
+      progress: 70,
+      message: 'Deploying to Vercel...'
+    });
+    
+    // Deploy to Vercel using the Vercel API
+    const vercelDeployment = await axios.post(
+      'https://api.vercel.com/v13/deployments',
+      {
+        name: `client-site-${slug}`,
+        target: 'production',
+        gitSource: {
+          type: 'github',
+          repo: `${repoOwner}/${repoName}`,
+          ref: branchName
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${vercelToken}`
+        }
+      }
+    );
+    
+    // Get the deployment URL
+    const deploymentUrl = `https://${vercelDeployment.data.url}`;
+    
+    // Update deployment status
+    deployments.set(deploymentId, {
+      ...deployments.get(deploymentId),
+      status: 'completed',
+      progress: 100,
+      message: 'Deployment completed',
+      url: deploymentUrl
+    });
+    
+    return deploymentUrl;
+  } catch (error) {
+    console.error('Error deploying client site:', error);
+    
+    // Update deployment status
+    deployments.set(deploymentId, {
+      ...deployments.get(deploymentId),
+      status: 'failed',
+      progress: 100,
+      error: error.message
+    });
+    
+    throw error;
+  }
+}
+
 // IMPORTANT: Define specific routes BEFORE the catch-all route
 
 // Admin route
