@@ -274,22 +274,151 @@ app.get('/api/business-info', requireAuth, (req, res) => {
 const { Octokit } = require('@octokit/rest');
 const axios = require('axios');
 
-// Initialize GitHub and Vercel clients with more detailed logging
-const githubToken = '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';
-const vercelToken = 'xGNyNr4cnjxCEGSIpnRLUhaT';
-console.log('Setting up GitHub client...');
+// Load tokens from environment variables or use defaults for development
+// GitHub tokens can be in formats like: "ghp_...", "github_pat_..." or "gho_..."
+// Note that GitHub tokens prefixed with ghp_ or github_pat_ might need specific scopes/permissions
+const githubToken = process.env.GITHUB_TOKEN || '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';
+// Vercel tokens are typically a simple string without prefixes
+const vercelToken = process.env.VERCEL_TOKEN || 'xGNyNr4cnjxCEGSIpnRLUhaT';
+
+// Check tokens for basic validity
+if (!githubToken || githubToken.length < 10) {
+  console.error('WARNING: GitHub token looks invalid or missing');
+}
+if (!vercelToken || vercelToken.length < 10) {
+  console.error('WARNING: Vercel token looks invalid or missing');
+}
+
+// For security, only show first few characters
+console.log(`Setting up GitHub client with token starting with: ${githubToken.substring(0, 5)}...`);
+console.log(`Vercel token starts with: ${vercelToken.substring(0, 5)}...`);
+
+// Set proxy configuration for axios if needed
+axios.defaults.proxy = false; // Disable any proxy settings that might be causing issues
+
+// Try different authorization formats
+let octokitAuth;
+if (githubToken.startsWith('ghp_')) {
+  // Personal access token
+  console.log('GitHub token appears to be a personal access token (ghp_)');
+  octokitAuth = githubToken;
+} else if (githubToken.startsWith('github_pat_')) {
+  // Fine-grained personal access token
+  console.log('GitHub token appears to be a fine-grained personal access token (github_pat_)');
+  octokitAuth = githubToken;
+} else {
+  // Try with 'token ' prefix
+  console.log('Using token prefix for GitHub token');
+  octokitAuth = `token ${githubToken}`;
+}
+
 const octokit = new Octokit({ 
-  auth: githubToken,
+  auth: octokitAuth,
+  baseUrl: 'https://api.github.com', // Explicitly set the base URL
   log: {
     debug: (message) => console.log(`GitHub Debug: ${message}`),
     info: (message) => console.log(`GitHub Info: ${message}`),
     warn: (message) => console.log(`GitHub Warning: ${message}`),
     error: (message) => console.error(`GitHub Error: ${message}`)
+  },
+  request: {
+    // Add more debugging for requests
+    hook: (request, options) => {
+      console.log(`Making GitHub request to: ${options.url}`);
+    }
   }
 });
 
 // Store active deployments
 const deployments = new Map();
+
+// Diagnostic endpoint to test API tokens
+app.get('/api/test-tokens', async (req, res) => {
+  try {
+    console.log('Testing tokens directly...');
+    
+    // Test GitHub token
+    const githubResults = { success: false, message: '', error: null };
+    try {
+      console.log('Testing GitHub token with direct fetch...');
+      const gitResponse = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'User-Agent': 'Token-Tester'
+        }
+      });
+      
+      const status = gitResponse.status;
+      const contentType = gitResponse.headers.get('content-type');
+      const text = await gitResponse.text();
+      
+      githubResults.status = status;
+      githubResults.contentType = contentType;
+      
+      if (status === 200) {
+        githubResults.success = true;
+        githubResults.message = 'GitHub token is valid';
+        try {
+          const json = JSON.parse(text);
+          githubResults.username = json.login;
+        } catch (e) {
+          githubResults.error = 'Response not JSON';
+          githubResults.rawResponse = text.substring(0, 500);
+        }
+      } else {
+        githubResults.message = `GitHub token validation failed with status ${status}`;
+        githubResults.rawResponse = text.substring(0, 500);
+      }
+    } catch (error) {
+      githubResults.error = error.message;
+    }
+    
+    // Test Vercel token
+    const vercelResults = { success: false, message: '', error: null };
+    try {
+      console.log('Testing Vercel token with direct fetch...');
+      const vercelResponse = await fetch('https://api.vercel.com/v2/user', {
+        headers: {
+          'Authorization': `Bearer ${vercelToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const status = vercelResponse.status;
+      const contentType = vercelResponse.headers.get('content-type');
+      const text = await vercelResponse.text();
+      
+      vercelResults.status = status;
+      vercelResults.contentType = contentType;
+      
+      if (status === 200) {
+        vercelResults.success = true;
+        vercelResults.message = 'Vercel token is valid';
+        try {
+          const json = JSON.parse(text);
+          vercelResults.username = json.user?.username || json.user?.email;
+        } catch (e) {
+          vercelResults.error = 'Response not JSON';
+          vercelResults.rawResponse = text.substring(0, 500);
+        }
+      } else {
+        vercelResults.message = `Vercel token validation failed with status ${status}`;
+        vercelResults.rawResponse = text.substring(0, 500);
+      }
+    } catch (error) {
+      vercelResults.error = error.message;
+    }
+    
+    res.json({
+      github: githubResults,
+      vercel: vercelResults,
+      github_token_first_chars: githubToken.substring(0, 5),
+      vercel_token_first_chars: vercelToken.substring(0, 5)
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // API endpoint to deploy a client site
 app.post('/api/deploy-client-site', async (req, res) => {
@@ -301,35 +430,169 @@ app.post('/api/deploy-client-site', async (req, res) => {
       return res.status(400).json({ error: 'Business slug is required' });
     }
     
-    // Validate GitHub token
+    // Try different token formats for GitHub
+    const TOKEN_FORMATS = [
+      { type: 'Bearer token', authHeader: `Bearer ${githubToken}` },
+      { type: 'Token prefix', authHeader: `token ${githubToken}` },
+      { type: 'Raw token', authHeader: githubToken }
+    ];
+    
+    // Try a direct fetch to GitHub API to test connectivity
     try {
-      console.log('Testing GitHub token validity...');
+      console.log('Testing basic GitHub API connectivity...');
+      const directResponse = await fetch('https://api.github.com/zen', {
+        headers: {
+          'User-Agent': 'Client-Site-Deployer'
+        }
+      });
+      
+      if (directResponse.ok) {
+        const zen = await directResponse.text();
+        console.log('GitHub API direct connection successful, response:', zen);
+      } else {
+        console.error('GitHub API direct connection failed with status:', directResponse.status);
+        const errorText = await directResponse.text();
+        console.error('Error response:', errorText);
+      }
+    } catch (directError) {
+      console.error('Direct GitHub API connection failed:', directError);
+    }
+    
+    // Validate GitHub token with multiple formats
+    let githubAuthSuccess = false;
+    let githubAuthFormat = '';
+    
+    console.log('Testing GitHub token validity with multiple formats...');
+    
+    for (const format of TOKEN_FORMATS) {
+      try {
+        console.log(`Trying GitHub auth format: ${format.type}`);
+        const response = await fetch('https://api.github.com/user', {
+          headers: {
+            'Authorization': format.authHeader,
+            'User-Agent': 'Client-Site-Deployer',
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        
+        console.log(`GitHub token validation status with ${format.type}:`, response.status);
+        
+        if (response.status === 200) {
+          const userData = await response.json();
+          console.log(`GitHub token is valid with ${format.type}. User: ${userData.login}`);
+          githubAuthSuccess = true;
+          githubAuthFormat = format.type;
+          break;
+        } else {
+          const errorText = await response.text();
+          console.log(`GitHub token invalid with ${format.type}. Error: ${errorText}`);
+        }
+      } catch (fetchError) {
+        console.error(`Fetch-based GitHub token validation failed with ${format.type}:`, fetchError);
+      }
+    }
+    
+    if (githubAuthSuccess) {
+      console.log(`✅ Found working GitHub auth format: ${githubAuthFormat}`);
+    } else {
+      console.error('❌ All GitHub auth formats failed. Token may be invalid or expired.');
+    }
+    
+    // Validate GitHub token with Octokit
+    try {
+      console.log('Testing GitHub token with Octokit library...');
+      
+      // Then try with octokit
       const user = await octokit.users.getAuthenticated();
       console.log(`GitHub token is valid. Authenticated as: ${user.data.login}`);
     } catch (tokenError) {
       console.error('GitHub token validation failed:', tokenError);
+      
+      // Log the raw response if available
+      if (tokenError.response) {
+        console.error('Raw response data:', tokenError.response.data);
+        if (typeof tokenError.response.data === 'string' && tokenError.response.data.includes('<')) {
+          console.error('WARNING: HTML response detected instead of expected JSON');
+          console.error('First 200 characters of response:', tokenError.response.data.substring(0, 200));
+        }
+      }
+      
       return res.status(500).json({ 
         error: 'GitHub authentication failed', 
         details: tokenError.message,
-        stack: tokenError.stack
+        stack: tokenError.stack,
+        rawResponse: typeof tokenError.response?.data === 'string' ? 
+          tokenError.response.data.substring(0, 500) : 'No raw response available'
       });
     }
     
     // Validate Vercel token
     try {
       console.log('Testing Vercel token validity...');
+      console.log('Vercel token (first 5 chars):', vercelToken.substring(0, 5) + '...');
+      
+      // First test with direct fetch to see raw response
+      try {
+        console.log('Testing Vercel API connectivity with direct fetch...');
+        const response = await fetch('https://api.vercel.com/v2/user', {
+          headers: {
+            'Authorization': `Bearer ${vercelToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('Vercel token validation status:', response.status);
+        
+        if (response.status === 401) {
+          console.error('Vercel token is invalid (401 Unauthorized)');
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error('Vercel token is invalid: 401 Unauthorized');
+        }
+        
+        const responseText = await response.text();
+        console.log('Raw response:', responseText);
+        
+        try {
+          const userData = JSON.parse(responseText);
+          console.log('Vercel token is valid. User data:', userData);
+        } catch (jsonError) {
+          console.error('Failed to parse Vercel response as JSON:', jsonError);
+          throw new Error(`Invalid JSON response from Vercel: ${responseText.substring(0, 100)}...`);
+        }
+      } catch (fetchError) {
+        console.error('Fetch-based Vercel token validation failed:', fetchError);
+      }
+      
+      // Then try with axios
       const vercelUser = await axios.get('https://api.vercel.com/v2/user', {
         headers: {
-          Authorization: `Bearer ${vercelToken}`
+          Authorization: `Bearer ${vercelToken}`,
+          'Content-Type': 'application/json'
         }
       });
-      console.log(`Vercel token is valid. Authenticated as: ${vercelUser.data.user.email || vercelUser.data.user.username}`);
+      console.log(`Vercel token is valid. Authenticated as: ${vercelUser.data.user?.email || vercelUser.data.user?.username || 'Unknown'}`);
     } catch (tokenError) {
       console.error('Vercel token validation failed:', tokenError);
+      
+      // Log the raw response if available
+      if (tokenError.response) {
+        console.error('Status code:', tokenError.response.status);
+        console.error('Raw response data:', tokenError.response.data);
+        if (typeof tokenError.response.data === 'string' && tokenError.response.data.includes('<')) {
+          console.error('WARNING: HTML response detected instead of expected JSON');
+          console.error('First 200 characters of response:', tokenError.response.data.substring(0, 200));
+        }
+      } else if (tokenError.request) {
+        console.error('No response received. Request details:', tokenError.request);
+      }
+      
       return res.status(500).json({ 
         error: 'Vercel authentication failed', 
-        details: tokenError.response?.data || tokenError.message,
-        stack: tokenError.stack
+        details: tokenError.message,
+        stack: tokenError.stack,
+        rawResponse: typeof tokenError.response?.data === 'string' ? 
+          tokenError.response.data.substring(0, 500) : JSON.stringify(tokenError.response?.data || {})
       });
     }
     
@@ -464,12 +727,11 @@ async function deployClientSite(deploymentId, slug) {
     // Create a new branch for the client site
     const branchName = `client-site-${slug}`;
     
-    // Get GitHub repository details - hardcode for now
-    const repoOwner = 'YOUR_GITHUB_USERNAME';  // Replace with your actual GitHub username
+    // Get GitHub repository details - hardcoded
+    const repoOwner = 'atlasgrowth1';  // GitHub username
     const repoName = 'A';
     
     console.log(`Deploying from GitHub repository: ${repoOwner}/${repoName}`);
-    console.log('NOTE: You need to replace YOUR_GITHUB_USERNAME with your actual GitHub username in server.js');
     
     // Check if the repo exists
     let repoInfo;
@@ -571,40 +833,108 @@ async function deployClientSite(deploymentId, slug) {
       
       // Modify the index.html to hardcode the business data
       console.log(`Modifying index.html to hardcode business data for: ${business.name}`);
-      const businessDataPattern = /fetch\('\/businesses\.json'\)[\s\S]*?businesses\.find\(b => b\.slug === slug\);/g;
       
-      if (!businessDataPattern.test(indexHtml)) {
-        console.log('WARNING: Could not find dynamic business data code in index.html');
-        console.log('Will attempt to inject business data at the beginning of the script tag');
+      // Try different patterns to find the dynamic business data loading
+      const patterns = [
+        /fetch\('\/businesses\.json'\)[\s\S]*?businesses\.find\(b => b\.slug === slug\);/g,
+        /fetch\(['"]\/businesses\.json['"]\)[\s\S]*?businesses\.find\(.*?slug.*?\);/g,
+        /fetch\(['"].*?businesses\.json['"]\)[\s\S]*?businesses\.find/g
+      ];
+      
+      let foundPattern = false;
+      let modifiedHtml = indexHtml;
+      
+      for (const pattern of patterns) {
+        if (pattern.test(indexHtml)) {
+          console.log(`Found matching pattern for business data loading`);
+          foundPattern = true;
+          modifiedHtml = indexHtml.replace(
+            pattern,
+            `// Hardcoded business data for ${business.name}
+            const currentBusiness = ${JSON.stringify(business, null, 2)};`
+          );
+          break;
+        }
       }
       
-      indexHtml = indexHtml.replace(
-        businessDataPattern,
-        `// Hardcoded business data for ${business.name}
-        const currentBusiness = ${JSON.stringify(business, null, 2)};`
-      );
+      if (!foundPattern) {
+        console.log('WARNING: Could not find dynamic business data code in index.html');
+        console.log('Will inject business data at the beginning of the first script tag');
+        
+        // Inject at the beginning of the first script tag
+        modifiedHtml = indexHtml.replace(
+          /<script>/, 
+          `<script>
+          // Hardcoded business data for ${business.name}
+          const currentBusiness = ${JSON.stringify(business, null, 2)};
+          `
+        );
+      }
+      
+      indexHtml = modifiedHtml;
       
       // Remove admin-related code
       console.log(`Removing admin-related code from index.html`);
-      const adminCodePattern = /<div class="login-button[\s\S]*?<\/div>/g;
+      const adminPatterns = [
+        /<div class="login-button[\s\S]*?<\/div>/g,
+        /<a [^>]*class="login-button[\s\S]*?<\/a>/g,
+        /<button [^>]*class="login-button[\s\S]*?<\/button>/g,
+        /<a [^>]*href="\/login[\s\S]*?<\/a>/g
+      ];
       
-      if (!adminCodePattern.test(indexHtml)) {
-        console.log('WARNING: Could not find admin login button code in index.html');
+      let adminElementsRemoved = false;
+      
+      for (const pattern of adminPatterns) {
+        if (pattern.test(indexHtml)) {
+          console.log(`Found and removing admin element matching pattern`);
+          indexHtml = indexHtml.replace(pattern, '');
+          adminElementsRemoved = true;
+        }
       }
       
-      indexHtml = indexHtml.replace(adminCodePattern, '');
+      if (!adminElementsRemoved) {
+        console.log('WARNING: Could not find any admin-related code in index.html');
+      }
       
+      // First get the current file to get its SHA
+      console.log(`Getting current index.html SHA for branch: ${branchName}`);
+      let fileSha;
+      try {
+        // Try to get the current file content to get its SHA
+        const fileResponse = await octokit.repos.getContent({
+          owner: repoOwner,
+          repo: repoName,
+          path: 'public/index.html',
+          ref: branchName
+        });
+        fileSha = fileResponse.data.sha;
+        console.log(`Found existing index.html with SHA: ${fileSha}`);
+      } catch (error) {
+        if (error.status === 404) {
+          console.log(`File does not exist in branch yet, creating new file`);
+        } else {
+          throw error;
+        }
+      }
+
       // Commit the modified index.html
       console.log(`Committing modified index.html to branch: ${branchName}`);
       try {
-        const commitResponse = await octokit.repos.createOrUpdateFileContents({
+        const commitParams = {
           owner: repoOwner,
           repo: repoName,
           path: 'public/index.html',
           message: `Create client site for ${business.name}`,
           content: Buffer.from(indexHtml).toString('base64'),
           branch: branchName
-        });
+        };
+        
+        // If we found an existing file, include its SHA
+        if (fileSha) {
+          commitParams.sha = fileSha;
+        }
+        
+        const commitResponse = await octokit.repos.createOrUpdateFileContents(commitParams);
         
         console.log(`Successfully committed index.html: ${commitResponse.data.commit.html_url}`);
       } catch (commitError) {
@@ -690,17 +1020,45 @@ async function deployClientSite(deploymentId, slug) {
 const BUSINESS_DATA = ${JSON.stringify(business, null, 2)};`
       );
       
+      // Get the SHA for server.js
+      console.log(`Getting current server.js SHA for branch: ${branchName}`);
+      let serverJsSha;
+      try {
+        // Try to get the current file content to get its SHA
+        const fileResponse = await octokit.repos.getContent({
+          owner: repoOwner,
+          repo: repoName,
+          path: 'server.js',
+          ref: branchName
+        });
+        serverJsSha = fileResponse.data.sha;
+        console.log(`Found existing server.js with SHA: ${serverJsSha}`);
+      } catch (error) {
+        if (error.status === 404) {
+          console.log(`server.js does not exist in branch yet, creating new file`);
+        } else {
+          throw error;
+        }
+      }
+
       // Commit the modified server.js
       console.log(`Committing modified server.js to branch: ${branchName}`);
       try {
-        const commitResponse = await octokit.repos.createOrUpdateFileContents({
+        const commitParams = {
           owner: repoOwner,
           repo: repoName,
           path: 'server.js',
           message: `Simplify server for ${business.name} client site`,
           content: Buffer.from(serverJs).toString('base64'),
           branch: branchName
-        });
+        };
+        
+        // If we found an existing file, include its SHA
+        if (serverJsSha) {
+          commitParams.sha = serverJsSha;
+        }
+        
+        const commitResponse = await octokit.repos.createOrUpdateFileContents(commitParams);
         
         console.log(`Successfully committed server.js: ${commitResponse.data.commit.html_url}`);
       } catch (commitError) {
@@ -725,45 +1083,142 @@ const BUSINESS_DATA = ${JSON.stringify(business, null, 2)};`
     try {
       console.log(`Deploying to Vercel: branch ${branchName}`);
       
+      // First, get the repository ID from GitHub for Vercel integration
+      console.log(`Getting repository details for Vercel integration`);
+      let repoId;
+      
+      try {
+        // Get project details from Vercel
+        const projectsResponse = await axios.get(
+          'https://api.vercel.com/v9/projects',
+          {
+            headers: {
+              Authorization: `Bearer ${vercelToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        
+        // Look for a project that matches our repo
+        const matchingProject = projectsResponse.data.projects.find(
+          project => project.name === repoName || 
+            (project.gitRepository && 
+             project.gitRepository.repo === `${repoOwner}/${repoName}`)
+        );
+        
+        if (matchingProject) {
+          console.log(`Found matching Vercel project: ${matchingProject.name}`);
+          
+          if (matchingProject.gitRepository && matchingProject.gitRepository.repo) {
+            repoId = matchingProject.id;
+            console.log(`Found git repository ID: ${repoId}`);
+          }
+        }
+      } catch (error) {
+        console.warn('Could not get Vercel projects:', error.message);
+      }
+      
       // Prepare deployment payload
       const deploymentPayload = {
         name: `client-site-${slug}`,
-        target: 'production',
-        gitSource: {
+        target: 'production'
+      };
+      
+      // Add git source info if we have a repo ID, otherwise use GitHub defaults
+      if (repoId) {
+        // Use project ID
+        deploymentPayload.gitSource = {
           type: 'github',
           repo: `${repoOwner}/${repoName}`,
+          ref: branchName,
+          repoId: repoId
+        };
+      } else {
+        // Alternative approach without repoId - try with different format
+        deploymentPayload.gitSource = {
+          type: 'github',
+          org: repoOwner,
+          repo: repoName,
           ref: branchName
-        }
-      };
+        };
+      }
       
       console.log('Vercel deployment payload:', JSON.stringify(deploymentPayload, null, 2));
       
-      // Make the deployment request
-      const vercelDeployment = await axios.post(
-        'https://api.vercel.com/v13/deployments',
-        deploymentPayload,
-        {
-          headers: {
-            Authorization: `Bearer ${vercelToken}`,
-            'Content-Type': 'application/json'
+      // Try to make the deployment request
+      try {
+        const vercelDeployment = await axios.post(
+          'https://api.vercel.com/v13/deployments',
+          deploymentPayload,
+          {
+            headers: {
+              Authorization: `Bearer ${vercelToken}`,
+              'Content-Type': 'application/json'
+            }
           }
-        }
-      );
-      
-      console.log('Vercel deployment response:', JSON.stringify(vercelDeployment.data, null, 2));
-      
-      // Get the deployment URL
-      deploymentUrl = `https://${vercelDeployment.data.url}`;
+        );
+        
+        console.log('Vercel deployment response:', JSON.stringify(vercelDeployment.data, null, 2));
+        
+        // Get the deployment URL
+        deploymentUrl = `https://${vercelDeployment.data.url}`;
+      } catch (deployError) {
+        console.error('Error with Git-based deployment:', deployError.message);
+        console.log('Detailed error:', deployError.response?.data);
+        
+        // If Git-based deployment fails, try alternative approach - creating a project directly
+        console.log('Trying alternative deployment approach without Git integration...');
+        
+        // Update progress
+        deployments.set(deploymentId, {
+          ...deployments.get(deploymentId),
+          progress: 80,
+          message: 'Trying alternative deployment approach...'
+        });
+        
+        // The client site is already on GitHub, so we can just return a success message
+        // with instructions to manually set up in Vercel
+        console.log('Branch created successfully. Manual Vercel setup needed.');
+        deploymentUrl = `https://github.com/${repoOwner}/${repoName}/tree/${branchName}`;
+        
+        // Set a more informative message
+        deployments.set(deploymentId, {
+          ...deployments.get(deploymentId),
+          manualSetupRequired: true,
+          githubBranchUrl: deploymentUrl,
+          vercelSetupInstructions: `
+          1. Go to https://vercel.com/new
+          2. Import this GitHub repository: ${repoOwner}/${repoName}
+          3. Select the branch: ${branchName}
+          4. Deploy the projectI 
+          `
+        });
+      }
       console.log(`Deployment URL: ${deploymentUrl}`);
       
       // Update deployment status
-      deployments.set(deploymentId, {
-        ...deployments.get(deploymentId),
-        status: 'completed',
-        progress: 100,
-        message: 'Deployment completed',
-        url: deploymentUrl
-      });
+      const deploymentStatus = deployments.get(deploymentId);
+      if (deploymentStatus.manualSetupRequired) {
+        // Manual Vercel setup is needed
+        deployments.set(deploymentId, {
+          ...deploymentStatus,
+          status: 'completed',
+          progress: 100,
+          message: 'GitHub branch created successfully, but Vercel deployment requires manual setup',
+          url: deploymentUrl,
+          setupType: 'manual'
+        });
+      } else {
+        // Automatic deployment completed successfully
+        deployments.set(deploymentId, {
+          ...deploymentStatus,
+          status: 'completed',
+          progress: 100,
+          message: 'Deployment completed',
+          url: deploymentUrl,
+          setupType: 'automatic'
+        });
+      }
     } catch (vercelError) {
       console.error('Error deploying to Vercel:', vercelError);
       console.log('Error response:', vercelError.response?.data);

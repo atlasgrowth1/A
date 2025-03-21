@@ -143,6 +143,9 @@
             <button type="button" class="btn btn-success ms-2" id="deployBtn">
               <i class="bi bi-cloud-upload"></i> Create Client Site
             </button>
+            <button type="button" class="btn btn-info ms-2" id="testTokensBtn">
+              <i class="bi bi-key"></i> Test API Tokens
+            </button>
           </div>
           <button type="button" class="btn btn-outline-secondary" id="resetBtn">Reset to Defaults</button>
         </div>
@@ -181,6 +184,31 @@
       </div>
     </div>
   </div>
+  
+  <!-- Test Tokens Modal -->
+  <div class="modal fade" id="testTokensModal" tabindex="-1" aria-labelledby="testTokensModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="testTokensModalLabel">Test API Tokens</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Testing GitHub and Vercel API tokens...</p>
+          <div id="tokensStatus">
+            <div class="d-flex justify-content-center">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -209,6 +237,11 @@
       const deployStatus = document.getElementById('deployStatus');
       const deployProgress = document.getElementById('deployProgress');
       const deployMessage = document.getElementById('deployMessage');
+      
+      // Token testing elements
+      const testTokensBtn = document.getElementById('testTokensBtn');
+      const testTokensModal = new bootstrap.Modal(document.getElementById('testTokensModal'));
+      const tokensStatus = document.getElementById('tokensStatus');
       
       // Default values
       const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
@@ -373,6 +406,126 @@
         aboutImagePreview.src = this.value;
       });
       
+      // Test tokens button click handler
+      testTokensBtn.addEventListener('click', async function() {
+        // Show the modal
+        testTokensModal.show();
+        
+        // Reset the status
+        tokensStatus.innerHTML = `
+          <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        `;
+        
+        try {
+          // Test the tokens
+          const response = await fetch('/api/test-tokens');
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Format the results
+            let html = '<div class="row">';
+            
+            // GitHub results
+            html += '<div class="col-md-6 mb-3">';
+            html += '<div class="card">';
+            html += '<div class="card-header bg-dark text-white">GitHub Token</div>';
+            html += '<div class="card-body">';
+            
+            if (data.github.success) {
+              html += `<div class="alert alert-success">
+                <strong>Success!</strong> Token is valid.
+                <br>Authenticated as: ${data.github.username || 'Unknown'}
+              </div>`;
+            } else {
+              html += `<div class="alert alert-danger">
+                <strong>Error!</strong> ${data.github.message || 'Token validation failed'}
+                <br>${data.github.error || ''}
+              </div>`;
+              
+              if (data.github.rawResponse) {
+                html += `<div class="mt-3">
+                  <strong>Raw Response:</strong>
+                  <pre class="bg-light p-2 mt-2" style="max-height: 200px; overflow: auto;">${data.github.rawResponse}</pre>
+                </div>`;
+              }
+            }
+            
+            html += `<div class="mt-2">
+              <strong>Status Code:</strong> ${data.github.status || 'Unknown'}
+              <br><strong>Content Type:</strong> ${data.github.contentType || 'Unknown'}
+              <br><strong>Token Prefix:</strong> ${data.github_token_first_chars}...
+            </div>`;
+            
+            html += '</div></div></div>';
+            
+            // Vercel results
+            html += '<div class="col-md-6 mb-3">';
+            html += '<div class="card">';
+            html += '<div class="card-header bg-dark text-white">Vercel Token</div>';
+            html += '<div class="card-body">';
+            
+            if (data.vercel.success) {
+              html += `<div class="alert alert-success">
+                <strong>Success!</strong> Token is valid.
+                <br>Authenticated as: ${data.vercel.username || 'Unknown'}
+              </div>`;
+            } else {
+              html += `<div class="alert alert-danger">
+                <strong>Error!</strong> ${data.vercel.message || 'Token validation failed'}
+                <br>${data.vercel.error || ''}
+              </div>`;
+              
+              if (data.vercel.rawResponse) {
+                html += `<div class="mt-3">
+                  <strong>Raw Response:</strong>
+                  <pre class="bg-light p-2 mt-2" style="max-height: 200px; overflow: auto;">${data.vercel.rawResponse}</pre>
+                </div>`;
+              }
+            }
+            
+            html += `<div class="mt-2">
+              <strong>Status Code:</strong> ${data.vercel.status || 'Unknown'}
+              <br><strong>Content Type:</strong> ${data.vercel.contentType || 'Unknown'}
+              <br><strong>Token Prefix:</strong> ${data.vercel_token_first_chars}...
+            </div>`;
+            
+            html += '</div></div></div>';
+            
+            html += '</div>';
+            
+            // Show the summary
+            html += `<div class="alert ${data.github.success && data.vercel.success ? 'alert-success' : 'alert-warning'}">
+              <strong>Summary:</strong> 
+              ${data.github.success && data.vercel.success ? 
+                'Both tokens are valid! You can deploy client sites.' : 
+                'One or both tokens are invalid. Deployment may fail.'}
+            </div>`;
+            
+            // Update the status
+            tokensStatus.innerHTML = html;
+          } else {
+            // Show error
+            tokensStatus.innerHTML = `
+              <div class="alert alert-danger">
+                <strong>Error!</strong> Failed to test tokens. Server returned status: ${response.status}
+              </div>
+            `;
+          }
+        } catch (error) {
+          // Show error
+          tokensStatus.innerHTML = `
+            <div class="alert alert-danger">
+              <strong>Error!</strong> Failed to test tokens: ${error.message}
+            </div>
+          `;
+        }
+      });
+    
       // Deploy button click handler
       deployBtn.addEventListener('click', function() {
         if (!currentBusiness) return;
@@ -450,13 +603,45 @@
               deployProgress.style.width = '100%';
               deployProgress.classList.remove('bg-primary');
               deployProgress.classList.add('bg-success');
-              deployMessage.innerHTML = `
-                <div class="alert alert-success">
-                  <strong>Deployment successful!</strong><br>
-                  The client site has been created and deployed.<br><br>
-                  <a href="${data.url}" target="_blank" class="btn btn-sm btn-primary">View Site</a>
-                </div>
-              `;
+              
+              if (data.setupType === 'manual') {
+                // Manual setup required
+                deployMessage.innerHTML = `
+                  <div class="alert alert-warning">
+                    <strong>GitHub branch created successfully!</strong><br>
+                    <p>The code has been prepared, but Vercel integration requires manual setup.</p>
+                    
+                    <div class="mt-3">
+                      <h5>Manual Setup Instructions:</h5>
+                      <ol>
+                        <li>Go to <a href="https://vercel.com/new" target="_blank">Vercel New Project</a></li>
+                        <li>Connect with GitHub and select this repository</li>
+                        <li>When prompted for the branch, select: <code>${data.url.split('/').pop()}</code></li>
+                        <li>Complete the setup and deployment on Vercel</li>
+                      </ol>
+                    </div>
+                    
+                    <div class="mt-3">
+                      <a href="${data.url}" target="_blank" class="btn btn-sm btn-primary">View GitHub Branch</a>
+                    </div>
+                    
+                    ${data.vercelSetupInstructions ? 
+                      `<div class="mt-3 p-3 bg-light">
+                        <pre>${data.vercelSetupInstructions}</pre>
+                      </div>` : 
+                      ''}
+                  </div>
+                `;
+              } else {
+                // Automatic deployment
+                deployMessage.innerHTML = `
+                  <div class="alert alert-success">
+                    <strong>Deployment successful!</strong><br>
+                    The client site has been created and deployed.<br><br>
+                    <a href="${data.url}" target="_blank" class="btn btn-sm btn-primary">View Site</a>
+                  </div>
+                `;
+              }
               confirmDeployBtn.disabled = false;
             } else if (data.status === 'failed') {
               // Deployment failed

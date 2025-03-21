@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:tokens": "node start-with-tokens.js",
     "convert": "node generate-custom-json.js",
     "setup": "npm install && node generate-custom-json.js && node server.js"
   },
