@@ -1551,18 +1551,43 @@
       });
       
       // Set phone number in various places and update href
-      // Convert phone to string if it's an object
-      const phone = typeof business.phone === 'object' ? 
-        (business.phone.toString() || '(555) 123-4567') : 
-        (business.phone || '(555) 123-4567');
+      // Extract and format phone number properly from any format
+      let phone = '(555) 123-4567'; // Default fallback
       
+      if (business.phone) {
+        if (typeof business.phone === 'string') {
+          phone = business.phone;
+        } else if (typeof business.phone === 'object') {
+          // Try to extract phone from common object formats
+          if (business.phone.phones_enricher && business.phone.phones_enricher.number) {
+            phone = business.phone.phones_enricher.number;
+          } else if (business.phone.number) {
+            phone = business.phone.number;
+          } else {
+            // Convert object to string and extract numbers
+            const phoneStr = JSON.stringify(business.phone);
+            const phoneMatch = phoneStr.match(/\d{10}|\d{3}[-.\s]\d{3}[-.\s]\d{4}|\(\d{3}\)\s*\d{3}[-.\s]\d{4}/);
+            if (phoneMatch) {
+              phone = phoneMatch[0];
+            }
+          }
+        }
+      }
+      
+      // Format the phone number consistently if it's just digits
+      if (/^\d{10}$/.test(phone)) {
+        phone = `(${phone.substring(0,3)}) ${phone.substring(3,6)}-${phone.substring(6)}`;
+      }
+      
+      // Set phone in all relevant places
       document.querySelectorAll('#phone-number-header, #phone-number-cta, #phone-number-footer').forEach(el => {
         el.textContent = phone;
       });
       
-      // Update phone links
+      // Update phone links - strip non-digits for the href
+      const phoneDigits = phone.replace(/[^0-9]/g, '');
       document.querySelectorAll('a[href^="tel:"]').forEach(el => {
-        el.href = `tel:${phone.toString().replace(/[^0-9]/g, '')}`;
+        el.href = `tel:${phoneDigits}`;
       });
       
       // Set city/location information
