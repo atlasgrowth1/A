@@ -1550,28 +1550,13 @@
         el.textContent = business.name || 'HVAC Pro';
       });
       
-      // Set phone number in various places and update href
-      // Extract and format phone number properly from any format
-      let phone = '(555) 123-4567'; // Default fallback
+      // Set phone number directly from the business data
+      // This simply uses the phone column from the CSV file
+      let phone = business.phone || '(555) 123-4567'; // Default fallback
       
-      if (business.phone) {
-        if (typeof business.phone === 'string') {
-          phone = business.phone;
-        } else if (typeof business.phone === 'object') {
-          // Try to extract phone from common object formats
-          if (business.phone.phones_enricher && business.phone.phones_enricher.number) {
-            phone = business.phone.phones_enricher.number;
-          } else if (business.phone.number) {
-            phone = business.phone.number;
-          } else {
-            // Convert object to string and extract numbers
-            const phoneStr = JSON.stringify(business.phone);
-            const phoneMatch = phoneStr.match(/\d{10}|\d{3}[-.\s]\d{3}[-.\s]\d{4}|\(\d{3}\)\s*\d{3}[-.\s]\d{4}/);
-            if (phoneMatch) {
-              phone = phoneMatch[0];
-            }
-          }
-        }
+      // If phone is still an object, try to get it directly
+      if (typeof phone === 'object') {
+        phone = phone.toString();
       }
       
       // Format the phone number consistently if it's just digits
