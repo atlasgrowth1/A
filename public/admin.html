@@ -157,7 +157,7 @@
   <div class="success-message" id="successMessage">
     Changes saved successfully!
   </div>
-  
+
   <!-- Deploy Modal -->
   <div class="modal fade" id="deployModal" tabindex="-1" aria-labelledby="deployModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -204,7 +204,7 @@
       const previewBtn = document.getElementById('previewBtn');
       const resetBtn = document.getElementById('resetBtn');
       const successMessage = document.getElementById('successMessage');
-      
+
       // Deployment elements
       const deployBtn = document.getElementById('deployBtn');
       const deployModal = new bootstrap.Modal(document.getElementById('deployModal'));
@@ -213,16 +213,16 @@
       const deployStatus = document.getElementById('deployStatus');
       const deployProgress = document.getElementById('deployProgress');
       const deployMessage = document.getElementById('deployMessage');
-      
+
       // Location review elements
       const locationReviewBtn = document.getElementById('locationReviewBtn');
-      
+
       // Default values
       const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
       const DEFAULT_ABOUT_IMAGE = 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
       const DEFAULT_PRIMARY_COLOR = '#0072CE';
       const DEFAULT_SECONDARY_COLOR = '#ff7a00';
-      
+
       let businesses = [];
       let currentBusiness = null;
 
@@ -231,10 +231,10 @@
         try {
           const response = await fetch('/businesses.json');
           businesses = await response.json();
-          
+
           // Clear the select
           businessSelect.innerHTML = '';
-          
+
           // Add options for each business
           businesses.forEach(business => {
             const option = document.createElement('option');
@@ -242,7 +242,7 @@
             option.textContent = business.name;
             businessSelect.appendChild(option);
           });
-          
+
           // If there are businesses, load the first one
           if (businesses.length > 0) {
             businessSelect.value = businesses[0].slug;
@@ -256,25 +256,30 @@
       // Load customization options for a specific business
       function loadBusinessCustomization(slug) {
         currentBusiness = businesses.find(b => b.slug === slug);
-        
+
         if (currentBusiness && currentBusiness.customization) {
           // Set form values
           heroImageInput.value = currentBusiness.customization.heroImage || DEFAULT_HERO_IMAGE;
           aboutImageInput.value = currentBusiness.customization.aboutImage || DEFAULT_ABOUT_IMAGE;
           primaryColorInput.value = currentBusiness.customization.primaryColor || DEFAULT_PRIMARY_COLOR;
           secondaryColorInput.value = currentBusiness.customization.secondaryColor || DEFAULT_SECONDARY_COLOR;
-          
+
           // Set color pickers
           primaryColorPicker.value = currentBusiness.customization.primaryColor || DEFAULT_PRIMARY_COLOR;
           secondaryColorPicker.value = currentBusiness.customization.secondaryColor || DEFAULT_SECONDARY_COLOR;
-          
+
           // Update image previews immediately with timestamp to force refresh
           updateImagePreview(heroImageInput.value, heroImagePreview);
           updateImagePreview(aboutImageInput.value, aboutImagePreview);
         } else {
           resetToDefaults();
         }
+          // Added code to handle phone number display
+          const phone = currentBusiness.phone;
+          const formattedPhone = getPhoneAsString(phone);
+          console.log("Formatted Phone:", formattedPhone); //debugging line
       }
+
 
       // Reset form to default values
       function resetToDefaults() {
@@ -284,7 +289,7 @@
         secondaryColorInput.value = DEFAULT_SECONDARY_COLOR;
         primaryColorPicker.value = DEFAULT_PRIMARY_COLOR;
         secondaryColorPicker.value = DEFAULT_SECONDARY_COLOR;
-        
+
         // Update image previews with timestamp to force refresh
         updateImagePreview(DEFAULT_HERO_IMAGE, heroImagePreview);
         updateImagePreview(DEFAULT_ABOUT_IMAGE, aboutImagePreview);
@@ -301,21 +306,21 @@
       // Save changes to the server
       async function saveChanges() {
         if (!currentBusiness) return;
-        
+
         // Update current business customization
         if (!currentBusiness.customization) {
           currentBusiness.customization = {};
         }
-        
+
         // Add timestamp to image URLs to force cache refresh
         const heroUrl = heroImageInput.value;
         const aboutUrl = aboutImageInput.value;
-        
+
         currentBusiness.customization.heroImage = heroUrl;
         currentBusiness.customization.aboutImage = aboutUrl;
         currentBusiness.customization.primaryColor = primaryColorInput.value;
         currentBusiness.customization.secondaryColor = secondaryColorInput.value;
-        
+
         try {
           // Send updated businesses to the server
           const response = await fetch('/api/save-customization', {
@@ -328,15 +333,15 @@
               customization: currentBusiness.customization
             })
           });
-          
+
           if (response.ok) {
             // Update image previews with timestamp to force refresh
             updateImagePreview(heroUrl, heroImagePreview);
             updateImagePreview(aboutUrl, aboutImagePreview);
-            
+
             // Show success message
             successMessage.style.display = 'block';
-            
+
             // Hide message after animation completes
             setTimeout(() => {
               successMessage.style.display = 'none';
@@ -353,7 +358,7 @@
       // Preview changes
       function previewChanges() {
         if (!currentBusiness) return;
-        
+
         // Save changes before opening preview
         saveChanges().then(() => {
           // Open preview in new tab
@@ -361,51 +366,51 @@
           window.open(previewUrl, '_blank');
         });
       }
-      
+
       // Event listeners
       businessSelect.addEventListener('change', function() {
         loadBusinessCustomization(this.value);
       });
-      
+
       customizationForm.addEventListener('submit', function(e) {
         e.preventDefault();
         saveChanges();
       });
-      
+
       previewBtn.addEventListener('click', previewChanges);
-      
+
       resetBtn.addEventListener('click', resetToDefaults);
-      
+
       // Sync color inputs with color pickers
       primaryColorPicker.addEventListener('input', function() {
         primaryColorInput.value = this.value;
       });
-      
+
       secondaryColorPicker.addEventListener('input', function() {
         secondaryColorInput.value = this.value;
       });
-      
+
       primaryColorInput.addEventListener('input', function() {
         primaryColorPicker.value = this.value;
       });
-      
+
       secondaryColorInput.addEventListener('input', function() {
         secondaryColorPicker.value = this.value;
       });
-      
+
       // Update image previews when inputs change
       heroImageInput.addEventListener('input', function() {
         updateImagePreview(this.value, heroImagePreview);
       });
-      
+
       aboutImageInput.addEventListener('input', function() {
         updateImagePreview(this.value, aboutImagePreview);
       });
-      
+
       // Location review button click handler
       locationReviewBtn.addEventListener('click', function() {
         if (!currentBusiness) return;
-        
+
         // Check if the business has a location review link
         if (currentBusiness.location_link || currentBusiness.reviews_link || currentBusiness.googleMapsUrl || currentBusiness.locationReviewLink) {
           const reviewLink = currentBusiness.location_link || currentBusiness.reviews_link || currentBusiness.googleMapsUrl || currentBusiness.locationReviewLink;
@@ -414,30 +419,30 @@
           alert('No location review link available for this business.');
         }
       });
-    
+
       // Deploy button click handler
       deployBtn.addEventListener('click', function() {
         if (!currentBusiness) return;
-        
+
         // Set the business name in the modal
         deployBusinessName.textContent = currentBusiness.name;
-        
+
         // Show the modal
         deployModal.show();
       });
-      
+
       // Confirm deploy button click handler
       confirmDeployBtn.addEventListener('click', async function() {
         if (!currentBusiness) return;
-        
+
         // Disable the button to prevent multiple clicks
         confirmDeployBtn.disabled = true;
-        
+
         // Show the status section
         deployStatus.classList.remove('d-none');
         deployProgress.style.width = '10%';
         deployMessage.innerHTML = 'Starting deployment...';
-        
+
         try {
           // Start the deployment process
           const response = await fetch('/api/deploy-client-site', {
@@ -449,15 +454,15 @@
               slug: currentBusiness.slug
             })
           });
-          
+
           if (response.ok) {
             // Deployment started successfully
             const data = await response.json();
-            
+
             // Update progress
             deployProgress.style.width = '50%';
             deployMessage.innerHTML = 'Creating site...';
-            
+
             // Poll the deployment status
             checkDeploymentStatus(data.deploymentId);
           } else {
@@ -478,28 +483,28 @@
           confirmDeployBtn.disabled = false;
         }
       });
-      
+
       // Function to check deployment status
       async function checkDeploymentStatus(deploymentId) {
         try {
           const response = await fetch(`/api/deployment-status/${deploymentId}`);
-          
+
           if (response.ok) {
             const data = await response.json();
-            
+
             if (data.status === 'completed') {
               // Deployment completed successfully
               deployProgress.style.width = '100%';
               deployProgress.classList.remove('bg-primary');
               deployProgress.classList.add('bg-success');
-              
+
               if (data.setupType === 'manual') {
                 // Manual setup required
                 deployMessage.innerHTML = `
                   <div class="alert alert-warning">
                     <strong>GitHub branch created successfully!</strong><br>
                     <p>The code has been prepared, but Vercel integration requires manual setup.</p>
-                    
+
                     <div class="mt-3">
                       <h5>Manual Setup Instructions:</h5>
                       <ol>
@@ -509,11 +514,11 @@
                         <li>Complete the setup and deployment on Vercel</li>
                       </ol>
                     </div>
-                    
+
                     <div class="mt-3">
                       <a href="${data.url}" target="_blank" class="btn btn-sm btn-primary">View GitHub Branch</a>
                     </div>
-                    
+
                     ${data.vercelSetupInstructions ? 
                       `<div class="mt-3 p-3 bg-light">
                         <pre>${data.vercelSetupInstructions}</pre>
@@ -543,7 +548,7 @@
               // Deployment still in progress
               deployProgress.style.width = `${data.progress}%`;
               deployMessage.innerHTML = `${data.message || 'Deploying...'}`;
-              
+
               // Check again in 2 seconds
               setTimeout(() => checkDeploymentStatus(deploymentId), 2000);
             }
@@ -565,7 +570,68 @@
           confirmDeployBtn.disabled = false;
         }
       }
-      
+
+      // Function to convert phone to string no matter what format it's in
+      function getPhoneAsString(phone) {
+        // If already a string, return it
+        if (typeof phone === 'string') {
+          return phone;
+        }
+
+        // If null/undefined
+        if (!phone) {
+          return '';
+        }
+
+        // If it's an object
+        if (typeof phone === 'object') {
+          // Try common object formats
+          if (phone.countryCode && phone.number) {
+            return `${phone.countryCode}${phone.number}`;
+          }
+
+          if (phone.full) {
+            return phone.full;
+          }
+
+          // Check if it's an phones_enricher object with carrier_name
+          if (phone.phones_enricher && phone.phones_enricher.carrier_name !== undefined) {
+            // Return the phone number from parent object's key
+            // Loop through parent keys to find the actual number
+            for (const key in phone) {
+              if (key !== 'phones_enricher' && typeof phone[key] === 'string') {
+                return phone[key];
+              }
+            }
+          }
+
+          // Check if it's an array-like object
+          if (Array.isArray(phone)) {
+            return phone.join('');
+          }
+
+          // Try to get any string property that looks like a phone
+          for (const key in phone) {
+            if (typeof phone[key] === 'string' && phone[key].match(/^\+?[0-9\s()-]+$/)) {
+              return phone[key];
+            }
+          }
+
+          // If no phone-like string found, convert the object to a string
+          try {
+            // Just converting to string will create [object Object]
+            // So instead extract values from JSON
+            const simplified = JSON.stringify(phone).replace(/["{},]/g, ' ').replace(/:/g, ' ');
+            return simplified.trim();
+          } catch (e) {
+            return ''; // Error case
+          }
+        }
+
+        // For anything else, try to convert to string
+        return String(phone);
+      }
+
       // Initial load
       loadBusinesses();
     });
