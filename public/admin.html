@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Website Customization Admin</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
     body {
       background-color: #f8f9fa;
@@ -143,8 +144,8 @@
             <button type="button" class="btn btn-success ms-2" id="deployBtn">
               <i class="bi bi-cloud-upload"></i> Create Client Site
             </button>
-            <button type="button" class="btn btn-info ms-2" id="testTokensBtn">
-              <i class="bi bi-key"></i> Test API Tokens
+            <button type="button" class="btn btn-secondary ms-2" id="locationReviewBtn">
+              <i class="bi bi-geo-alt"></i> Location Review Link
             </button>
           </div>
           <button type="button" class="btn btn-outline-secondary" id="resetBtn">Reset to Defaults</button>
@@ -184,31 +185,6 @@
       </div>
     </div>
   </div>
-  
-  <!-- Test Tokens Modal -->
-  <div class="modal fade" id="testTokensModal" tabindex="-1" aria-labelledby="testTokensModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="testTokensModalLabel">Test API Tokens</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Testing GitHub and Vercel API tokens...</p>
-          <div id="tokensStatus">
-            <div class="d-flex justify-content-center">
-              <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -238,10 +214,8 @@
       const deployProgress = document.getElementById('deployProgress');
       const deployMessage = document.getElementById('deployMessage');
       
-      // Token testing elements
-      const testTokensBtn = document.getElementById('testTokensBtn');
-      const testTokensModal = new bootstrap.Modal(document.getElementById('testTokensModal'));
-      const tokensStatus = document.getElementById('tokensStatus');
+      // Location review elements
+      const locationReviewBtn = document.getElementById('locationReviewBtn');
       
       // Default values
       const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
@@ -294,9 +268,9 @@
           primaryColorPicker.value = currentBusiness.customization.primaryColor || DEFAULT_PRIMARY_COLOR;
           secondaryColorPicker.value = currentBusiness.customization.secondaryColor || DEFAULT_SECONDARY_COLOR;
           
-          // Update image previews
-          heroImagePreview.src = heroImageInput.value;
-          aboutImagePreview.src = aboutImageInput.value;
+          // Update image previews immediately with timestamp to force refresh
+          updateImagePreview(heroImageInput.value, heroImagePreview);
+          updateImagePreview(aboutImageInput.value, aboutImagePreview);
         } else {
           resetToDefaults();
         }
@@ -310,8 +284,18 @@
         secondaryColorInput.value = DEFAULT_SECONDARY_COLOR;
         primaryColorPicker.value = DEFAULT_PRIMARY_COLOR;
         secondaryColorPicker.value = DEFAULT_SECONDARY_COLOR;
-        heroImagePreview.src = DEFAULT_HERO_IMAGE;
-        aboutImagePreview.src = DEFAULT_ABOUT_IMAGE;
+        
+        // Update image previews with timestamp to force refresh
+        updateImagePreview(DEFAULT_HERO_IMAGE, heroImagePreview);
+        updateImagePreview(DEFAULT_ABOUT_IMAGE, aboutImagePreview);
+      }
+
+      // Function to update image preview with cache-busting
+      function updateImagePreview(url, imgElement) {
+        // Add a timestamp to force browser to refresh the image
+        const timestamp = Date.now();
+        const separator = url.includes('?') ? '&' : '?';
+        imgElement.src = `${url}${separator}t=${timestamp}`;
       }
 
       // Save changes to the server
@@ -342,6 +326,10 @@
           });
           
           if (response.ok) {
+            // Update image previews with timestamp to force refresh
+            updateImagePreview(heroImageInput.value, heroImagePreview);
+            updateImagePreview(aboutImageInput.value, aboutImagePreview);
+            
             // Show success message
             successMessage.style.display = 'block';
             
@@ -362,8 +350,12 @@
       function previewChanges() {
         if (!currentBusiness) return;
         
-        const previewUrl = `/${currentBusiness.slug}`;
-        window.open(previewUrl, '_blank');
+        // Save changes before opening preview
+        saveChanges().then(() => {
+          // Open preview in new tab
+          const previewUrl = `/${currentBusiness.slug}`;
+          window.open(previewUrl, '_blank');
+        });
       }
       
       // Event listeners
@@ -399,130 +391,23 @@
       
       // Update image previews when inputs change
       heroImageInput.addEventListener('input', function() {
-        heroImagePreview.src = this.value;
+        updateImagePreview(this.value, heroImagePreview);
       });
       
       aboutImageInput.addEventListener('input', function() {
-        aboutImagePreview.src = this.value;
+        updateImagePreview(this.value, aboutImagePreview);
       });
       
-      // Test tokens button click handler
-      testTokensBtn.addEventListener('click', async function() {
-        // Show the modal
-        testTokensModal.show();
+      // Location review button click handler
+      locationReviewBtn.addEventListener('click', function() {
+        if (!currentBusiness) return;
         
-        // Reset the status
-        tokensStatus.innerHTML = `
-          <div class="d-flex justify-content-center">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        `;
-        
-        try {
-          // Test the tokens
-          const response = await fetch('/api/test-tokens');
-          
-          if (response.ok) {
-            const data = await response.json();
-            
-            // Format the results
-            let html = '<div class="row">';
-            
-            // GitHub results
-            html += '<div class="col-md-6 mb-3">';
-            html += '<div class="card">';
-            html += '<div class="card-header bg-dark text-white">GitHub Token</div>';
-            html += '<div class="card-body">';
-            
-            if (data.github.success) {
-              html += `<div class="alert alert-success">
-                <strong>Success!</strong> Token is valid.
-                <br>Authenticated as: ${data.github.username || 'Unknown'}
-              </div>`;
-            } else {
-              html += `<div class="alert alert-danger">
-                <strong>Error!</strong> ${data.github.message || 'Token validation failed'}
-                <br>${data.github.error || ''}
-              </div>`;
-              
-              if (data.github.rawResponse) {
-                html += `<div class="mt-3">
-                  <strong>Raw Response:</strong>
-                  <pre class="bg-light p-2 mt-2" style="max-height: 200px; overflow: auto;">${data.github.rawResponse}</pre>
-                </div>`;
-              }
-            }
-            
-            html += `<div class="mt-2">
-              <strong>Status Code:</strong> ${data.github.status || 'Unknown'}
-              <br><strong>Content Type:</strong> ${data.github.contentType || 'Unknown'}
-              <br><strong>Token Prefix:</strong> ${data.github_token_first_chars}...
-            </div>`;
-            
-            html += '</div></div></div>';
-            
-            // Vercel results
-            html += '<div class="col-md-6 mb-3">';
-            html += '<div class="card">';
-            html += '<div class="card-header bg-dark text-white">Vercel Token</div>';
-            html += '<div class="card-body">';
-            
-            if (data.vercel.success) {
-              html += `<div class="alert alert-success">
-                <strong>Success!</strong> Token is valid.
-                <br>Authenticated as: ${data.vercel.username || 'Unknown'}
-              </div>`;
-            } else {
-              html += `<div class="alert alert-danger">
-                <strong>Error!</strong> ${data.vercel.message || 'Token validation failed'}
-                <br>${data.vercel.error || ''}
-              </div>`;
-              
-              if (data.vercel.rawResponse) {
-                html += `<div class="mt-3">
-                  <strong>Raw Response:</strong>
-                  <pre class="bg-light p-2 mt-2" style="max-height: 200px; overflow: auto;">${data.vercel.rawResponse}</pre>
-                </div>`;
-              }
-            }
-            
-            html += `<div class="mt-2">
-              <strong>Status Code:</strong> ${data.vercel.status || 'Unknown'}
-              <br><strong>Content Type:</strong> ${data.vercel.contentType || 'Unknown'}
-              <br><strong>Token Prefix:</strong> ${data.vercel_token_first_chars}...
-            </div>`;
-            
-            html += '</div></div></div>';
-            
-            html += '</div>';
-            
-            // Show the summary
-            html += `<div class="alert ${data.github.success && data.vercel.success ? 'alert-success' : 'alert-warning'}">
-              <strong>Summary:</strong> 
-              ${data.github.success && data.vercel.success ? 
-                'Both tokens are valid! You can deploy client sites.' : 
-                'One or both tokens are invalid. Deployment may fail.'}
-            </div>`;
-            
-            // Update the status
-            tokensStatus.innerHTML = html;
-          } else {
-            // Show error
-            tokensStatus.innerHTML = `
-              <div class="alert alert-danger">
-                <strong>Error!</strong> Failed to test tokens. Server returned status: ${response.status}
-              </div>
-            `;
-          }
-        } catch (error) {
-          // Show error
-          tokensStatus.innerHTML = `
-            <div class="alert alert-danger">
-              <strong>Error!</strong> Failed to test tokens: ${error.message}
-            </div>
-          `;
+        // Check if the business has a location review link
+        if (currentBusiness.location_link || currentBusiness.reviews_link || currentBusiness.googleMapsUrl || currentBusiness.locationReviewLink) {
+          const reviewLink = currentBusiness.location_link || currentBusiness.reviews_link || currentBusiness.googleMapsUrl || currentBusiness.locationReviewLink;
+          window.open(reviewLink, '_blank');
+        } else {
+          alert('No location review link available for this business.');
         }
       });
     

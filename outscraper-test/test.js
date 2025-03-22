@@ -54,4 +54,4 @@ async function fetchRequestResults() {
 }
 
 // Execute the function
-fetchRequestResults();
+fetchRequestResults(); 

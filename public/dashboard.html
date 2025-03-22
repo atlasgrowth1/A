@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding-top: 56px;
+      padding-bottom: 20px;
+    }
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 20px auto;
+    }
+    .navbar-brand {
+      font-weight: 600;
+      color: #0072CE;
+    }
+    .sidebar {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      height: calc(100vh - 100px);
+      position: sticky;
+      top: 80px;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar-item {
+      margin-bottom: 0.5rem;
+    }
+    .sidebar-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      color: #495057;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background-color: #e9ecef;
+      color: #0072CE;
+    }
+    .sidebar-icon {
+      margin-right: 0.75rem;
+      width: 20px;
+      text-align: center;
+    }
+    .content-area {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      min-height: calc(100vh - 100px);
+    }
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .lead-card {
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      background-color: #fff;
+      transition: all 0.2s;
+    }
+    .lead-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .lead-card.unread {
+      border-left: 4px solid #0072CE;
+      background-color: #f8f9fe;
+    }
+    .lead-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    .lead-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+    .lead-time {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+    .lead-contact {
+      margin-bottom: 0.75rem;
+      color: #495057;
+      font-size: 0.9rem;
+    }
+    .lead-message {
+      background-color: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+    }
+    .lead-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6c757d;
+    }
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #dee2e6;
+    }
+    .phone-value {
+      display: inline;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        height: auto;
+        position: relative;
+        top: 0;
+        margin-bottom: 1rem;
+      }
+      .content-area {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="#" id="business-name-nav">Business Dashboard</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="view-website-link" target="_blank">
+              <i class="fas fa-external-link-alt"></i> View Website
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="dashboard-container">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3">
+        <div class="sidebar">
+          <ul class="sidebar-menu">
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link active" data-section="leads">
+                <i class="fas fa-user-friends sidebar-icon"></i> Leads
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link disabled" data-section="reviews" style="opacity: 0.5; pointer-events: none;">
+                <i class="fas fa-star sidebar-icon"></i> Reviews <span class="badge bg-secondary">Coming Soon</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link disabled" data-section="invoices" style="opacity: 0.5; pointer-events: none;">
+                <i class="fas fa-file-invoice-dollar sidebar-icon"></i> Invoices <span class="badge bg-secondary">Coming Soon</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link disabled" data-section="settings" style="opacity: 0.5; pointer-events: none;">
+                <i class="fas fa-cog sidebar-icon"></i> Settings <span class="badge bg-secondary">Coming Soon</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="col-md-9">
+        <div class="content-area">
+          <!-- Leads Section -->
+          <div id="leads-section" class="content-section">
+            <div class="content-header">
+              <h2>Leads</h2>
+              <div>
+                <button id="refresh-leads" class="btn btn-outline-primary">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+              </div>
+            </div>
+            
+            <div id="leads-container">
+              <!-- Leads will be loaded here -->
+              <div class="empty-state">
+                <div class="empty-icon">
+                  <i class="fas fa-inbox"></i>
+                </div>
+                <h4>Loading leads...</h4>
+                <p>Please wait while we retrieve your leads.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get DOM elements
+      const businessNameNav = document.getElementById('business-name-nav');
+      const viewWebsiteLink = document.getElementById('view-website-link');
+      const refreshLeadsBtn = document.getElementById('refresh-leads');
+      const leadsContainer = document.getElementById('leads-container');
+      
+      // Business info
+      let businessInfo = {
+        slug: '',
+        name: 'Business Dashboard'
+      };
+      
+      // Load business info
+      async function loadBusinessInfo() {
+        try {
+          const response = await fetch('/api/business-info');
+          
+          if (response.ok) {
+            businessInfo = await response.json();
+            
+            // Update UI with business info
+            businessNameNav.textContent = businessInfo.name;
+            document.title = `${businessInfo.name} - Dashboard`;
+            viewWebsiteLink.href = `/${businessInfo.slug}`;
+          } else {
+            console.error('Error loading business info');
+          }
+        } catch (error) {
+          console.error('Error loading business info:', error);
+        }
+      }
+      
+      // Load leads
+      async function loadLeads() {
+        try {
+          // Show loading state
+          leadsContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-sync-alt fa-spin"></i>
+              </div>
+              <h4>Loading leads...</h4>
+              <p>Please wait while we retrieve your leads.</p>
+            </div>
+          `;
+          
+          const response = await fetch('/api/leads');
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            if (data.leads && data.leads.length > 0) {
+              // Pre-process all leads data to fix phone numbers permanently
+              const processedLeads = data.leads.map(lead => {
+                // Create a new lead object with phone processed as a string
+                const processedPhone = getPhoneAsString(lead.phone);
+                
+                return {
+                  ...lead, 
+                  // Replace the phone property with a string value
+                  phone: processedPhone
+                };
+              });
+              
+              // Render the processed leads
+              renderLeads(processedLeads);
+            } else {
+              // Show empty state
+              leadsContainer.innerHTML = `
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
+                  </div>
+                  <h4>No leads yet</h4>
+                  <p>When customers send messages through your website's chat, they'll appear here.</p>
+                </div>
+              `;
+            }
+          } else {
+            leadsContainer.innerHTML = `
+              <div class="alert alert-danger">
+                Failed to load leads. Please try again later.
+              </div>
+            `;
+            console.error('Error loading leads');
+          }
+        } catch (error) {
+          leadsContainer.innerHTML = `
+            <div class="alert alert-danger">
+              Failed to load leads. Please try again later.
+            </div>
+          `;
+          console.error('Error loading leads:', error);
+        }
+      }
+      
+      // Function to convert phone to string no matter what format it's in
+      function getPhoneAsString(phone) {
+        // If already a string, return it
+        if (typeof phone === 'string') {
+          return phone;
+        }
+        
+        // If null/undefined
+        if (!phone) {
+          return '';
+        }
+        
+        // If it's an object
+        if (typeof phone === 'object') {
+          // Try common object formats
+          if (phone.countryCode && phone.number) {
+            return `${phone.countryCode}${phone.number}`;
+          }
+          
+          if (phone.full) {
+            return phone.full;
+          }
+          
+          // Check if it's an array-like object
+          if (Array.isArray(phone)) {
+            return phone.join('');
+          }
+          
+          // Try to get any string property that looks like a phone
+          for (const key in phone) {
+            if (typeof phone[key] === 'string' && phone[key].match(/^\+?[0-9\s()-]+$/)) {
+              return phone[key];
+            }
+          }
+          
+          // If no phone-like string found, convert the object to a string
+          try {
+            // Just converting to string will create [object Object]
+            // So instead extract values from JSON
+            const simplified = JSON.stringify(phone).replace(/["{},]/g, ' ').replace(/:/g, ' ');
+            return simplified.trim();
+          } catch (e) {
+            return ''; // Error case
+          }
+        }
+        
+        // For anything else, try to convert to string
+        return String(phone);
+      }
+      
+      // Render leads
+      function renderLeads(leads) {
+        leadsContainer.innerHTML = '';
+        
+        leads.forEach(lead => {
+          // Format date
+          const timestamp = new Date(lead.timestamp);
+          const formattedDate = timestamp.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          // Create lead card
+          const leadCard = document.createElement('div');
+          leadCard.className = `lead-card ${lead.read ? '' : 'unread'}`;
+          leadCard.dataset.id = lead.id;
+          
+          // Use the already-processed phone string directly
+          const phoneHtml = lead.phone ? `<div><i class="fas fa-phone me-2"></i> <span class="phone-value">${escapeHtml(lead.phone)}</span></div>` : '';
+          
+          leadCard.innerHTML = `
+            <div class="lead-header">
+              <div>
+                <div class="lead-name">${escapeHtml(lead.name || 'Anonymous')}</div>
+                <div class="lead-time">${formattedDate}</div>
+              </div>
+              ${lead.read ? '' : '<span class="badge bg-primary">New</span>'}
+            </div>
+            <div class="lead-contact">
+              ${lead.email ? `<div><i class="fas fa-envelope me-2"></i> ${escapeHtml(lead.email)}</div>` : ''}
+              ${phoneHtml}
+            </div>
+            <div class="lead-message">
+              ${escapeHtml(lead.message || 'No message')}
+            </div>
+            <div class="lead-actions">
+              ${lead.read ? '' : `
+                <button class="btn btn-sm btn-outline-primary mark-read-btn" data-id="${lead.id}">
+                  <i class="fas fa-check"></i> Mark as Read
+                </button>
+              `}
+              ${lead.email ? `
+                <a href="mailto:${escapeHtml(lead.email)}" class="btn btn-sm btn-outline-secondary">
+                  <i class="fas fa-reply"></i> Reply by Email
+                </a>
+              ` : ''}
+            </div>
+          `;
+          
+          leadsContainer.appendChild(leadCard);
+        });
+        
+        // Add event listeners to mark as read buttons
+        document.querySelectorAll('.mark-read-btn').forEach(btn => {
+          btn.addEventListener('click', markLeadAsRead);
+        });
+      }
+      
+      // Mark lead as read
+      async function markLeadAsRead(e) {
+        const leadId = e.currentTarget.dataset.id;
+        const leadCard = document.querySelector(`.lead-card[data-id="${leadId}"]`);
+        
+        try {
+          const response = await fetch('/api/mark-lead-read', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ leadId })
+          });
+          
+          if (response.ok) {
+            // Update UI
+            leadCard.classList.remove('unread');
+            e.currentTarget.remove();
+            
+            // Remove new badge
+            const newBadge = leadCard.querySelector('.badge.bg-primary');
+            if (newBadge) {
+              newBadge.remove();
+            }
+          } else {
+            console.error('Error marking lead as read');
+          }
+        } catch (error) {
+          console.error('Error marking lead as read:', error);
+        }
+      }
+      
+      // Helper function to escape HTML
+      function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+      
+      // Event listener for refresh button
+      refreshLeadsBtn.addEventListener('click', loadLeads);
+      
+      // Initial load
+      loadBusinessInfo();
+      loadLeads();
+      
+      // Sidebar navigation
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          if (this.classList.contains('disabled')) {
+            return;
+          }
+          
+          // Remove active class from all links
+          document.querySelectorAll('.sidebar-link').forEach(l => {
+            l.classList.remove('active');
+          });
+          
+          // Add active class to clicked link
+          this.classList.add('active');
+          
+          // Get target section
+          const targetSection = this.dataset.section;
+          
+          // Hide all sections
+          document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+          });
+          
+          // Show target section
+          document.getElementById(`${targetSection}-section`).style.display = 'block';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

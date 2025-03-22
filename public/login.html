@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Login</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 50px 20px 20px;
+    }
+    .login-container {
+      max-width: 400px;
+      width: 100%;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-top: 30px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .back-link {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: #0072CE;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+      text-decoration: none;
+      z-index: 2;
+    }
+    
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #0072CE;
+    }
+    .login-form {
+      margin-top: 1rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .alert {
+      display: none;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="javascript:history.back()" class="back-link">
+    <i class="fas fa-arrow-left"></i> Back to website
+  </a>
+  <div class="login-container">
+    <div class="login-logo">
+      <h2>HVAC Business Portal</h2>
+      <p class="text-muted">Login to manage your leads</p>
+    </div>
+    
+    <form id="login-form" class="login-form">
+      <div class="alert alert-info">
+        <strong>Note:</strong> Your username and password are both your business slug (e.g., <code>stegallheatingairconditioningandplumbing</code>)
+      </div>
+      
+      <div class="form-group">
+        <label for="username" class="form-label">Business Username</label>
+        <input type="text" class="form-control" id="username" placeholder="Enter your business slug" autocomplete="username">
+        <small class="form-text text-muted">This is your business URL identifier</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" placeholder="Enter your password (same as username)" autocomplete="current-password">
+      </div>
+      
+      <div class="alert alert-danger" id="login-error" style="display: none;"></div>
+      
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.getElementById('login-form');
+      const loginError = document.getElementById('login-error');
+      
+      // Pre-fill username if in the URL path
+      const pathParts = window.location.pathname.split('/');
+      if (pathParts.length > 2 && pathParts[2] === 'login') {
+        const slug = pathParts[1];
+        document.getElementById('username').value = slug;
+        document.getElementById('password').value = slug; // For convenience
+      }
+      
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        
+        if (!username || !password) {
+          loginError.textContent = 'Please enter both username and password';
+          loginError.style.display = 'block';
+          return;
+        }
+        
+        // Visual feedback
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...';
+        
+        try {
+          const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok && data.success) {
+            loginError.style.display = 'none';
+            // Show success before redirect
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Success! Redirecting...';
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-success');
+            
+            setTimeout(function() {
+              window.location.href = data.redirect || '/dashboard';
+            }, 1000);
+          } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            loginError.textContent = data.error || 'Login failed. Please try again.';
+            loginError.style.display = 'block';
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+          loginError.textContent = 'Network error. Please check your connection and try again.';
+          loginError.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
