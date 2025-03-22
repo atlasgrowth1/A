@@ -269,6 +269,79 @@
       transform: translateY(-2px);
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     }
+    
+    /* Reviews Badge in Header */
+    .reviews-badge {
+      display: inline-flex;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.15);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      margin-left: 1.5rem;
+      color: white;
+    }
+    
+    .reviews-badge .stars {
+      color: var(--warning);
+      margin-right: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .reviews-badge .reviews-count {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .reviews-badge-mobile {
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    
+    .reviews-badge-mobile .stars {
+      color: var(--warning);
+      margin-right: 0.5rem;
+    }
+    
+    /* Hero Section Improvements */
+    .hero-badge {
+      display: inline-flex;
+      background-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      margin-bottom: 1rem;
+    }
+    
+    .hero-badge .badge-content {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      font-weight: 600;
+    }
+    
+    .hero-badge i {
+      color: var(--warning);
+    }
+    
+    .hero-trust-indicators {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+    }
+    
+    .trust-item i {
+      color: var(--warning);
+    }
 
     .mobile-toggle {
       display: none;
@@ -1217,6 +1290,10 @@
           <div class="contact-info">
             <i class="fa-solid fa-phone contact-icon"></i>
             <a href="tel:" class="phone-number" id="phone-number-header">(205) 123-4567</a>
+            <div class="reviews-badge" id="header-reviews-badge">
+              <span class="stars">★★★★★</span>
+              <span class="reviews-count"><span id="header-rating">5.0</span> (<span id="header-reviews">149</span> reviews)</span>
+            </div>
             <a href="/login" class="login-button">
               <i class="fa-solid fa-user"></i> Login
             </a>
@@ -1244,6 +1321,10 @@
           <div class="mobile-contact-info">
             <i class="fa-solid fa-phone contact-icon"></i>
             <a href="tel:" class="phone-number" id="mobile-phone-number">(205) 123-4567</a>
+            <div class="reviews-badge-mobile">
+              <span class="stars">★★★★★</span>
+              <span class="reviews-count"><span id="mobile-header-rating">5.0</span></span>
+            </div>
           </div>
         </ul>
       </nav>
@@ -1257,8 +1338,30 @@
     </div>
     <div class="container">
       <div class="hero-content">
+        <div class="hero-badge">
+          <div class="badge-content">
+            <i class="fa-solid fa-certificate"></i>
+            <span>Trusted Local Pros</span>
+          </div>
+        </div>
         <h1 class="hero-title"><span id="business-name-hero">HVAC Pro</span></h1>
         <h2 class="hero-subtitle">Professional Heating & Cooling Services in <span id="city-name">Birmingham</span></h2>
+        
+        <div class="hero-trust-indicators">
+          <div class="trust-item">
+            <i class="fa-solid fa-star"></i>
+            <span><span id="hero-rating">5.0</span> Rating</span>
+          </div>
+          <div class="trust-item">
+            <i class="fa-solid fa-certificate"></i>
+            <span>Licensed & Insured</span>
+          </div>
+          <div class="trust-item">
+            <i class="fa-solid fa-clock"></i>
+            <span>24/7 Service</span>
+          </div>
+        </div>
+        
         <div class="hero-btns">
           <a href="tel:" class="btn btn-secondary" id="phone-btn">
             <i class="fa-solid fa-phone"></i> Call Now
@@ -1848,6 +1951,25 @@
 
       // Set current year in copyright
       document.getElementById('current-year').textContent = new Date().getFullYear();
+
+      // Update review data in header and hero section
+      const headerRating = document.getElementById('header-rating');
+      const headerReviews = document.getElementById('header-reviews');
+      const mobileHeaderRating = document.getElementById('mobile-header-rating');
+      const heroRating = document.getElementById('hero-rating');
+      
+      // Set review information if available
+      if (business.rating) {
+        const rating = parseFloat(business.rating).toFixed(1);
+        if (headerRating) headerRating.textContent = rating;
+        if (mobileHeaderRating) mobileHeaderRating.textContent = rating;
+        if (heroRating) heroRating.textContent = rating;
+      }
+      
+      if (business.reviews) {
+        const reviews = business.reviews;
+        if (headerReviews) headerReviews.textContent = reviews;
+      }
 
       // Check if we have actual review data from the JSON file
       if (business.reviewsData && business.reviewsData.length > 0) {
