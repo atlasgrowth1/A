@@ -1528,6 +1528,7 @@
         console.error('Error loading business data:', error);
       }
     }
+    
     // Populate the page with business data
     function populatePage(business) {
       // Apply custom colors if available
@@ -1548,53 +1549,31 @@
       document.querySelectorAll('#business-name-header, #business-name-hero, #business-name-about, #business-name-footer, #business-name-copyright').forEach(el => {
         el.textContent = business.name || 'HVAC Pro';
       });
-
+      
       // Set phone number directly from the business data
-      // Fix for object phone number issue
-      let phone = '(555) 123-4567'; // Default fallback
-
-      if (business.phone) {
-        // Convert to string if it's not already
-        phone = String(business.phone);
-
-        // Check if it's still "[object Object]"
-        if (phone === '[object Object]' && typeof business.phone === 'object') {
-          // Try to get phone from common object properties that might contain the phone
-          if (business.phone.number) {
-            phone = String(business.phone.number);
-          } else if (business.phone.main) {
-            phone = String(business.phone.main);
-          } else if (business.phone.primary) {
-            phone = String(business.phone.primary);
-          } else if (business.phone.toString) {
-            phone = business.phone.toString();
-          } else {
-            // Fallback to default
-            phone = '(555) 123-4567';
-          }
-        }
+      // This simply uses the phone column from the CSV file
+      let phone = business.phone || '(555) 123-4567'; // Default fallback
+      
+      // If phone is still an object, try to get it directly
+      if (typeof phone === 'object') {
+        phone = phone.toString();
       }
-
+      
       // Format the phone number consistently if it's just digits
       if (/^\d{10}$/.test(phone)) {
         phone = `(${phone.substring(0,3)}) ${phone.substring(3,6)}-${phone.substring(6)}`;
       }
-
+      
       // Set phone in all relevant places
       document.querySelectorAll('#phone-number-header, #phone-number-cta, #phone-number-footer').forEach(el => {
         el.textContent = phone;
       });
-
+      
       // Update phone links - strip non-digits for the href
       const phoneDigits = phone.replace(/[^0-9]/g, '');
       document.querySelectorAll('a[href^="tel:"]').forEach(el => {
         el.href = `tel:${phoneDigits}`;
       });
-      
-      // Set city/location information
-      const city = business.city || 'Birmingham';
-      const state = business.state || 'AL';
-    }
       
       // Set city/location information
       const city = business.city || 'Birmingham';
