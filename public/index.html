@@ -269,8 +269,7 @@
       transform: translateY(-2px);
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     }
-    
-    /* Reviews Badge in Header */
+
     .reviews-badge {
       display: inline-flex;
       align-items: center;
@@ -280,29 +279,29 @@
       margin-left: 1.5rem;
       color: white;
     }
-    
+
     .reviews-badge .stars {
       color: var(--warning);
       margin-right: 0.5rem;
       font-size: 0.9rem;
     }
-    
+
     .reviews-badge .reviews-count {
       font-size: 0.9rem;
       font-weight: 500;
     }
-    
+
     .reviews-badge-mobile {
       display: flex;
       align-items: center;
       margin-top: 0.5rem;
     }
-    
+
     .reviews-badge-mobile .stars {
       color: var(--warning);
       margin-right: 0.5rem;
     }
-    
+
     /* Hero Section Improvements */
     .hero-badge {
       display: inline-flex;
@@ -312,7 +311,7 @@
       border-radius: 50px;
       margin-bottom: 1rem;
     }
-    
+
     .hero-badge .badge-content {
       display: flex;
       align-items: center;
@@ -320,25 +319,25 @@
       color: white;
       font-weight: 600;
     }
-    
+
     .hero-badge i {
       color: var(--warning);
     }
-    
+
     .hero-trust-indicators {
       display: flex;
       align-items: center;
       gap: 1.5rem;
       margin: 1.5rem 0;
     }
-    
+
     .trust-item {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       color: white;
     }
-    
+
     .trust-item i {
       color: var(--warning);
     }
@@ -364,31 +363,31 @@
       align-items: center;
       padding: 0.5rem 2rem;
     }
-    
+
     .top-bar-left {
       display: flex;
       align-items: center;
     }
-    
+
     .google-reviews-badge {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       color: white;
     }
-    
+
     .star-rating-small {
       display: flex;
       align-items: center;
       gap: 0.3rem;
       color: white;
     }
-    
+
     .stars-small {
       color: var(--warning);
       font-size: 0.9rem;
     }
-    
+
     .reviews-count-small {
       font-size: 0.9rem;
     }
@@ -402,6 +401,7 @@
       overflow: hidden;
       display: flex;
       align-items: center;
+      text-align: center; /* Center text on all screen sizes */
     }
 
     .hero-background {
@@ -424,12 +424,13 @@
       z-index: -1;
       transform: scale(1);
       transition: transform 10s ease;
+      filter: brightness(0.9); /* Slightly reduce brightness */
     }
 
     .hero.loaded .hero-image {
       transform: scale(1.05);
     }
-    
+
     .hero-content-wrapper {
       width: 100%;
       max-width: 1200px;
@@ -437,58 +438,61 @@
       position: relative;
       z-index: 1;
       padding: 0 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center content vertically */
     }
-    
+
     .hero-text {
       max-width: 600px;
       color: white;
       animation: fadeInUp 0.8s ease-out;
     }
-    
+
     .hero-text h1 {
       font-size: 4rem;
       font-weight: 800;
       line-height: 1.1;
       margin-bottom: 0.8rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Darker text shadow */
     }
-    
+
     .hero-text h2 {
       font-size: 1.7rem;
       font-weight: 400;
       margin-bottom: 2rem;
       opacity: 0.9;
     }
-    
+
     .hero-rating {
       display: flex;
       align-items: center;
       margin-bottom: 2.5rem;
       gap: 1rem;
     }
-    
+
     .hero-rating .stars {
       color: var(--warning);
       font-size: 1.3rem;
       display: flex;
       align-items: center;
     }
-    
+
     .hero-rating .stars i {
       margin-right: 0.2rem;
     }
-    
+
     .hero-rating .stars span {
       margin-left: 0.5rem;
       color: white;
       font-weight: 700;
     }
-    
+
     .hero-buttons {
       display: flex;
       gap: 1.5rem;
     }
-    
+
     .hero-buttons a {
       display: inline-flex;
       align-items: center;
@@ -500,29 +504,29 @@
       transition: all 0.3s ease;
       text-decoration: none;
     }
-    
+
     .hero-buttons a:first-child {
       background-color: var(--secondary);
       color: white;
     }
-    
+
     .hero-buttons a:first-child:hover {
       background-color: #e66e00;
       transform: translateY(-3px);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
     }
-    
+
     .hero-buttons a:last-child {
       background-color: var(--primary);
       color: white;
     }
-    
+
     .hero-buttons a:last-child:hover {
       background-color: var(--primary-dark);
       transform: translateY(-3px);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
     }
-    
+
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -533,7 +537,7 @@
         transform: translateY(0);
       }
     }
-    
+
     .hero-card {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 16px;
@@ -543,11 +547,11 @@
       animation: fadeInRight 1s ease-out;
       transition: transform 0.3s ease;
     }
-    
+
     .hero-card:hover {
       transform: translateY(-10px);
     }
-    
+
     .hero-card-header {
       background-color: var(--primary);
       color: white;
@@ -560,24 +564,24 @@
       gap: 0.5rem;
       font-size: 1.1rem;
     }
-    
+
     .hero-card-body {
       padding: 2rem;
       color: var(--dark);
     }
-    
+
     .hero-card-body h3 {
       font-size: 1.5rem;
       margin-bottom: 1rem;
       color: var(--primary);
     }
-    
+
     .hero-card-body p {
       margin-bottom: 1.5rem;
       color: #555;
       line-height: 1.5;
     }
-    
+
     .hero-card-phone {
       background-color: rgba(0, 114, 206, 0.1);
       padding: 1.2rem;
@@ -588,22 +592,22 @@
       justify-content: center;
       transition: all 0.3s ease;
     }
-    
+
     .hero-card-phone:hover {
       background-color: rgba(0, 114, 206, 0.2);
     }
-    
+
     .hero-card-phone i {
       color: var(--primary);
       animation: pulse 2s infinite;
     }
-    
+
     .hero-card-phone a {
       font-weight: 700;
       color: var(--primary);
       font-size: 1.2rem;
     }
-    
+
     @keyframes fadeInLeft {
       from {
         opacity: 0;
@@ -614,7 +618,7 @@
         transform: translateX(0);
       }
     }
-    
+
     @keyframes fadeInRight {
       from {
         opacity: 0;
@@ -625,7 +629,7 @@
         transform: translateX(0);
       }
     }
-    
+
     @keyframes pulse {
       0% {
         transform: scale(1);
@@ -1018,7 +1022,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cgfill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
       z-index: 0;
     }
 
@@ -1383,36 +1387,36 @@
       nav {
         flex-grow: 0;
       }
-      
+
       .nav-links li {
         margin: 0 1rem;
       }
     }
-    
+
     @media (max-width: 992px) {
       .hero-text {
         max-width: 100%;
       }
-      
+
       .hero-text h1 {
         font-size: 3.5rem;
       }
-      
+
       .hero-text h2 {
         font-size: 1.5rem;
       }
     }
-    
+
     @media (max-width: 768px) {
       .top-bar-content {
         justify-content: space-between;
         padding: 0 1rem;
       }
-      
+
       .header-container {
         padding: 0.8rem 1rem;
       }
-      
+
       nav {
         position: static;
       }
@@ -1440,7 +1444,7 @@
         margin: 1rem 0;
         width: 100%;
       }
-      
+
       .nav-links a {
         display: block;
         padding: 0.5rem 0;
@@ -1451,7 +1455,7 @@
         display: block;
         z-index: 1000;
       }
-      
+
       .mobile-contact-info {
         display: flex;
         align-items: center;
@@ -1460,37 +1464,37 @@
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         width: 100%;
       }
-      
+
       .mobile-contact-info .phone-number {
         color: var(--primary);
       }
-      
+
       .hero {
         height: auto;
         min-height: 450px;
       }
-      
+
       .hero-text {
         text-align: center;
       }
-      
+
       .hero-text h1 {
         font-size: 3rem;
       }
-      
+
       .hero-text h2 {
         font-size: 1.4rem;
       }
-      
+
       .hero-rating {
         justify-content: center;
       }
-      
+
       .hero-buttons {
         flex-direction: column;
         gap: 1rem;
       }
-      
+
       .hero-buttons a {
         width: 100%;
       }
@@ -1504,36 +1508,36 @@
       .section-title {
         font-size: 2rem;
       }
-      
+
       .hero {
         margin-top: 4rem;
         min-height: 400px;
       }
-      
+
       .hero-content-wrapper {
         padding: 0 1.5rem;
       }
-      
+
       .hero-text h1 {
         font-size: 2.5rem;
       }
-      
+
       .hero-text h2 {
         font-size: 1.2rem;
         margin-bottom: 1.5rem;
       }
-      
+
       .hero-rating {
         margin-bottom: 1.5rem;
         flex-direction: column;
         align-items: center;
         gap: 0.5rem;
       }
-      
+
       .top-bar-left {
         display: none;
       }
-      
+
       .top-bar-content {
         justify-content: center;
       }
@@ -1615,7 +1619,7 @@
       <div class="hero-text">
         <h1 id="business-name-hero">HVAC Pro</h1>
         <h2>Professional Heating & Cooling in <span id="city-name">Birmingham</span></h2>
-        
+
         <div class="hero-rating">
           <div class="stars">
             <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
@@ -1623,7 +1627,7 @@
           </div>
           <span id="review-count-badge">149+ Reviews</span>
         </div>
-        
+
         <div class="hero-buttons">
           <a href="tel:" id="phone-btn">
             <i class="fa-solid fa-phone"></i> Call Now
@@ -1998,12 +2002,12 @@
       // Get current business slug from URL
       const pathParts = window.location.pathname.split('/').filter(Boolean);
       const currentSlug = pathParts[0] || 'stegallheatingairconditioningandplumbing';
-      
+
       // First check if we have a hardcoded phone number for this business
       if (phoneMap[currentSlug]) {
         return phoneMap[currentSlug];
       }
-      
+
       // If already a string, return it
       if (typeof phone === 'string') {
         return phone;
@@ -2020,7 +2024,7 @@
         if (phoneMap[currentSlug]) {
           return phoneMap[currentSlug];
         }
-        
+
         // Otherwise try to extract from the object
         if (phone.phones_enricher && phone.phones_enricher.carrier_name !== undefined) {
           // Return the phone number from parent object's key
@@ -2221,7 +2225,7 @@
       const heroRating = document.getElementById('hero-rating-value');
       const reviewCountBadge = document.getElementById('review-count-badge');
       const cardPhoneNumber = document.getElementById('card-phone-number');
-      
+
       // Set review information if available
       if (business.rating) {
         const rating = parseFloat(business.rating).toFixed(1);
@@ -2229,17 +2233,17 @@
         if (mobileHeaderRating) mobileHeaderRating.textContent = rating;
         if (heroRating) heroRating.textContent = rating;
       }
-      
+
       if (business.reviews) {
         const reviews = business.reviews;
         if (reviewCountBadge) reviewCountBadge.textContent = reviews + '+ Customer Reviews';
       }
-      
+
       if (business.reviews) {
         const reviews = business.reviews;
         if (headerReviews) headerReviews.textContent = reviews;
       }
-      
+
       // Set phone number in hero card
       if (cardPhoneNumber) {
         cardPhoneNumber.textContent = phone;
@@ -2514,7 +2518,7 @@
 
       mobileToggle.addEventListener('click', () => {
         navLinks.classList.toggle('active');
-        
+
         // Add overlay when menu is active
         if (navLinks.classList.contains('active')) {
           // Create overlay if it doesn't exist
@@ -2531,12 +2535,12 @@
             overlay.style.opacity = '0';
             overlay.style.transition = 'opacity 0.3s ease';
             document.body.appendChild(overlay);
-            
+
             // Fade in overlay
             setTimeout(() => {
               overlay.style.opacity = '1';
             }, 10);
-            
+
             // Close menu when overlay is clicked
             overlay.addEventListener('click', () => {
               navLinks.classList.remove('active');
@@ -2544,7 +2548,7 @@
               setTimeout(() => {
                 document.body.removeChild(overlay);
               }, 300);
-              
+
               // Reset icon
               const icon = mobileToggle.querySelector('i');
               icon.classList.remove('fa-xmark');
@@ -2577,7 +2581,7 @@
       navLinks.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
           navLinks.classList.remove('active');
-          
+
           // Remove overlay
           const overlay = document.getElementById('menu-overlay');
           if (overlay) {
@@ -2586,7 +2590,7 @@
               document.body.removeChild(overlay);
             }, 300);
           }
-          
+
           // Reset icon
           const icon = mobileToggle.querySelector('i');
           icon.classList.remove('fa-xmark');
