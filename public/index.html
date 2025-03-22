@@ -1590,8 +1590,10 @@
       document.querySelectorAll('a[href^="tel:"]').forEach(el => {
         el.href = `tel:${phoneDigits}`;
       });
-
-      // Rest of the function remains the same...
+      
+      // Set city/location information
+      const city = business.city || 'Birmingham';
+      const state = business.state || 'AL';
     }
       
       // Set city/location information
