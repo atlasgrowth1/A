@@ -393,15 +393,15 @@
       font-size: 0.9rem;
     }
 
-    /* Hero Section */
+    /* Hero Section - Clean, Modern Design */
     .hero {
       position: relative;
-      min-height: 600px;
+      height: 80vh;
+      min-height: 500px;
+      margin-top: 4.5rem;
+      overflow: hidden;
       display: flex;
       align-items: center;
-      margin-top: 6.5rem;
-      overflow: hidden;
-      padding: 4rem 0;
     }
 
     .hero-background {
@@ -410,22 +410,18 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: -1;
+      z-index: 0;
+      background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 100%);
     }
 
-    .hero-overlay {
+    .hero-image {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.3) 100%);
-    }
-
-    .hero-image {
-      width: 100%;
-      height: 100%;
       object-fit: cover;
+      z-index: -1;
       transform: scale(1);
       transition: transform 10s ease;
     }
@@ -434,128 +430,108 @@
       transform: scale(1.05);
     }
     
-    .hero-flex-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .hero-content-wrapper {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
       position: relative;
-      z-index: 2;
+      z-index: 1;
+      padding: 0 2rem;
     }
     
-    .hero-content {
+    .hero-text {
+      max-width: 600px;
       color: white;
-      max-width: 800px;
-      animation: fadeInLeft 1s ease-out;
-      background-color: rgba(0,0,0,0.4);
-      backdrop-filter: blur(5px);
-      padding: 2.5rem;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 0.8s ease-out;
     }
     
-    .hero-title {
-      font-size: 4.5rem;
-      margin-bottom: 0.5rem;
+    .hero-text h1 {
+      font-size: 4rem;
       font-weight: 800;
       line-height: 1.1;
-      color: white;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     
-    .hero-tagline {
-      margin-bottom: 2rem;
-    }
-    
-    .hero-subtitle {
-      font-size: 1.6rem;
-      color: rgba(255, 255, 255, 0.9);
+    .hero-text h2 {
+      font-size: 1.7rem;
       font-weight: 400;
-      letter-spacing: 0.5px;
+      margin-bottom: 2rem;
+      opacity: 0.9;
     }
     
-    .hero-rating-box {
-      background-color: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      padding: 1.2rem;
-      border-radius: 12px;
+    .hero-rating {
+      display: flex;
+      align-items: center;
       margin-bottom: 2.5rem;
-      border-left: 4px solid var(--warning);
-      transition: transform 0.3s ease;
-    }
-    
-    .hero-rating-box:hover {
-      transform: translateY(-5px);
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-    
-    .stars-row {
-      display: flex;
-      align-items: center;
-      color: var(--warning);
-      font-size: 1.3rem;
-      margin-bottom: 0.3rem;
-    }
-    
-    .rating-value {
-      margin-left: 0.5rem;
-      font-weight: 700;
-      color: white;
-    }
-    
-    .reviews-text {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    
-    .reviews-text i {
-      color: #4285F4;
-      font-size: 1.2rem;
-    }
-    
-    .hero-cta {
-      display: flex;
       gap: 1rem;
     }
     
-    .btn-call, .btn-schedule {
+    .hero-rating .stars {
+      color: var(--warning);
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .hero-rating .stars i {
+      margin-right: 0.2rem;
+    }
+    
+    .hero-rating .stars span {
+      margin-left: 0.5rem;
+      color: white;
+      font-weight: 700;
+    }
+    
+    .hero-buttons {
+      display: flex;
+      gap: 1.5rem;
+    }
+    
+    .hero-buttons a {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 1.2rem 2rem;
-      border-radius: 10px;
+      padding: 1rem 2rem;
+      border-radius: 50px;
       font-weight: 600;
       font-size: 1.1rem;
       transition: all 0.3s ease;
       text-decoration: none;
     }
     
-    .btn-call {
+    .hero-buttons a:first-child {
       background-color: var(--secondary);
       color: white;
-      flex: 1;
     }
     
-    .btn-call:hover {
+    .hero-buttons a:first-child:hover {
       background-color: #e66e00;
       transform: translateY(-3px);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      color: white;
     }
     
-    .btn-schedule {
+    .hero-buttons a:last-child {
       background-color: var(--primary);
       color: white;
-      flex: 1;
     }
     
-    .btn-schedule:hover {
+    .hero-buttons a:last-child:hover {
       background-color: var(--primary-dark);
       transform: translateY(-3px);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      color: white;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .hero-card {
@@ -1414,27 +1390,16 @@
     }
     
     @media (max-width: 992px) {
-      .hero-flex-container {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .hero-content {
-        text-align: center;
+      .hero-text {
         max-width: 100%;
       }
       
-      .hero-top-badge {
-        justify-content: center;
+      .hero-text h1 {
+        font-size: 3.5rem;
       }
       
-      .hero-features-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      .hero-card {
-        max-width: 500px;
-        width: 100%;
+      .hero-text h2 {
+        font-size: 1.5rem;
       }
     }
     
@@ -1501,23 +1466,33 @@
       }
       
       .hero {
-        padding: 3rem 0;
+        height: auto;
+        min-height: 450px;
       }
       
-      .hero-title {
-        font-size: 3.5rem;
+      .hero-text {
+        text-align: center;
       }
       
-      .hero-subtitle {
+      .hero-text h1 {
+        font-size: 3rem;
+      }
+      
+      .hero-text h2 {
         font-size: 1.4rem;
       }
       
-      .hero-features-grid {
-        grid-template-columns: 1fr;
+      .hero-rating {
+        justify-content: center;
       }
       
-      .hero-cta {
+      .hero-buttons {
         flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .hero-buttons a {
+        width: 100%;
       }
     }
 
@@ -1531,26 +1506,28 @@
       }
       
       .hero {
-        padding: 2rem 0;
-        min-height: auto;
+        margin-top: 4rem;
+        min-height: 400px;
       }
       
-      .hero-content {
-        padding: 0;
+      .hero-content-wrapper {
+        padding: 0 1.5rem;
       }
       
-      .hero-title {
-        font-size: 2.8rem;
+      .hero-text h1 {
+        font-size: 2.5rem;
       }
       
-      .hero-subtitle {
+      .hero-text h2 {
         font-size: 1.2rem;
+        margin-bottom: 1.5rem;
       }
       
-      .hero-top-badge {
+      .hero-rating {
+        margin-bottom: 1.5rem;
         flex-direction: column;
-        gap: 0.5rem;
         align-items: center;
+        gap: 0.5rem;
       }
       
       .top-bar-left {
@@ -1633,39 +1610,27 @@
   <section class="hero" id="hero">
     <div class="hero-background">
       <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" alt="HVAC Services" class="hero-image" id="hero-image">
-      <div class="hero-overlay"></div>
     </div>
-    <div class="container">
-      <div class="hero-flex-container">
-        <div class="hero-content">
-          <h1 class="hero-title"><span id="business-name-hero">HVAC Pro</span></h1>
-          <div class="hero-tagline">
-            <h2 class="hero-subtitle">Professional Heating & Cooling in <span id="city-name">Birmingham</span></h2>
+    <div class="hero-content-wrapper">
+      <div class="hero-text">
+        <h1 id="business-name-hero">HVAC Pro</h1>
+        <h2>Professional Heating & Cooling in <span id="city-name">Birmingham</span></h2>
+        
+        <div class="hero-rating">
+          <div class="stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            <span id="hero-rating-value">5.0</span>
           </div>
-          
-          <div class="hero-rating-box">
-            <div class="stars-row">
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <i class="fa-solid fa-star"></i>
-              <span class="rating-value" id="hero-rating-value">5.0</span>
-            </div>
-            <div class="reviews-text">
-              <span id="review-count-badge">149+ Customer Reviews</span>
-              <i class="fa-brands fa-google"></i>
-            </div>
-          </div>
-          
-          <div class="hero-cta">
-            <a href="tel:" class="btn-call" id="phone-btn">
-              <i class="fa-solid fa-phone"></i> Call Now
-            </a>
-            <a href="#" class="btn-schedule" id="chat-open-btn">
-              <i class="fa-solid fa-message"></i> Chat With Us
-            </a>
-          </div>
+          <span id="review-count-badge">149+ Reviews</span>
+        </div>
+        
+        <div class="hero-buttons">
+          <a href="tel:" id="phone-btn">
+            <i class="fa-solid fa-phone"></i> Call Now
+          </a>
+          <a href="#" id="chat-open-btn">
+            <i class="fa-solid fa-message"></i> Chat With Us
+          </a>
         </div>
       </div>
     </div>
