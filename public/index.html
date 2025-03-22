@@ -396,12 +396,12 @@
     /* Hero Section */
     .hero {
       position: relative;
-      height: 80vh;
-      min-height: 600px;
+      min-height: 700px;
       display: flex;
       align-items: center;
       margin-top: 6.5rem;
       overflow: hidden;
+      padding: 4rem 0;
     }
 
     .hero-background {
@@ -419,7 +419,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to right, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);
+      background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.4) 100%);
     }
 
     .hero-image {
@@ -433,86 +433,163 @@
     .hero.loaded .hero-image {
       transform: scale(1.05);
     }
-
-    .hero-content-modern {
-      color: white;
-      max-width: 700px;
-      position: relative;
-      z-index: 1;
-      animation: fadeInUp 1s ease-out;
-    }
-
-    .hero-badge-floating {
-      display: inline-flex;
+    
+    .hero-flex-container {
+      display: flex;
       align-items: center;
-      background-color: rgba(255, 255, 255, 0.9);
-      color: var(--dark);
-      font-weight: 600;
-      padding: 0.5rem 1.2rem;
-      border-radius: 50px;
+      justify-content: space-between;
+      gap: 3rem;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .hero-content {
+      color: white;
+      max-width: 650px;
+      animation: fadeInLeft 1s ease-out;
+    }
+    
+    .hero-top-badge {
+      display: flex;
+      gap: 1.5rem;
       margin-bottom: 1.5rem;
     }
     
-    .star-icon {
-      color: var(--warning);
-      margin-right: 0.3rem;
+    .hero-badge-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 500;
     }
     
-    .badge-separator {
-      margin: 0 0.8rem;
-      opacity: 0.5;
+    .hero-badge-item i {
+      color: var(--warning);
     }
-
-    .hero-title-modern {
-      font-size: 4rem;
-      margin-bottom: 1rem;
+    
+    .hero-title {
+      font-size: 4.5rem;
+      margin-bottom: 0.5rem;
       font-weight: 800;
       line-height: 1.1;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      color: white;
+      background: linear-gradient(90deg, #ffffff, #e0e0e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-
-    .hero-subtitle-modern {
-      font-size: 1.8rem;
-      margin-bottom: 2rem;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      color: white;
+    
+    .hero-tagline {
+      margin-bottom: 1.5rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.6rem;
+      color: rgba(255, 255, 255, 0.9);
       font-weight: 400;
+      letter-spacing: 0.5px;
     }
-
-    .hero-features {
+    
+    .hero-rating-box {
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--warning);
+    }
+    
+    .stars-row {
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
+      color: var(--warning);
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    .rating-value {
+      margin-left: 0.5rem;
+      font-weight: 700;
+      color: white;
+    }
+    
+    .reviews-text {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .reviews-text i {
+      color: #4285F4;
+      font-size: 1.2rem;
+    }
+    
+    .hero-features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
     }
     
-    .feature-pill {
+    .feature-box {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 1rem;
+      background-color: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      padding: 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .feature-box:hover {
+      transform: translateY(-3px);
       background-color: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(5px);
-      padding: 0.5rem 1rem;
-      border-radius: 50px;
-      font-weight: 500;
     }
     
-    .feature-pill i {
-      color: var(--warning);
-    }
-
-    .hero-btns-modern {
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background-color: var(--primary);
+      border-radius: 8px;
       display: flex;
-      gap: 1.2rem;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: white;
     }
     
-    .btn-hero {
+    .feature-text {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .feature-text strong {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    
+    .feature-text span {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .btn-call, .btn-schedule {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 1rem 2rem;
-      border-radius: 50px;
+      border-radius: 8px;
       font-weight: 600;
       font-size: 1.1rem;
       transition: all 0.3s ease;
@@ -522,6 +599,7 @@
     .btn-call {
       background-color: var(--secondary);
       color: white;
+      flex: 1;
     }
     
     .btn-call:hover {
@@ -534,6 +612,7 @@
     .btn-schedule {
       background-color: var(--primary);
       color: white;
+      flex: 1;
     }
     
     .btn-schedule:hover {
@@ -541,6 +620,115 @@
       transform: translateY(-3px);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
       color: white;
+    }
+    
+    .hero-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 350px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      animation: fadeInRight 1s ease-out;
+    }
+    
+    .hero-card-header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      font-weight: 600;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .hero-card-body {
+      padding: 1.5rem;
+      color: var(--dark);
+    }
+    
+    .hero-card-body h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    
+    .hero-card-body p {
+      margin-bottom: 1.5rem;
+      color: #555;
+    }
+    
+    .hero-card-phone {
+      background-color: rgba(0, 114, 206, 0.1);
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+    
+    .hero-card-phone i {
+      color: var(--primary);
+      animation: pulse 2s infinite;
+    }
+    
+    .hero-card-phone a {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+    
+    .hero-card-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .hero-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .hero-badge i {
+      color: var(--success);
+    }
+    
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
     }
 
     /* Services Section */
@@ -1294,6 +1482,31 @@
       }
     }
     
+    @media (max-width: 992px) {
+      .hero-flex-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .hero-content {
+        text-align: center;
+        max-width: 100%;
+      }
+      
+      .hero-top-badge {
+        justify-content: center;
+      }
+      
+      .hero-features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .hero-card {
+        max-width: 500px;
+        width: 100%;
+      }
+    }
+    
     @media (max-width: 768px) {
       .top-bar-content {
         justify-content: space-between;
@@ -1356,33 +1569,24 @@
         color: var(--primary);
       }
       
-      .hero-title-modern {
-        font-size: 2.5rem;
-      }
-
-      .hero-subtitle-modern {
-        font-size: 1.3rem;
+      .hero {
+        padding: 3rem 0;
       }
       
-      .hero-features {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.8rem;
-      }
-
-      .hero-btns-modern {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .btn-hero {
-        width: 100%;
-        text-align: center;
+      .hero-title {
+        font-size: 3.5rem;
       }
       
-      .hero-badge-floating {
-        width: 100%;
-        justify-content: center;
+      .hero-subtitle {
+        font-size: 1.4rem;
+      }
+      
+      .hero-features-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .hero-cta {
+        flex-direction: column;
       }
     }
 
@@ -1394,14 +1598,28 @@
       .section-title {
         font-size: 2rem;
       }
-
-      .hero-content-modern {
-        text-align: center;
-        padding: 0 1rem;
+      
+      .hero {
+        padding: 2rem 0;
+        min-height: auto;
       }
       
-      .hero-features {
-        justify-content: center;
+      .hero-content {
+        padding: 0;
+      }
+      
+      .hero-title {
+        font-size: 2.8rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+      
+      .hero-top-badge {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
       }
       
       .top-bar-left {
@@ -1410,10 +1628,6 @@
       
       .top-bar-content {
         justify-content: center;
-      }
-      
-      .hero-title-modern {
-        font-size: 2.2rem;
       }
 
       .service-card, .review-card {
@@ -1491,41 +1705,110 @@
       <div class="hero-overlay"></div>
     </div>
     <div class="container">
-      <div class="hero-content-modern">
-        <div class="hero-badge-floating">
-          <div class="star-rating">
-            <span class="star-icon">★</span>
-            <span id="hero-rating-value">5.0</span>
+      <div class="hero-flex-container">
+        <div class="hero-content">
+          <div class="hero-top-badge">
+            <div class="hero-badge-item">
+              <i class="fa-solid fa-award"></i>
+              <span>Top-Rated Service</span>
+            </div>
+            <div class="hero-badge-item">
+              <i class="fa-solid fa-certificate"></i>
+              <span>Certified Experts</span>
+            </div>
           </div>
-          <span class="badge-separator">|</span>
-          <span id="review-count-badge">149+ Reviews</span>
+          
+          <h1 class="hero-title"><span id="business-name-hero">HVAC Pro</span></h1>
+          <div class="hero-tagline">
+            <h2 class="hero-subtitle">Professional Heating & Cooling in <span id="city-name">Birmingham</span></h2>
+          </div>
+          
+          <div class="hero-rating-box">
+            <div class="stars-row">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <span class="rating-value" id="hero-rating-value">5.0</span>
+            </div>
+            <div class="reviews-text">
+              <span id="review-count-badge">149+ Customer Reviews</span>
+              <i class="fa-brands fa-google"></i>
+            </div>
+          </div>
+          
+          <div class="hero-features-grid">
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div class="feature-text">
+                <strong>24/7 Service</strong>
+                <span>Emergency Support</span>
+              </div>
+            </div>
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div class="feature-text">
+                <strong>Licensed & Insured</strong>
+                <span>Guaranteed Work</span>
+              </div>
+            </div>
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fa-solid fa-thumbs-up"></i>
+              </div>
+              <div class="feature-text">
+                <strong>100% Satisfaction</strong>
+                <span>Customer Guarantee</span>
+              </div>
+            </div>
+            <div class="feature-box">
+              <div class="feature-icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+              </div>
+              <div class="feature-text">
+                <strong>Fair Pricing</strong>
+                <span>No Hidden Fees</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="hero-cta">
+            <a href="tel:" class="btn-call" id="phone-btn">
+              <i class="fa-solid fa-phone"></i> Call Now
+            </a>
+            <a href="#contact" class="btn-schedule">
+              <i class="fa-solid fa-calendar-check"></i> Schedule Service
+            </a>
+          </div>
         </div>
         
-        <h1 class="hero-title-modern"><span id="business-name-hero">HVAC Pro</span></h1>
-        <h2 class="hero-subtitle-modern">Professional Heating & Cooling Services in <span id="city-name">Birmingham</span></h2>
-        
-        <div class="hero-features">
-          <div class="feature-pill">
-            <i class="fa-solid fa-certificate"></i>
-            <span>Licensed & Insured</span>
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <i class="fa-solid fa-bolt"></i> Quick Response
           </div>
-          <div class="feature-pill">
-            <i class="fa-solid fa-clock"></i>
-            <span>24/7 Emergency Service</span>
+          <div class="hero-card-body">
+            <h3>Need Service Today?</h3>
+            <p>We offer same-day service for emergencies. Our certified technicians are ready to help!</p>
+            <div class="hero-card-phone">
+              <i class="fa-solid fa-phone-volume"></i>
+              <a href="tel:" id="card-phone-number">(205) 123-4567</a>
+            </div>
+            <div class="hero-card-footer">
+              <div class="hero-badge">
+                <i class="fa-solid fa-check-circle"></i>
+                <span>Same Day Service</span>
+              </div>
+              <div class="hero-badge">
+                <i class="fa-solid fa-check-circle"></i>
+                <span>Free Estimates</span>
+              </div>
+            </div>
           </div>
-          <div class="feature-pill">
-            <i class="fa-solid fa-thumbs-up"></i>
-            <span>100% Satisfaction Guarantee</span>
-          </div>
-        </div>
-        
-        <div class="hero-btns-modern">
-          <a href="tel:" class="btn-hero btn-call" id="phone-btn">
-            <i class="fa-solid fa-phone"></i> Call Now
-          </a>
-          <a href="#contact" class="btn-hero btn-schedule">
-            <i class="fa-solid fa-calendar-check"></i> Schedule Service
-          </a>
         </div>
       </div>
     </div>
@@ -2115,6 +2398,7 @@
       const mobileHeaderRating = document.getElementById('mobile-header-rating');
       const heroRating = document.getElementById('hero-rating-value');
       const reviewCountBadge = document.getElementById('review-count-badge');
+      const cardPhoneNumber = document.getElementById('card-phone-number');
       
       // Set review information if available
       if (business.rating) {
@@ -2126,12 +2410,18 @@
       
       if (business.reviews) {
         const reviews = business.reviews;
-        if (reviewCountBadge) reviewCountBadge.textContent = reviews + '+ Reviews';
+        if (reviewCountBadge) reviewCountBadge.textContent = reviews + '+ Customer Reviews';
       }
       
       if (business.reviews) {
         const reviews = business.reviews;
         if (headerReviews) headerReviews.textContent = reviews;
+      }
+      
+      // Set phone number in hero card
+      if (cardPhoneNumber) {
+        cardPhoneNumber.textContent = phone;
+        cardPhoneNumber.href = `tel:${phoneDigits}`;
       }
 
       // Check if we have actual review data from the JSON file
