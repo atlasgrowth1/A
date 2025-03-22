@@ -357,6 +357,42 @@
       display: none;
     }
 
+    /* Top Bar Improvements */
+    .top-bar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 2rem;
+    }
+    
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .google-reviews-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+    }
+    
+    .star-rating-small {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      color: white;
+    }
+    
+    .stars-small {
+      color: var(--warning);
+      font-size: 0.9rem;
+    }
+    
+    .reviews-count-small {
+      font-size: 0.9rem;
+    }
+
     /* Hero Section */
     .hero {
       position: relative;
@@ -377,11 +413,19 @@
       z-index: -1;
     }
 
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);
+    }
+
     .hero-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: brightness(0.7);
       transform: scale(1);
       transition: transform 10s ease;
     }
@@ -390,38 +434,113 @@
       transform: scale(1.05);
     }
 
-    .hero-content {
+    .hero-content-modern {
       color: white;
       max-width: 700px;
-      padding: 2rem;
       position: relative;
       z-index: 1;
       animation: fadeInUp 1s ease-out;
-      background-color: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(5px);
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
 
-    .hero-title {
-      font-size: 3.5rem;
+    .hero-badge-floating {
+      display: inline-flex;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: var(--dark);
+      font-weight: 600;
+      padding: 0.5rem 1.2rem;
+      border-radius: 50px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .star-icon {
+      color: var(--warning);
+      margin-right: 0.3rem;
+    }
+    
+    .badge-separator {
+      margin: 0 0.8rem;
+      opacity: 0.5;
+    }
+
+    .hero-title-modern {
+      font-size: 4rem;
       margin-bottom: 1rem;
       font-weight: 800;
-      line-height: 1.2;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      line-height: 1.1;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       color: white;
     }
 
-    .hero-subtitle {
-      font-size: 1.5rem;
+    .hero-subtitle-modern {
+      font-size: 1.8rem;
       margin-bottom: 2rem;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       color: white;
+      font-weight: 400;
     }
 
-    .hero-btns {
+    .hero-features {
       display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .feature-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(5px);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 500;
+    }
+    
+    .feature-pill i {
+      color: var(--warning);
+    }
+
+    .hero-btns-modern {
+      display: flex;
+      gap: 1.2rem;
+    }
+    
+    .btn-hero {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    
+    .btn-call {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .btn-call:hover {
+      background-color: #e66e00;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      color: white;
+    }
+    
+    .btn-schedule {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-schedule:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      color: white;
     }
 
     /* Services Section */
@@ -1177,7 +1296,7 @@
     
     @media (max-width: 768px) {
       .top-bar-content {
-        justify-content: center;
+        justify-content: space-between;
         padding: 0 1rem;
       }
       
@@ -1236,22 +1355,34 @@
       .mobile-contact-info .phone-number {
         color: var(--primary);
       }
-
-      .hero-title {
-        font-size: 2.2rem;
+      
+      .hero-title-modern {
+        font-size: 2.5rem;
       }
 
-      .hero-subtitle {
-        font-size: 1.2rem;
+      .hero-subtitle-modern {
+        font-size: 1.3rem;
+      }
+      
+      .hero-features {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
       }
 
-      .hero-btns {
+      .hero-btns-modern {
         flex-direction: column;
         gap: 1rem;
       }
 
-      .hero-btns .btn {
+      .btn-hero {
         width: 100%;
+        text-align: center;
+      }
+      
+      .hero-badge-floating {
+        width: 100%;
+        justify-content: center;
       }
     }
 
@@ -1264,9 +1395,25 @@
         font-size: 2rem;
       }
 
-      .hero-content {
-        padding: 1rem;
+      .hero-content-modern {
         text-align: center;
+        padding: 0 1rem;
+      }
+      
+      .hero-features {
+        justify-content: center;
+      }
+      
+      .top-bar-left {
+        display: none;
+      }
+      
+      .top-bar-content {
+        justify-content: center;
+      }
+      
+      .hero-title-modern {
+        font-size: 2.2rem;
       }
 
       .service-card, .review-card {
@@ -1287,13 +1434,19 @@
     <div class="top-bar">
       <div class="container">
         <div class="top-bar-content">
+          <div class="top-bar-left">
+            <div class="google-reviews-badge">
+              <i class="fab fa-google"></i>
+              <div class="star-rating-small">
+                <span class="stars-small">★★★★★</span>
+                <span id="header-rating">5.0</span>
+              </div>
+              <span class="reviews-count-small">(<span id="header-reviews">149</span> reviews)</span>
+            </div>
+          </div>
           <div class="contact-info">
             <i class="fa-solid fa-phone contact-icon"></i>
             <a href="tel:" class="phone-number" id="phone-number-header">(205) 123-4567</a>
-            <div class="reviews-badge" id="header-reviews-badge">
-              <span class="stars">★★★★★</span>
-              <span class="reviews-count"><span id="header-rating">5.0</span> (<span id="header-reviews">149</span> reviews)</span>
-            </div>
             <a href="/login" class="login-button">
               <i class="fa-solid fa-user"></i> Login
             </a>
@@ -1335,38 +1488,42 @@
   <section class="hero" id="hero">
     <div class="hero-background">
       <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" alt="HVAC Services" class="hero-image" id="hero-image">
+      <div class="hero-overlay"></div>
     </div>
     <div class="container">
-      <div class="hero-content">
-        <div class="hero-badge">
-          <div class="badge-content">
-            <i class="fa-solid fa-certificate"></i>
-            <span>Trusted Local Pros</span>
+      <div class="hero-content-modern">
+        <div class="hero-badge-floating">
+          <div class="star-rating">
+            <span class="star-icon">★</span>
+            <span id="hero-rating-value">5.0</span>
           </div>
+          <span class="badge-separator">|</span>
+          <span id="review-count-badge">149+ Reviews</span>
         </div>
-        <h1 class="hero-title"><span id="business-name-hero">HVAC Pro</span></h1>
-        <h2 class="hero-subtitle">Professional Heating & Cooling Services in <span id="city-name">Birmingham</span></h2>
         
-        <div class="hero-trust-indicators">
-          <div class="trust-item">
-            <i class="fa-solid fa-star"></i>
-            <span><span id="hero-rating">5.0</span> Rating</span>
-          </div>
-          <div class="trust-item">
+        <h1 class="hero-title-modern"><span id="business-name-hero">HVAC Pro</span></h1>
+        <h2 class="hero-subtitle-modern">Professional Heating & Cooling Services in <span id="city-name">Birmingham</span></h2>
+        
+        <div class="hero-features">
+          <div class="feature-pill">
             <i class="fa-solid fa-certificate"></i>
             <span>Licensed & Insured</span>
           </div>
-          <div class="trust-item">
+          <div class="feature-pill">
             <i class="fa-solid fa-clock"></i>
-            <span>24/7 Service</span>
+            <span>24/7 Emergency Service</span>
+          </div>
+          <div class="feature-pill">
+            <i class="fa-solid fa-thumbs-up"></i>
+            <span>100% Satisfaction Guarantee</span>
           </div>
         </div>
         
-        <div class="hero-btns">
-          <a href="tel:" class="btn btn-secondary" id="phone-btn">
+        <div class="hero-btns-modern">
+          <a href="tel:" class="btn-hero btn-call" id="phone-btn">
             <i class="fa-solid fa-phone"></i> Call Now
           </a>
-          <a href="#contact" class="btn btn-primary">
+          <a href="#contact" class="btn-hero btn-schedule">
             <i class="fa-solid fa-calendar-check"></i> Schedule Service
           </a>
         </div>
@@ -1956,7 +2113,8 @@
       const headerRating = document.getElementById('header-rating');
       const headerReviews = document.getElementById('header-reviews');
       const mobileHeaderRating = document.getElementById('mobile-header-rating');
-      const heroRating = document.getElementById('hero-rating');
+      const heroRating = document.getElementById('hero-rating-value');
+      const reviewCountBadge = document.getElementById('review-count-badge');
       
       // Set review information if available
       if (business.rating) {
@@ -1964,6 +2122,11 @@
         if (headerRating) headerRating.textContent = rating;
         if (mobileHeaderRating) mobileHeaderRating.textContent = rating;
         if (heroRating) heroRating.textContent = rating;
+      }
+      
+      if (business.reviews) {
+        const reviews = business.reviews;
+        if (reviewCountBadge) reviewCountBadge.textContent = reviews + '+ Reviews';
       }
       
       if (business.reviews) {
