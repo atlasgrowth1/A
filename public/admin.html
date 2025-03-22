@@ -307,8 +307,12 @@
           currentBusiness.customization = {};
         }
         
-        currentBusiness.customization.heroImage = heroImageInput.value;
-        currentBusiness.customization.aboutImage = aboutImageInput.value;
+        // Add timestamp to image URLs to force cache refresh
+        const heroUrl = heroImageInput.value;
+        const aboutUrl = aboutImageInput.value;
+        
+        currentBusiness.customization.heroImage = heroUrl;
+        currentBusiness.customization.aboutImage = aboutUrl;
         currentBusiness.customization.primaryColor = primaryColorInput.value;
         currentBusiness.customization.secondaryColor = secondaryColorInput.value;
         
@@ -327,8 +331,8 @@
           
           if (response.ok) {
             // Update image previews with timestamp to force refresh
-            updateImagePreview(heroImageInput.value, heroImagePreview);
-            updateImagePreview(aboutImageInput.value, aboutImagePreview);
+            updateImagePreview(heroUrl, heroImagePreview);
+            updateImagePreview(aboutUrl, aboutImagePreview);
             
             // Show success message
             successMessage.style.display = 'block';

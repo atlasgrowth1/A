@@ -1551,14 +1551,18 @@
       });
       
       // Set phone number in various places and update href
-      const phone = business.phone || '(555) 123-4567';
+      // Convert phone to string if it's an object
+      const phone = typeof business.phone === 'object' ? 
+        (business.phone.toString() || '(555) 123-4567') : 
+        (business.phone || '(555) 123-4567');
+      
       document.querySelectorAll('#phone-number-header, #phone-number-cta, #phone-number-footer').forEach(el => {
         el.textContent = phone;
       });
       
       // Update phone links
       document.querySelectorAll('a[href^="tel:"]').forEach(el => {
-        el.href = `tel:${phone.replace(/[^0-9]/g, '')}`;
+        el.href = `tel:${phone.toString().replace(/[^0-9]/g, '')}`;
       });
       
       // Set city/location information
@@ -1653,19 +1657,27 @@
         directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
       }
       
-      // Set hero image from customization
+      // Set hero image from customization with timestamp to force refresh
       const heroImg = document.getElementById('hero-image');
       if (business.customization && business.customization.heroImage) {
-        heroImg.src = business.customization.heroImage;
+        // Add timestamp parameter to force browser to reload the image
+        const timestamp = Date.now();
+        const heroUrl = business.customization.heroImage;
+        const separator = heroUrl.includes('?') ? '&' : '?';
+        heroImg.src = `${heroUrl}${separator}t=${timestamp}`;
       } else {
         // Default hero image
         heroImg.src = 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
       }
       
-      // Set about image if available
+      // Set about image if available with timestamp to force refresh
       const aboutImg = document.getElementById('about-image');
       if (business.customization && business.customization.aboutImage) {
-        aboutImg.src = business.customization.aboutImage;
+        // Add timestamp parameter to force browser to reload the image
+        const timestamp = Date.now();
+        const aboutUrl = business.customization.aboutImage;
+        const separator = aboutUrl.includes('?') ? '&' : '?';
+        aboutImg.src = `${aboutUrl}${separator}t=${timestamp}`;
       }
       
       // Set current year in copyright
