@@ -128,6 +128,212 @@
     .phone-value {
       display: inline;
     }
+    /* Reviews Section Styles */
+    .stars-large {
+      font-size: 1.5rem;
+      color: #ffc107;
+    }
+    .display-4 {
+      font-size: 3rem;
+    }
+    .rating-bars {
+      margin-top: 1.5rem;
+    }
+    .rating-bar-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .rating-label {
+      width: 50px;
+      text-align: right;
+      margin-right: 1rem;
+      font-weight: 500;
+    }
+    .progress {
+      flex-grow: 1;
+      height: 12px;
+      margin-right: 1rem;
+    }
+    .rating-count {
+      width: 50px;
+      text-align: left;
+      color: #6c757d;
+    }
+    .review-filters {
+      margin-bottom: 1.5rem;
+    }
+    .review-card {
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      background-color: #fff;
+      transition: all 0.2s;
+    }
+    .review-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    .reviewer-info {
+      display: flex;
+      align-items: center;
+    }
+    .reviewer-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 1rem;
+      object-fit: cover;
+    }
+    .reviewer-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .review-date {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+    .review-stars {
+      color: #ffc107;
+      margin-bottom: 0.5rem;
+    }
+    .review-text {
+      margin-bottom: 1rem;
+      white-space: pre-line;
+    }
+    .review-images {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .review-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 4px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    .owner-response {
+      background-color: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+      border-left: 3px solid #0072CE;
+    }
+    .owner-response-header {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #0072CE;
+    }
+    /* Weather Section Styles */
+    .weather-day {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
+      flex: 0 0 13%;
+    }
+    .weather-day-header {
+      font-weight: 600;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 8px;
+    }
+    .weather-icon {
+      font-size: 2rem;
+      margin: 10px 0;
+      color: #0072CE;
+    }
+    .weather-temp {
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+    }
+    .weather-detail {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+    .current-weather-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .current-weather-icon {
+      font-size: 5rem;
+      margin-right: 20px;
+    }
+    .current-weather-details {
+      text-align: left;
+    }
+    .current-temp {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .current-condition {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+    .hvac-demand-marker {
+      position: relative;
+      height: 20px;
+      margin-top: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .hvac-alert {
+      border-left: 4px solid;
+      padding: 10px 15px;
+      margin-bottom: 15px;
+      background-color: #f8f9fa;
+    }
+    .hvac-alert.high {
+      border-color: #dc3545;
+      background-color: rgba(220, 53, 69, 0.05);
+    }
+    .hvac-alert.medium {
+      border-color: #fd7e14;
+      background-color: rgba(253, 126, 20, 0.05);
+    }
+    .hvac-alert.low {
+      border-color: #28a745;
+      background-color: rgba(40, 167, 69, 0.05);
+    }
+    
+    /* Maintenance Reminders Styles */
+    .seasonal-campaigns .alert {
+      border-left-width: 5px;
+    }
+    .reminder-card {
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #e9ecef;
+      transition: all 0.2s;
+    }
+    .reminder-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .reminder-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .template-preview {
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+    }
     @media (max-width: 768px) {
       .sidebar {
         height: auto;
@@ -137,6 +343,9 @@
       }
       .content-area {
         min-height: auto;
+      }
+      .weather-day {
+        flex: 0 0 30%;
       }
     }
   </style>
@@ -179,8 +388,18 @@
               </a>
             </li>
             <li class="sidebar-item">
-              <a href="#" class="sidebar-link disabled" data-section="reviews" style="opacity: 0.5; pointer-events: none;">
-                <i class="fas fa-star sidebar-icon"></i> Reviews <span class="badge bg-secondary">Coming Soon</span>
+              <a href="#" class="sidebar-link" data-section="reviews">
+                <i class="fas fa-star sidebar-icon"></i> Reviews
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link" data-section="weather">
+                <i class="fas fa-cloud-sun sidebar-icon"></i> Weather
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link" data-section="maintenance">
+                <i class="fas fa-tools sidebar-icon"></i> Maintenance Reminders
               </a>
             </li>
             <li class="sidebar-item">
@@ -222,6 +441,382 @@
               </div>
             </div>
           </div>
+          
+          <!-- Reviews Section -->
+          <div id="reviews-section" class="content-section" style="display: none;">
+            <div class="content-header">
+              <h2>Google Reviews</h2>
+              <div>
+                <button id="refresh-reviews" class="btn btn-outline-primary">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <a id="view-all-reviews" href="#" target="_blank" class="btn btn-primary ms-2">
+                  <i class="fas fa-external-link-alt"></i> View All on Google
+                </a>
+              </div>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">Overall Rating</h5>
+                    <div class="display-4 fw-bold text-warning mb-2" id="average-rating">0.0</div>
+                    <div class="stars-large mb-2">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-muted" id="total-reviews">Based on 0 reviews</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-8">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Rating Distribution</h5>
+                    <div class="rating-bars" id="rating-distribution">
+                      <!-- Rating bars will be generated here -->
+                      <div class="rating-bar-container">
+                        <div class="rating-label">5 <i class="fas fa-star text-warning"></i></div>
+                        <div class="progress">
+                          <div class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="rating-count">0</div>
+                      </div>
+                      <div class="rating-bar-container">
+                        <div class="rating-label">4 <i class="fas fa-star text-warning"></i></div>
+                        <div class="progress">
+                          <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="rating-count">0</div>
+                      </div>
+                      <div class="rating-bar-container">
+                        <div class="rating-label">3 <i class="fas fa-star text-warning"></i></div>
+                        <div class="progress">
+                          <div class="progress-bar bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="rating-count">0</div>
+                      </div>
+                      <div class="rating-bar-container">
+                        <div class="rating-label">2 <i class="fas fa-star text-warning"></i></div>
+                        <div class="progress">
+                          <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="rating-count">0</div>
+                      </div>
+                      <div class="rating-bar-container">
+                        <div class="rating-label">1 <i class="fas fa-star text-warning"></i></div>
+                        <div class="progress">
+                          <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="rating-count">0</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Reviews Over Time Chart -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Reviews Over Time</h5>
+                    <div id="reviews-chart-container" style="height: 250px; position: relative;">
+                      <div class="empty-state" id="reviews-chart-loading">
+                        <div class="empty-icon">
+                          <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4>Loading chart data...</h4>
+                      </div>
+                      <div id="reviews-chart" style="width: 100%; height: 100%; display: none;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Recent Reviews</h5>
+                    
+                    <div class="review-filters mb-3">
+                      <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active" data-filter="all">All Reviews</button>
+                        <button type="button" class="btn btn-outline-secondary" data-filter="5">5 Star Only</button>
+                        <button type="button" class="btn btn-outline-secondary" data-filter="recent">Most Recent</button>
+                      </div>
+                      <div class="mt-2 small text-muted">
+                        <i class="fas fa-info-circle me-1"></i> Showing all reviews by default. Public website only displays 5-star reviews.
+                      </div>
+                    </div>
+                    
+                    <div id="reviews-container">
+                      <!-- Reviews will be loaded here -->
+                      <div class="empty-state">
+                        <div class="empty-icon">
+                          <i class="fas fa-star"></i>
+                        </div>
+                        <h4>Loading reviews...</h4>
+                        <p>Please wait while we retrieve your Google reviews.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Weather Section -->
+          <div id="weather-section" class="content-section" style="display: none;">
+            <div class="content-header">
+              <h2>Weather Forecast</h2>
+              <div>
+                <button id="refresh-weather" class="btn btn-outline-primary">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+              </div>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-5">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Current Weather</h5>
+                    <div id="current-weather" class="text-center p-3">
+                      <div class="empty-state">
+                        <div class="empty-icon">
+                          <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <h4>Loading weather data...</h4>
+                        <p>Please wait while we fetch the latest weather information.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-7">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">HVAC Demand Index</h5>
+                    <div id="hvac-demand-chart" style="height: 230px;">
+                      <div class="empty-state">
+                        <div class="empty-icon">
+                          <i class="fas fa-temperature-high"></i>
+                        </div>
+                        <h4>Loading demand forecast...</h4>
+                        <p>Please wait while we analyze weather patterns.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">7-Day Forecast</h5>
+                    <div id="forecast-container" class="d-flex flex-wrap justify-content-between">
+                      <!-- Forecast days will be generated here -->
+                      <div class="empty-state w-100">
+                        <div class="empty-icon">
+                          <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <h4>Loading forecast...</h4>
+                        <p>Please wait while we fetch the 7-day forecast.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Weather Alerts & HVAC Tips</h5>
+                    <div id="weather-alerts" class="mb-4">
+                      <!-- Weather alerts will be shown here -->
+                    </div>
+                    
+                    <div id="hvac-tips">
+                      <h6>HVAC Service Tips Based on Current Weather</h6>
+                      <ul class="list-group list-group-flush" id="weather-tips-list">
+                        <!-- HVAC tips based on weather will be shown here -->
+                        <li class="list-group-item">Loading customized HVAC tips...</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Maintenance Reminders Section -->
+          <div id="maintenance-section" class="content-section" style="display: none;">
+            <div class="content-header">
+              <h2>Maintenance Reminders</h2>
+              <div>
+                <button id="create-reminder" class="btn btn-primary">
+                  <i class="fas fa-plus"></i> New Reminder
+                </button>
+              </div>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-5">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Upcoming Seasonal Campaigns</h5>
+                    <div class="seasonal-campaigns">
+                      <div class="alert alert-info mb-3">
+                        <h6 class="alert-heading"><i class="fas fa-snowflake me-2"></i> Winter Preparation Campaign</h6>
+                        <p class="mb-1">Send furnace maintenance reminders before the cold season starts.</p>
+                        <small>Optimal timing: September - October</small>
+                        <div class="mt-2">
+                          <button class="btn btn-sm btn-outline-primary" id="schedule-winter-campaign">Schedule Campaign</button>
+                        </div>
+                      </div>
+                      
+                      <div class="alert alert-warning mb-3">
+                        <h6 class="alert-heading"><i class="fas fa-sun me-2"></i> Summer Preparation Campaign</h6>
+                        <p class="mb-1">Send AC tune-up reminders before the hot season begins.</p>
+                        <small>Optimal timing: March - April</small>
+                        <div class="mt-2">
+                          <button class="btn btn-sm btn-outline-primary" id="schedule-summer-campaign">Schedule Campaign</button>
+                        </div>
+                      </div>
+                      
+                      <div class="alert alert-success mb-3">
+                        <h6 class="alert-heading"><i class="fas fa-filter me-2"></i> Spring Filter Replacement</h6>
+                        <p class="mb-1">Remind customers to replace air filters for allergy season.</p>
+                        <small>Optimal timing: February - March</small>
+                        <div class="mt-2">
+                          <button class="btn btn-sm btn-outline-primary" id="schedule-filter-campaign">Schedule Campaign</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-7">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Reminder Performance</h5>
+                    <div id="reminder-stats" class="row text-center mb-3">
+                      <div class="col">
+                        <div class="card">
+                          <div class="card-body py-2">
+                            <h3 class="mb-0 text-primary">0</h3>
+                            <small class="text-muted">Active Reminders</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col">
+                        <div class="card">
+                          <div class="card-body py-2">
+                            <h3 class="mb-0 text-success">0%</h3>
+                            <small class="text-muted">Open Rate</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col">
+                        <div class="card">
+                          <div class="card-body py-2">
+                            <h3 class="mb-0 text-warning">0</h3>
+                            <small class="text-muted">Bookings</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="reminders-chart-container" style="height: 230px;">
+                      <div class="empty-state">
+                        <div class="empty-icon">
+                          <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <h4>No reminder data</h4>
+                        <p>Data will appear when you create and send reminders.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between">
+                      <span>Reminder Templates</span>
+                      <button class="btn btn-sm btn-outline-primary" id="add-template">
+                        <i class="fas fa-plus"></i> New Template
+                      </button>
+                    </h5>
+                    
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Template Name</th>
+                            <th>Type</th>
+                            <th>Last Used</th>
+                            <th>Performance</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody id="templates-table">
+                          <tr>
+                            <td>Winter Furnace Tune-Up</td>
+                            <td><span class="badge bg-info">Seasonal</span></td>
+                            <td>Never</td>
+                            <td>-</td>
+                            <td>
+                              <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                              <button class="btn btn-sm btn-primary">Use</button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Summer AC Maintenance</td>
+                            <td><span class="badge bg-info">Seasonal</span></td>
+                            <td>Never</td>
+                            <td>-</td>
+                            <td>
+                              <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                              <button class="btn btn-sm btn-primary">Use</button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Filter Replacement Reminder</td>
+                            <td><span class="badge bg-warning">Maintenance</span></td>
+                            <td>Never</td>
+                            <td>-</td>
+                            <td>
+                              <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                              <button class="btn btn-sm btn-primary">Use</button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -229,13 +824,17 @@
 
   <!-- Load Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Get DOM elements
       const businessNameNav = document.getElementById('business-name-nav');
       const viewWebsiteLink = document.getElementById('view-website-link');
       const refreshLeadsBtn = document.getElementById('refresh-leads');
+      const refreshReviewsBtn = document.getElementById('refresh-reviews');
       const leadsContainer = document.getElementById('leads-container');
+      const reviewsContainer = document.getElementById('reviews-container');
+      const viewAllReviewsLink = document.getElementById('view-all-reviews');
       
       // Business info
       let businessInfo = {
@@ -255,6 +854,11 @@
             businessNameNav.textContent = businessInfo.name;
             document.title = `${businessInfo.name} - Dashboard`;
             viewWebsiteLink.href = `/${businessInfo.slug}`;
+            
+            // Load reviews, weather, and maintenance data after business info is loaded
+            loadReviews();
+            loadWeather();
+            loadMaintenanceReminders();
           } else {
             console.error('Error loading business info');
           }
@@ -325,6 +929,520 @@
           `;
           console.error('Error loading leads:', error);
         }
+      }
+      
+      // Load reviews
+      async function loadReviews() {
+        try {
+          // Show loading state
+          reviewsContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-sync-alt fa-spin"></i>
+              </div>
+              <h4>Loading reviews...</h4>
+              <p>Please wait while we retrieve your Google reviews.</p>
+            </div>
+          `;
+          
+          // Update the overall rating UI to loading state
+          document.getElementById('average-rating').textContent = '...';
+          document.getElementById('total-reviews').textContent = 'Loading...';
+          
+          // Reset rating distribution
+          document.querySelectorAll('.rating-bar-container .progress-bar').forEach(bar => {
+            bar.style.width = '0%';
+            bar.setAttribute('aria-valuenow', '0');
+          });
+          document.querySelectorAll('.rating-bar-container .rating-count').forEach(count => {
+            count.textContent = '...';
+          });
+          
+          // Show chart loading
+          document.getElementById('reviews-chart').style.display = 'none';
+          document.getElementById('reviews-chart-loading').style.display = 'block';
+          
+          // Fetch reviews for this business
+          const response = await fetch(`/api/reviews/${businessInfo.slug}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Update the Google reviews link
+            if (data.reviewsLink) {
+              viewAllReviewsLink.href = data.reviewsLink;
+            } else {
+              viewAllReviewsLink.style.display = 'none';
+            }
+            
+            // Update summary metrics
+            updateReviewSummary(data.summary);
+            
+            // Create reviews over time chart
+            if (data.reviews && data.reviews.length > 0) {
+              renderReviewsOverTimeChart(data.reviews);
+              renderReviews(data.reviews);
+            } else {
+              reviewsContainer.innerHTML = `
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <i class="fas fa-star"></i>
+                  </div>
+                  <h4>No reviews yet</h4>
+                  <p>When customers leave reviews on Google, they'll appear here.</p>
+                </div>
+              `;
+              
+              // Hide chart and show no data message
+              document.getElementById('reviews-chart-loading').innerHTML = `
+                <div class="empty-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <h4>No review data available</h4>
+                <p>Charts will appear when you have reviews.</p>
+              `;
+            }
+          } else {
+            reviewsContainer.innerHTML = `
+              <div class="alert alert-danger">
+                Failed to load reviews. Please try again later.
+              </div>
+            `;
+            console.error('Error loading reviews');
+            
+            // Hide chart and show error message
+            document.getElementById('reviews-chart-loading').innerHTML = `
+              <div class="empty-icon text-danger">
+                <i class="fas fa-exclamation-circle"></i>
+              </div>
+              <h4>Failed to load chart data</h4>
+            `;
+          }
+        } catch (error) {
+          reviewsContainer.innerHTML = `
+            <div class="alert alert-danger">
+              Failed to load reviews. Please try again later.
+            </div>
+          `;
+          console.error('Error loading reviews:', error);
+          
+          // Hide chart and show error message
+          document.getElementById('reviews-chart-loading').innerHTML = `
+            <div class="empty-icon text-danger">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h4>Failed to load chart data</h4>
+          `;
+        }
+      }
+      
+      // Render reviews over time chart
+      function renderReviewsOverTimeChart(reviews) {
+        // Group reviews by month/year
+        const reviewsByMonth = {};
+        let chartLabels = [];
+        let chartData = [];
+        
+        // Also track rating averages by month for a second chart
+        const ratingsByMonth = {};
+        let ratingChartData = [];
+        
+        // Process each review to get date
+        reviews.forEach(review => {
+          if (review.date) {
+            // Extract year and month from date
+            const date = new Date(review.date);
+            const month = date.getMonth();
+            const year = date.getFullYear();
+            const monthYear = `${year}-${month+1}`;
+            
+            // Group reviews by month-year
+            if (!reviewsByMonth[monthYear]) {
+              reviewsByMonth[monthYear] = {
+                count: 0,
+                label: new Date(year, month, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+              };
+            }
+            
+            // Track for volume count
+            reviewsByMonth[monthYear].count++;
+            
+            // Track for rating averages
+            if (!ratingsByMonth[monthYear]) {
+              ratingsByMonth[monthYear] = {
+                total: 0,
+                count: 0,
+                label: reviewsByMonth[monthYear].label
+              };
+            }
+            
+            if (review.rating) {
+              ratingsByMonth[monthYear].total += review.rating;
+              ratingsByMonth[monthYear].count++;
+            }
+          }
+        });
+        
+        // Convert to arrays for Chart.js
+        // Sort keys by date
+        const sortedMonths = Object.keys(reviewsByMonth).sort();
+        
+        // If we have a lot of months, just show the last 12
+        const monthsToShow = sortedMonths.length > 12 ? sortedMonths.slice(-12) : sortedMonths;
+        
+        // Create labels and data arrays
+        monthsToShow.forEach(monthYear => {
+          chartLabels.push(reviewsByMonth[monthYear].label);
+          chartData.push(reviewsByMonth[monthYear].count);
+          
+          // Calculate average rating for this month
+          if (ratingsByMonth[monthYear] && ratingsByMonth[monthYear].count > 0) {
+            const avgRating = ratingsByMonth[monthYear].total / ratingsByMonth[monthYear].count;
+            ratingChartData.push(avgRating.toFixed(1));
+          } else {
+            ratingChartData.push(null); // No rating data for this month
+          }
+        });
+        
+        // If we have no data, show a message
+        if (chartLabels.length === 0) {
+          document.getElementById('reviews-chart-loading').innerHTML = `
+            <div class="empty-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h4>No date information available</h4>
+            <p>Unable to generate time-based chart.</p>
+          `;
+          return;
+        }
+        
+        // Create the chart
+        const chartContainer = document.getElementById('reviews-chart');
+        chartContainer.style.display = 'block';
+        document.getElementById('reviews-chart-loading').style.display = 'none';
+        
+        // Create Chart.js instance - we'll make a combo chart with bars for volume and line for ratings
+        const ctx = document.createElement('canvas');
+        ctx.width = chartContainer.offsetWidth;
+        ctx.height = chartContainer.offsetHeight;
+        chartContainer.innerHTML = '';
+        chartContainer.appendChild(ctx);
+        
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: chartLabels,
+            datasets: [
+              {
+                label: 'Review Count',
+                data: chartData,
+                backgroundColor: 'rgba(0, 114, 206, 0.7)',
+                borderColor: 'rgba(0, 114, 206, 1)',
+                borderWidth: 1,
+                order: 2
+              },
+              {
+                label: 'Average Rating',
+                data: ratingChartData,
+                type: 'line',
+                fill: false,
+                backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                borderColor: 'rgba(255, 193, 7, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+                pointRadius: 4,
+                yAxisID: 'y1',
+                order: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                position: 'left',
+                title: {
+                  display: true,
+                  text: 'Review Count'
+                },
+                ticks: {
+                  stepSize: 1,
+                  precision: 0
+                }
+              },
+              y1: {
+                beginAtZero: false,
+                position: 'right',
+                min: 1,
+                max: 5,
+                title: {
+                  display: true,
+                  text: 'Rating'
+                },
+                grid: {
+                  drawOnChartArea: false
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Reviews Over Time'
+              },
+              tooltip: {
+                callbacks: {
+                  title: function(tooltipItems) {
+                    return tooltipItems[0].label;
+                  },
+                  label: function(context) {
+                    if (context.dataset.label === 'Review Count') {
+                      const count = context.raw;
+                      return `${count} ${count === 1 ? 'review' : 'reviews'}`;
+                    } else if (context.dataset.label === 'Average Rating') {
+                      return `Average rating: ${context.raw}`;
+                    }
+                    return context.raw;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      // Update the review summary section
+      function updateReviewSummary(summary) {
+        if (!summary) {
+          return;
+        }
+        
+        // Update overall rating
+        const averageRating = document.getElementById('average-rating');
+        averageRating.textContent = summary.averageRating ? summary.averageRating.toFixed(1) : '0.0';
+        
+        // Update total reviews count
+        const totalReviews = document.getElementById('total-reviews');
+        totalReviews.textContent = `Based on ${summary.totalReviews || 0} reviews`;
+        
+        // Update the large stars (visually filled based on rating)
+        const starsLarge = document.querySelector('.stars-large');
+        starsLarge.innerHTML = renderStars(summary.averageRating || 0, 'large');
+        
+        // Update rating distribution bars
+        const totalReviewCount = summary.totalReviews || 0;
+        if (totalReviewCount > 0) {
+          updateRatingBar(5, summary.fiveStarCount || 0, totalReviewCount);
+          updateRatingBar(4, summary.fourStarCount || 0, totalReviewCount);
+          updateRatingBar(3, summary.threeStarCount || 0, totalReviewCount);
+          updateRatingBar(2, summary.twoStarCount || 0, totalReviewCount);
+          updateRatingBar(1, summary.oneStarCount || 0, totalReviewCount);
+        }
+      }
+      
+      // Update a single rating bar
+      function updateRatingBar(rating, count, total) {
+        const container = document.querySelector(`.rating-bar-container:nth-child(${6-rating})`);
+        if (!container) return;
+        
+        const progressBar = container.querySelector('.progress-bar');
+        const countEl = container.querySelector('.rating-count');
+        
+        const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+        
+        progressBar.style.width = `${percentage}%`;
+        progressBar.setAttribute('aria-valuenow', percentage.toString());
+        countEl.textContent = count.toString();
+      }
+      
+      // Render stars based on rating
+      function renderStars(rating, size = 'normal') {
+        const fullStar = '<i class="fas fa-star"></i>';
+        const halfStar = '<i class="fas fa-star-half-alt"></i>';
+        const emptyStar = '<i class="far fa-star"></i>';
+        
+        let stars = '';
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        
+        // Add full stars
+        for (let i = 0; i < fullStars; i++) {
+          stars += fullStar;
+        }
+        
+        // Add half star if needed
+        if (hasHalfStar) {
+          stars += halfStar;
+        }
+        
+        // Add empty stars to make 5 total
+        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+        for (let i = 0; i < emptyStars; i++) {
+          stars += emptyStar;
+        }
+        
+        return stars;
+      }
+      
+      // Render reviews
+      function renderReviews(reviews) {
+        reviewsContainer.innerHTML = '';
+        
+        // Set up the current filter
+        let currentFilter = 'all';
+        const filterButtons = document.querySelectorAll('.review-filters button');
+        
+        // Set up filter buttons
+        filterButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            // Update active class
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Get filter
+            currentFilter = this.dataset.filter;
+            
+            // Apply filter
+            applyReviewFilter(reviews, currentFilter);
+          });
+        });
+        
+        // Initial render with all reviews
+        applyReviewFilter(reviews, 'all');
+      }
+      
+      // Apply filter to reviews
+      function applyReviewFilter(reviews, filter) {
+        // Make a copy of the reviews array
+        let filteredReviews = [...reviews];
+        
+        // Apply filter
+        if (filter === '5') {
+          filteredReviews = filteredReviews.filter(review => review.rating === 5);
+        } else if (filter === 'recent') {
+          // Sort by date (should already be sorted, but just to be sure)
+          filteredReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+          // Limit to most recent 10
+          filteredReviews = filteredReviews.slice(0, 10);
+        }
+        
+        // Clear container
+        reviewsContainer.innerHTML = '';
+        
+        // Render filtered reviews
+        if (filteredReviews.length > 0) {
+          filteredReviews.forEach(review => {
+            reviewsContainer.appendChild(createReviewCard(review));
+          });
+        } else {
+          reviewsContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-filter"></i>
+              </div>
+              <h4>No matching reviews</h4>
+              <p>Try a different filter to see reviews.</p>
+            </div>
+          `;
+        }
+      }
+      
+      // Create a review card element
+      function createReviewCard(review) {
+        const card = document.createElement('div');
+        card.className = 'review-card';
+        
+        // Format date
+        let formattedDate = 'Unknown date';
+        if (review.date) {
+          try {
+            const date = new Date(review.date);
+            formattedDate = date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+          } catch (e) {
+            console.error('Error formatting date:', e);
+          }
+        }
+        
+        // Create avatar HTML
+        let avatarHtml = `
+          <div class="reviewer-avatar bg-light text-secondary d-flex align-items-center justify-content-center">
+            <i class="fas fa-user"></i>
+          </div>
+        `;
+        
+        if (review.authorImage) {
+          avatarHtml = `<img src="${escapeHtml(review.authorImage)}" alt="${escapeHtml(review.author)}" class="reviewer-avatar">`;
+        }
+        
+        // Create images HTML
+        let imagesHtml = '';
+        if (review.images && review.images.length > 0) {
+          imagesHtml = '<div class="review-images">';
+          review.images.forEach(image => {
+            if (image && image.trim()) {
+              imagesHtml += `<img src="${escapeHtml(image)}" class="review-image" alt="Review image">`;
+            }
+          });
+          imagesHtml += '</div>';
+        }
+        
+        // Create owner response HTML
+        let ownerResponseHtml = '';
+        if (review.ownerResponse) {
+          let responseDate = '';
+          if (review.ownerResponseDate) {
+            try {
+              const date = new Date(review.ownerResponseDate);
+              responseDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              });
+              responseDate = ` - ${responseDate}`;
+            } catch (e) {
+              console.error('Error formatting owner response date:', e);
+            }
+          }
+          
+          ownerResponseHtml = `
+            <div class="owner-response">
+              <div class="owner-response-header">
+                <i class="fas fa-comment-dots me-2"></i> Owner Response${responseDate}
+              </div>
+              <div class="owner-response-text">
+                ${escapeHtml(review.ownerResponse)}
+              </div>
+            </div>
+          `;
+        }
+        
+        // Build the card HTML
+        card.innerHTML = `
+          <div class="review-header">
+            <div class="reviewer-info">
+              ${avatarHtml}
+              <div>
+                <div class="reviewer-name">${escapeHtml(review.author)}</div>
+                <div class="review-date">${formattedDate}</div>
+              </div>
+            </div>
+          </div>
+          <div class="review-stars">
+            ${renderStars(review.rating)}
+          </div>
+          <div class="review-text">
+            ${escapeHtml(review.text)}
+          </div>
+          ${imagesHtml}
+          ${ownerResponseHtml}
+        `;
+        
+        return card;
       }
       
       // Function to convert phone to string no matter what format it's in
@@ -478,8 +1596,400 @@
         return div.innerHTML;
       }
       
-      // Event listener for refresh button
+      // Load weather data
+      async function loadWeather() {
+        try {
+          // Update UI to loading state
+          document.getElementById('current-weather').innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-sync-alt fa-spin"></i>
+              </div>
+              <h4>Loading weather data...</h4>
+              <p>Please wait while we fetch the latest weather information.</p>
+            </div>
+          `;
+          
+          document.getElementById('forecast-container').innerHTML = `
+            <div class="empty-state w-100">
+              <div class="empty-icon">
+                <i class="fas fa-sync-alt fa-spin"></i>
+              </div>
+              <h4>Loading forecast...</h4>
+              <p>Please wait while we fetch the 7-day forecast.</p>
+            </div>
+          `;
+          
+          document.getElementById('hvac-demand-chart').innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-sync-alt fa-spin"></i>
+              </div>
+              <h4>Loading demand forecast...</h4>
+              <p>Please wait while we analyze weather patterns.</p>
+            </div>
+          `;
+          
+          document.getElementById('weather-alerts').innerHTML = '';
+          document.getElementById('weather-tips-list').innerHTML = '<li class="list-group-item">Loading tips...</li>';
+          
+          // Fetch weather data
+          const response = await fetch(`/api/weather/${businessInfo.slug}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Render current weather
+            renderCurrentWeather(data.current);
+            
+            // Render 7-day forecast
+            renderForecast(data.daily);
+            
+            // Render HVAC demand chart
+            renderHVACDemand(data.hvac_demand);
+            
+            // Render weather alerts
+            renderWeatherAlerts(data.alerts);
+            
+            // Render HVAC tips
+            renderHVACTips(data.hvac_demand.maintenance_tips);
+          } else {
+            // Show error state
+            document.getElementById('current-weather').innerHTML = `
+              <div class="alert alert-danger">Failed to load weather data. Please try again later.</div>
+            `;
+            
+            document.getElementById('forecast-container').innerHTML = `
+              <div class="alert alert-danger w-100">Failed to load forecast data. Please try again later.</div>
+            `;
+            
+            document.getElementById('hvac-demand-chart').innerHTML = `
+              <div class="alert alert-danger">Failed to load HVAC demand forecast. Please try again later.</div>
+            `;
+          }
+        } catch (error) {
+          console.error('Error loading weather:', error);
+          
+          // Show error state
+          document.getElementById('current-weather').innerHTML = `
+            <div class="alert alert-danger">An error occurred while loading weather data. Please try again later.</div>
+          `;
+          
+          document.getElementById('forecast-container').innerHTML = `
+            <div class="alert alert-danger w-100">An error occurred while loading forecast data. Please try again later.</div>
+          `;
+          
+          document.getElementById('hvac-demand-chart').innerHTML = `
+            <div class="alert alert-danger">An error occurred while loading HVAC demand forecast. Please try again later.</div>
+          `;
+        }
+      }
+      
+      // Render current weather
+      function renderCurrentWeather(current) {
+        // Get weather icon
+        let weatherIcon = getWeatherIcon(current.weather[0].main);
+        
+        // Create the HTML
+        const html = `
+          <div class="current-weather-container">
+            <div class="current-weather-icon">
+              ${weatherIcon}
+            </div>
+            <div class="current-weather-details">
+              <div class="current-temp">${Math.round(current.temp)}°F</div>
+              <div class="current-condition">${current.weather[0].description}</div>
+              <div class="current-details">
+                <div><i class="fas fa-thermometer-half me-2"></i> Feels like: ${Math.round(current.feels_like)}°F</div>
+                <div><i class="fas fa-tint me-2"></i> Humidity: ${current.humidity}%</div>
+                <div><i class="fas fa-wind me-2"></i> Wind: ${current.wind_speed} mph</div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('current-weather').innerHTML = html;
+      }
+      
+      // Render 7-day forecast
+      function renderForecast(daily) {
+        const forecastContainer = document.getElementById('forecast-container');
+        forecastContainer.innerHTML = '';
+        
+        // Get the days of the week
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        // Loop through the daily forecast (limit to 7 days)
+        daily.slice(0, 7).forEach((day, index) => {
+          // Get date
+          const date = new Date(day.dt * 1000);
+          const dayName = index === 0 ? 'Today' : days[date.getDay()];
+          
+          // Get weather icon
+          const weatherIcon = getWeatherIcon(day.weather[0].main);
+          
+          // Create day card
+          const dayCard = document.createElement('div');
+          dayCard.className = 'weather-day';
+          dayCard.innerHTML = `
+            <div class="weather-day-header">${dayName}</div>
+            <div class="weather-icon">${weatherIcon}</div>
+            <div class="weather-temp">${Math.round(day.temp.max)}° / ${Math.round(day.temp.min)}°</div>
+            <div class="weather-detail">${day.weather[0].description}</div>
+            <div class="weather-detail"><i class="fas fa-tint me-1"></i> ${day.humidity}%</div>
+          `;
+          
+          forecastContainer.appendChild(dayCard);
+        });
+      }
+      
+      // Render HVAC demand chart
+      function renderHVACDemand(hvacDemand) {
+        const container = document.getElementById('hvac-demand-chart');
+        container.innerHTML = '';
+        
+        // Create a canvas element for the chart
+        const canvas = document.createElement('canvas');
+        canvas.id = 'demand-chart';
+        container.appendChild(canvas);
+        
+        // Get days of the week
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = new Date().getDay();
+        const labels = Array.from({length: 7}, (_, i) => {
+          const day = (today + i) % 7;
+          return i === 0 ? 'Today' : days[day];
+        });
+        
+        // Create the chart
+        new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Cooling Demand',
+                data: hvacDemand.cooling,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+              },
+              {
+                label: 'Heating Demand',
+                data: hvacDemand.heating,
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 10,
+                title: {
+                  display: true,
+                  text: 'Demand Level (0-10)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Projected HVAC Demand (Higher values indicate higher usage)'
+              },
+              tooltip: {
+                callbacks: {
+                  title: function(tooltipItems) {
+                    return tooltipItems[0].label;
+                  },
+                  label: function(context) {
+                    const value = context.raw;
+                    let demandLevel = 'Low';
+                    
+                    if (value > 7) {
+                      demandLevel = 'Very High';
+                    } else if (value > 5) {
+                      demandLevel = 'High';
+                    } else if (value > 3) {
+                      demandLevel = 'Moderate';
+                    }
+                    
+                    if (context.dataset.label === 'Cooling Demand') {
+                      return `Cooling: ${value}/10 (${demandLevel})`;
+                    } else {
+                      return `Heating: ${value}/10 (${demandLevel})`;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      // Render weather alerts
+      function renderWeatherAlerts(alerts) {
+        const alertsContainer = document.getElementById('weather-alerts');
+        alertsContainer.innerHTML = '';
+        
+        if (!alerts || alerts.length === 0) {
+          alertsContainer.innerHTML = `
+            <div class="alert alert-success">
+              <i class="fas fa-check-circle me-2"></i> No weather alerts for your area
+            </div>
+          `;
+          return;
+        }
+        
+        // Loop through alerts
+        alerts.forEach(alert => {
+          // Format dates
+          const startDate = new Date(alert.start * 1000);
+          const endDate = new Date(alert.end * 1000);
+          
+          const startString = startDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          const endString = endDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          // Create alert element
+          const alertElement = document.createElement('div');
+          alertElement.className = 'alert alert-danger';
+          alertElement.innerHTML = `
+            <h6 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i> ${alert.event}</h6>
+            <p>${alert.description}</p>
+            <small>Valid: ${startString} to ${endString}</small>
+          `;
+          
+          alertsContainer.appendChild(alertElement);
+        });
+      }
+      
+      // Render HVAC tips
+      function renderHVACTips(tips) {
+        const tipsList = document.getElementById('weather-tips-list');
+        tipsList.innerHTML = '';
+        
+        if (!tips || tips.length === 0) {
+          tipsList.innerHTML = '<li class="list-group-item">No specific maintenance tips for current weather conditions</li>';
+          return;
+        }
+        
+        // Loop through tips
+        tips.sort((a, b) => {
+          const priorityOrder = { high: 0, medium: 1, low: 2 };
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        }).forEach(tip => {
+          // Create tip element
+          const tipElement = document.createElement('li');
+          tipElement.className = 'list-group-item';
+          
+          // Add priority badge
+          let priorityBadge = '';
+          if (tip.priority === 'high') {
+            priorityBadge = '<span class="badge bg-danger me-2">High Priority</span>';
+          } else if (tip.priority === 'medium') {
+            priorityBadge = '<span class="badge bg-warning text-dark me-2">Medium Priority</span>';
+          } else if (tip.priority === 'low') {
+            priorityBadge = '<span class="badge bg-success me-2">Low Priority</span>';
+          }
+          
+          tipElement.innerHTML = `${priorityBadge} ${tip.message}`;
+          tipsList.appendChild(tipElement);
+        });
+      }
+      
+      // Helper function to get weather icons
+      function getWeatherIcon(condition) {
+        const iconMap = {
+          'Clear': '<i class="fas fa-sun text-warning"></i>',
+          'Clouds': '<i class="fas fa-cloud text-secondary"></i>',
+          'Rain': '<i class="fas fa-cloud-rain text-primary"></i>',
+          'Drizzle': '<i class="fas fa-cloud-rain text-info"></i>',
+          'Thunderstorm': '<i class="fas fa-bolt text-warning"></i>',
+          'Snow': '<i class="fas fa-snowflake text-info"></i>',
+          'Mist': '<i class="fas fa-smog text-secondary"></i>',
+          'Smoke': '<i class="fas fa-smog text-secondary"></i>',
+          'Haze': '<i class="fas fa-smog text-secondary"></i>',
+          'Dust': '<i class="fas fa-smog text-secondary"></i>',
+          'Fog': '<i class="fas fa-smog text-secondary"></i>',
+          'Sand': '<i class="fas fa-wind text-warning"></i>',
+          'Ash': '<i class="fas fa-smog text-dark"></i>',
+          'Squall': '<i class="fas fa-wind text-primary"></i>',
+          'Tornado': '<i class="fas fa-wind text-danger"></i>'
+        };
+        
+        return iconMap[condition] || '<i class="fas fa-cloud-sun text-primary"></i>';
+      }
+      
+      // Load maintenance reminders
+      async function loadMaintenanceReminders() {
+        try {
+          // Fetch reminders
+          const response = await fetch('/api/maintenance-reminders');
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Update the reminders stats
+            updateReminderStats(data.reminders);
+          }
+        } catch (error) {
+          console.error('Error loading maintenance reminders:', error);
+        }
+      }
+      
+      // Update reminder stats
+      function updateReminderStats(reminders) {
+        // Count active reminders
+        const activeCount = reminders.filter(r => r.status === 'scheduled' || r.status === 'sent').length;
+        
+        // Update the stats
+        document.querySelector('#reminder-stats .text-primary').textContent = activeCount;
+      }
+      
+      // Event handlers for the reminders section
+      document.getElementById('create-reminder').addEventListener('click', function() {
+        alert('This feature is not yet implemented in the demo. It would open a modal to create a new reminder.');
+      });
+      
+      document.getElementById('schedule-winter-campaign').addEventListener('click', function() {
+        alert('This would schedule the winter campaign in a production implementation.');
+      });
+      
+      document.getElementById('schedule-summer-campaign').addEventListener('click', function() {
+        alert('This would schedule the summer campaign in a production implementation.');
+      });
+      
+      document.getElementById('schedule-filter-campaign').addEventListener('click', function() {
+        alert('This would schedule the filter replacement campaign in a production implementation.');
+      });
+      
+      document.getElementById('add-template').addEventListener('click', function() {
+        alert('This would open a template editor in a production implementation.');
+      });
+      
+      // Event listener for refresh buttons
       refreshLeadsBtn.addEventListener('click', loadLeads);
+      refreshReviewsBtn.addEventListener('click', loadReviews);
+      
+      const refreshWeatherBtn = document.getElementById('refresh-weather');
+      if (refreshWeatherBtn) {
+        refreshWeatherBtn.addEventListener('click', loadWeather);
+      }
       
       // Initial load
       loadBusinessInfo();

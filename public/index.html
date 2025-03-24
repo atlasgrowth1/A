@@ -1729,70 +1729,86 @@
     <div class="container">
       <div class="reviews-header">
         <h2 class="section-title fade-in">What Our Customers Say</h2>
-        <a href="#" class="review-link" id="google-reviews-link">
+        <a href="#" class="review-link" id="google-reviews-link" target="_blank">
           See all reviews on Google <i class="fa-solid fa-arrow-right"></i>
         </a>
       </div>
-      <div class="reviews-grid" id="reviews-container">
-        <!-- Reviews will be populated dynamically -->
-        <div class="review-card fade-in">
-          <div class="stars">
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
+      <div id="reviews-container">
+        <!-- Reviews slider will be populated dynamically -->
+        <div class="reviews-slider">
+          <!-- Fallback static reviews (will be replaced by JavaScript) -->
+          <div class="review-card fade-in">
+            <div class="stars">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <p class="review-text">
+              "Outstanding service! The technician arrived promptly, diagnosed our AC issue quickly, and had everything fixed within an hour. Highly recommend!"
+            </p>
+            <div class="reviewer">
+              <div class="reviewer-img">J</div>
+              <div>
+                <div>James D.</div>
+                <div class="review-date">3 months ago</div>
+              </div>
+            </div>
           </div>
-          <p class="review-text">
-            "Outstanding service! The technician arrived promptly, diagnosed our AC issue quickly, and had everything fixed within an hour. Highly recommend!"
-          </p>
-          <div class="reviewer">
-            <div class="reviewer-img">J</div>
-            <div>
-              <div>James D.</div>
-              <div class="review-date">3 months ago</div>
+
+          <div class="review-card fade-in">
+            <div class="stars">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <p class="review-text">
+              "Professional, knowledgeable, and efficient. They replaced our entire HVAC system and the difference in air quality and efficiency is remarkable."
+            </p>
+            <div class="reviewer">
+              <div class="reviewer-img">S</div>
+              <div>
+                <div>Sarah M.</div>
+                <div class="review-date">1 month ago</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card fade-in">
+            <div class="stars">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <p class="review-text">
+              "I've been using their maintenance service for years and my AC has never run better. The technicians are always courteous and thorough."
+            </p>
+            <div class="reviewer">
+              <div class="reviewer-img">R</div>
+              <div>
+                <div>Robert J.</div>
+                <div class="review-date">2 months ago</div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="review-card fade-in">
-          <div class="stars">
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-          </div>
-          <p class="review-text">
-            "Professional, knowledgeable, and efficient. They replaced our entire HVAC system and the difference in air quality and efficiency is remarkable."
-          </p>
-          <div class="reviewer">
-            <div class="reviewer-img">S</div>
-            <div>
-              <div>Sarah M.</div>
-              <div class="review-date">1 month ago</div>
-            </div>
-          </div>
+        
+        <!-- Slider controls -->
+        <div class="slider-controls">
+          <button class="slider-arrow prev-arrow"><i class="fas fa-chevron-left"></i></button>
+          <button class="slider-arrow next-arrow"><i class="fas fa-chevron-right"></i></button>
         </div>
-
-        <div class="review-card fade-in">
-          <div class="stars">
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-          </div>
-          <p class="review-text">
-            "I've been using their maintenance service for years and my AC has never run better. The technicians are always courteous and thorough."
-          </p>
-          <div class="reviewer">
-            <div class="reviewer-img">R</div>
-            <div>
-              <div>Robert J.</div>
-              <div class="review-date">2 months ago</div>
-            </div>
-          </div>
+        
+        <!-- Slider pagination -->
+        <div class="slider-progress">
+          <div class="progress-dot active" data-index="0"></div>
+          <div class="progress-dot" data-index="1"></div>
+          <div class="progress-dot" data-index="2"></div>
         </div>
       </div>
     </div>
@@ -1975,6 +1991,32 @@
 
         // Find the business with matching slug
         const business = businesses.find(b => b.slug === slug) || businesses[0];
+        
+        // Fetch reviews for this business from our API
+        try {
+          const reviewsResponse = await fetch(`/api/reviews/${business.slug}`);
+          if (reviewsResponse.ok) {
+            const reviewsData = await reviewsResponse.json();
+            // Store the 5-star reviews in the business object
+            if (reviewsData.fiveStarReviews && reviewsData.fiveStarReviews.length > 0) {
+              business.reviewsData = reviewsData.fiveStarReviews;
+            } 
+            // If no 5-star reviews, use all reviews
+            else if (reviewsData.reviews && reviewsData.reviews.length > 0) {
+              business.reviewsData = reviewsData.reviews;
+            }
+            
+            // Update the Google reviews link if available
+            if (reviewsData.reviewsLink) {
+              const googleReviewsLink = document.getElementById('google-reviews-link');
+              if (googleReviewsLink) {
+                googleReviewsLink.href = reviewsData.reviewsLink;
+              }
+            }
+          }
+        } catch (reviewError) {
+          console.error('Error fetching reviews:', reviewError);
+        }
 
         // Use the business data to populate the page
         populatePage(business);

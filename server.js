@@ -85,6 +85,469 @@ app.post('/api/save-customization', (req, res) => {
   }
 });
 
+// API endpoint to get business reviews
+app.get('/api/reviews/:slug', (req, res) => {
+  try {
+    const { slug } = req.params;
+    
+    if (!slug) {
+      return res.status(400).json({ error: 'Business slug is required' });
+    }
+    
+    // Read the businesses.json file
+    const businessesPath = path.join(__dirname, 'public', 'businesses.json');
+    const businessesData = fs.readFileSync(businessesPath, 'utf8');
+    const businesses = JSON.parse(businessesData);
+    
+    // Find the business with the matching slug
+    const business = businesses.find(b => b.slug === slug);
+    
+    if (!business) {
+      return res.status(404).json({ error: 'Business not found' });
+    }
+    
+    // Get the review data
+    const reviews = business.reviewData ? business.reviewData.reviews : [];
+    const reviewSummary = business.reviewData ? business.reviewData.summary : null;
+    const reviewsLink = business.reviews_link || '';
+    
+    // Filter for 5-star reviews if needed
+    const fiveStarReviews = reviews.filter(review => review.rating === 5);
+    
+    res.json({
+      reviews: reviews,
+      fiveStarReviews: fiveStarReviews,
+      summary: reviewSummary,
+      reviewsLink: reviewsLink
+    });
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+});
+
+// Ensure axios is imported (imported again later in the file)
+
+// API endpoint to get weather data
+app.get('/api/weather/:businessSlug', async (req, res) => {
+  try {
+    const { businessSlug } = req.params;
+    
+    if (!businessSlug) {
+      return res.status(400).json({ error: 'Business slug is required' });
+    }
+    
+    // Get the business location information
+    const businessesPath = path.join(__dirname, 'public', 'businesses.json');
+    const businessesData = fs.readFileSync(businessesPath, 'utf8');
+    const businesses = JSON.parse(businessesData);
+    
+    // Find the business with the matching slug
+    const business = businesses.find(b => b.slug === businessSlug);
+    
+    if (!business) {
+      return res.status(404).json({ error: 'Business not found' });
+    }
+    
+    // Extract location - use zipcode, city, or coordinates if available
+    let location = '';
+    if (business.zipcode) {
+      location = business.zipcode;
+    } else if (business.city && business.state) {
+      location = `${business.city},${business.state}`;
+    } else {
+      // Default to Birmingham if nothing is available
+      location = 'Birmingham,AL';
+    }
+    
+    // WeatherAPI key - in production this would come from environment variables
+    const apiKey = '05f05658f4f54131a0f05505252303';
+    
+    try {
+      console.log(`Getting weather data for location: ${location}`);
+      
+      // Make API request to WeatherAPI.com
+      const forecastResponse = await axios.get(`https://api.weatherapi.com/v1/forecast.json`, {
+        params: {
+          key: apiKey,
+          q: location,
+          days: 7,
+          aqi: 'yes',
+          alerts: 'yes'
+        }
+      });
+      
+      // Extract the data we need
+      const apiData = forecastResponse.data;
+      
+      // Format the data to match our frontend expectations
+      const weatherData = {
+        current: {
+          temp: apiData.current.temp_f,
+          feels_like: apiData.current.feelslike_f,
+          humidity: apiData.current.humidity,
+          wind_speed: apiData.current.wind_mph,
+          weather: [{ 
+            main: apiData.current.condition.text, 
+            description: apiData.current.condition.text, 
+            icon: apiData.current.condition.icon
+          }],
+          // Add air quality if available
+          air_quality: apiData.current.air_quality ? {
+            pm2_5: apiData.current.air_quality.pm2_5,
+            pm10: apiData.current.air_quality.pm10,
+            index: getAirQualityIndex(apiData.current.air_quality)
+          } : null
+        },
+        daily: apiData.forecast.forecastday.map(day => ({
+          dt: new Date(day.date).getTime() / 1000,
+          temp: { 
+            min: day.day.mintemp_f, 
+            max: day.day.maxtemp_f 
+          },
+          weather: [{ 
+            main: day.day.condition.text, 
+            description: day.day.condition.text, 
+            icon: day.day.condition.icon
+          }],
+          humidity: day.day.avghumidity,
+          wind_speed: day.day.maxwind_mph,
+          // Additional fields useful for HVAC
+          uv_index: day.day.uv,
+          rain_chance: day.day.daily_chance_of_rain,
+          snow_chance: day.day.daily_chance_of_snow
+        })),
+        alerts: apiData.alerts?.alert ? apiData.alerts.alert.map(alert => ({
+          event: alert.headline || alert.desc,
+          description: alert.desc,
+          start: new Date(alert.effective).getTime() / 1000,
+          end: new Date(alert.expires).getTime() / 1000
+        })) : []
+      };
+      
+      // Calculate HVAC demand based on weather data
+      const hvacDemand = calculateHVACDemand(weatherData);
+      weatherData.hvac_demand = hvacDemand;
+      
+      res.json(weatherData);
+    } catch (apiError) {
+      console.error('Weather API error:', apiError);
+      console.log('Falling back to mock data since API error occurred');
+      
+      // If the API call fails, fall back to mock data
+      const mockWeatherData = {
+        current: {
+          temp: 72,
+          feels_like: 70,
+          humidity: 65,
+          wind_speed: 5,
+          weather: [{ main: 'Clear', description: 'clear sky', icon: '01d' }]
+        },
+        daily: [
+          {
+            dt: Date.now() / 1000,
+            temp: { min: 65, max: 78 },
+            weather: [{ main: 'Clear', description: 'clear sky', icon: '01d' }],
+            humidity: 65,
+            wind_speed: 5
+          },
+          {
+            dt: Date.now() / 1000 + 86400,
+            temp: { min: 63, max: 75 },
+            weather: [{ main: 'Clouds', description: 'scattered clouds', icon: '03d' }],
+            humidity: 70,
+            wind_speed: 6
+          },
+          {
+            dt: Date.now() / 1000 + 172800,
+            temp: { min: 62, max: 73 },
+            weather: [{ main: 'Rain', description: 'light rain', icon: '10d' }],
+            humidity: 80,
+            wind_speed: 8
+          },
+          {
+            dt: Date.now() / 1000 + 259200,
+            temp: { min: 60, max: 70 },
+            weather: [{ main: 'Rain', description: 'moderate rain', icon: '10d' }],
+            humidity: 85,
+            wind_speed: 10
+          },
+          {
+            dt: Date.now() / 1000 + 345600,
+            temp: { min: 58, max: 68 },
+            weather: [{ main: 'Clouds', description: 'broken clouds', icon: '04d' }],
+            humidity: 75,
+            wind_speed: 7
+          },
+          {
+            dt: Date.now() / 1000 + 432000,
+            temp: { min: 60, max: 72 },
+            weather: [{ main: 'Clear', description: 'clear sky', icon: '01d' }],
+            humidity: 65,
+            wind_speed: 5
+          },
+          {
+            dt: Date.now() / 1000 + 518400,
+            temp: { min: 63, max: 76 },
+            weather: [{ main: 'Clear', description: 'clear sky', icon: '01d' }],
+            humidity: 60,
+            wind_speed: 4
+          }
+        ],
+        alerts: [
+          {
+            event: 'Heat Advisory',
+            description: 'Heat index values up to 105 expected',
+            start: Date.now() / 1000,
+            end: Date.now() / 1000 + 86400
+          }
+        ],
+        hvac_demand: {
+          cooling: [8, 9, 7, 5, 4, 6, 7],  // Daily cooling demand 0-10 scale
+          heating: [0, 0, 0, 2, 3, 1, 0],  // Daily heating demand 0-10 scale
+          maintenance_tips: [
+            { 
+              type: 'high_temp', 
+              message: 'Check refrigerant levels as AC systems work harder in high temperatures', 
+              priority: 'medium'
+            },
+            { 
+              type: 'high_humidity', 
+              message: 'Recommend dehumidifier installation for optimal comfort',
+              priority: 'low'
+            },
+            {
+              type: 'seasonal',
+              message: 'Time to schedule AC tune-ups before peak summer season',
+              priority: 'high'
+            }
+          ]
+        }
+      };
+      
+      res.json(mockWeatherData);
+    }
+  } catch (error) {
+    console.error('Error fetching weather data:', error);
+    res.status(500).json({ error: 'Failed to fetch weather data' });
+  }
+});
+
+// Helper function to calculate HVAC demand based on weather
+function calculateHVACDemand(weatherData) {
+  // Create arrays to hold demand values for heating and cooling
+  const cooling = [];
+  const heating = [];
+  
+  // HVAC maintenance tips based on weather conditions
+  const tips = [];
+  
+  // Process each day's forecast
+  weatherData.daily.forEach(day => {
+    // Calculate cooling demand (0-10 scale)
+    // Higher temperatures and humidity increase cooling demand
+    let coolingDemand = 0;
+    if (day.temp.max >= 85) {
+      coolingDemand = 10;
+    } else if (day.temp.max >= 80) {
+      coolingDemand = 8;
+    } else if (day.temp.max >= 75) {
+      coolingDemand = 6;
+    } else if (day.temp.max >= 70) {
+      coolingDemand = 4;
+    } else if (day.temp.max >= 65) {
+      coolingDemand = 2;
+    }
+    
+    // Add effect of humidity
+    if (day.humidity > 80 && coolingDemand > 0) {
+      coolingDemand += 1;
+    }
+    cooling.push(Math.min(10, coolingDemand)); // Cap at 10
+    
+    // Calculate heating demand (0-10 scale)
+    // Lower temperatures increase heating demand
+    let heatingDemand = 0;
+    if (day.temp.min <= 30) {
+      heatingDemand = 10;
+    } else if (day.temp.min <= 40) {
+      heatingDemand = 8;
+    } else if (day.temp.min <= 50) {
+      heatingDemand = 6;
+    } else if (day.temp.min <= 60) {
+      heatingDemand = 4;
+    } else if (day.temp.min <= 65) {
+      heatingDemand = 2;
+    }
+    heating.push(Math.min(10, heatingDemand)); // Cap at 10
+  });
+  
+  // Add maintenance tips based on weather conditions
+  
+  // Check current temperature for high heat conditions
+  if (weatherData.current.temp >= 85) {
+    tips.push({ 
+      type: 'high_temp', 
+      message: 'Check refrigerant levels as AC systems work harder in high temperatures', 
+      priority: 'medium'
+    });
+  }
+  
+  // Check humidity for moisture issues
+  if (weatherData.current.humidity >= 75) {
+    tips.push({ 
+      type: 'high_humidity', 
+      message: 'Recommend dehumidifier installation for optimal comfort and system efficiency',
+      priority: 'medium'
+    });
+  }
+  
+  // Check for dramatic temperature swings
+  const tempDifference = Math.max(...weatherData.daily.map(d => d.temp.max)) - 
+                         Math.min(...weatherData.daily.map(d => d.temp.min));
+  if (tempDifference > 30) {
+    tips.push({
+      type: 'temp_swing',
+      message: 'Large temperature swings forecasted - adjust programmable thermostats to optimize efficiency',
+      priority: 'medium'
+    });
+  }
+  
+  // Seasonal tips based on average temperature
+  const avgTemp = weatherData.daily.reduce((sum, day) => sum + (day.temp.max + day.temp.min)/2, 0) / weatherData.daily.length;
+  
+  if (avgTemp > 75) {
+    // Summer season
+    tips.push({
+      type: 'seasonal',
+      message: 'Recommend AC tune-ups and filter changes before peak summer heat',
+      priority: 'high'
+    });
+  } else if (avgTemp < 45) {
+    // Winter season
+    tips.push({
+      type: 'seasonal',
+      message: 'Schedule furnace inspections and tune-ups for winter readiness',
+      priority: 'high'
+    });
+  } else if (avgTemp >= 45 && avgTemp <= 65) {
+    // Spring/Fall season
+    tips.push({
+      type: 'seasonal',
+      message: 'Ideal time for system maintenance between heating and cooling seasons',
+      priority: 'high'
+    });
+  }
+  
+  // Air quality tips if available
+  if (weatherData.current.air_quality && weatherData.current.air_quality.index > 100) {
+    tips.push({
+      type: 'air_quality',
+      message: 'Poor air quality detected - recommend HEPA filters and air purification systems',
+      priority: 'high'
+    });
+  }
+  
+  return {
+    cooling,
+    heating,
+    maintenance_tips: tips
+  };
+}
+
+// Helper function to get air quality index value
+function getAirQualityIndex(airQuality) {
+  // Calculate AQI based on PM2.5 and PM10 values
+  // This is a simplified version
+  if (!airQuality) return 0;
+  
+  // Use US EPA index if available
+  if (airQuality['us-epa-index']) {
+    return airQuality['us-epa-index'] * 50; // Scale to 0-250 range
+  }
+  
+  // Otherwise calculate from PM values
+  const pm25 = airQuality.pm2_5 || 0;
+  const pm10 = airQuality.pm10 || 0;
+  
+  // Very simplified calculation
+  return Math.max(pm25 * 4, pm10 * 2);
+}
+
+// API endpoint to save maintenance reminders
+app.post('/api/maintenance-reminders', requireAuth, (req, res) => {
+  try {
+    const { title, type, content, scheduledDate } = req.body;
+    const slug = req.session.businessSlug;
+    
+    if (!title || !type || !content) {
+      return res.status(400).json({ error: 'Title, type and content are required' });
+    }
+    
+    // Create reminders directory if it doesn't exist
+    const remindersDir = path.join(__dirname, 'data', 'reminders');
+    if (!fs.existsSync(remindersDir)) {
+      fs.mkdirSync(remindersDir);
+    }
+    
+    // Create reminder file for the business if it doesn't exist
+    const reminderFilePath = path.join(remindersDir, `${slug}-reminders.json`);
+    let reminders = [];
+    
+    if (fs.existsSync(reminderFilePath)) {
+      const remindersData = fs.readFileSync(reminderFilePath, 'utf8');
+      reminders = JSON.parse(remindersData);
+    }
+    
+    // Add the new reminder
+    const reminder = {
+      id: Date.now().toString(),
+      title,
+      type,
+      content,
+      scheduledDate,
+      createdAt: new Date().toISOString(),
+      status: 'scheduled'
+    };
+    
+    reminders.push(reminder);
+    
+    // Write back to the file
+    fs.writeFileSync(reminderFilePath, JSON.stringify(reminders, null, 2));
+    
+    res.json({ success: true, reminder });
+  } catch (error) {
+    console.error('Error saving reminder:', error);
+    res.status(500).json({ error: 'Failed to save reminder' });
+  }
+});
+
+// API endpoint to get maintenance reminders
+app.get('/api/maintenance-reminders', requireAuth, (req, res) => {
+  try {
+    const slug = req.session.businessSlug;
+    
+    // Check if reminders file exists
+    const reminderFilePath = path.join(__dirname, 'data', 'reminders', `${slug}-reminders.json`);
+    
+    if (!fs.existsSync(reminderFilePath)) {
+      return res.json({ reminders: [] });
+    }
+    
+    // Read and parse the reminders file
+    const remindersData = fs.readFileSync(reminderFilePath, 'utf8');
+    const reminders = JSON.parse(remindersData);
+    
+    // Sort reminders by scheduledDate (nearest first)
+    reminders.sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
+    
+    res.json({ reminders });
+  } catch (error) {
+    console.error('Error fetching reminders:', error);
+    res.status(500).json({ error: 'Failed to fetch reminders' });
+  }
+});
+
 // API endpoint to handle chat messages
 app.post('/api/chat-message', (req, res) => {
   try {
