@@ -107,8 +107,49 @@ app.get('/api/reviews/:slug', (req, res) => {
     }
     
     // Get the review data
-    const reviews = business.reviewData ? business.reviewData.reviews : [];
-    const reviewSummary = business.reviewData ? business.reviewData.summary : null;
+    let reviews = [];
+    let reviewSummary = null;
+    
+    // Check first for reviewData (nested structure)
+    if (business.reviewData && business.reviewData.reviews) {
+      reviews = business.reviewData.reviews;
+      reviewSummary = business.reviewData.summary;
+    } 
+    // Then check for reviewsData (flat array)
+    else if (business.reviewsData && Array.isArray(business.reviewsData)) {
+      reviews = business.reviewsData;
+      
+      // Calculate summary for flat arrays
+      let totalReviews = reviews.length;
+      let totalRating = 0;
+      let ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+      let latestReviewDate = null;
+      
+      reviews.forEach(review => {
+        if (review.rating) {
+          totalRating += review.rating;
+          ratingCounts[review.rating] = (ratingCounts[review.rating] || 0) + 1;
+          
+          // Track latest review date
+          if (review.date && (!latestReviewDate || new Date(review.date) > new Date(latestReviewDate))) {
+            latestReviewDate = review.date;
+          }
+        }
+      });
+      
+      // Create summary object similar to nested structure
+      reviewSummary = {
+        totalReviews: totalReviews,
+        averageRating: totalReviews > 0 ? totalRating / totalReviews : 0,
+        fiveStarCount: ratingCounts[5] || 0,
+        fourStarCount: ratingCounts[4] || 0,
+        threeStarCount: ratingCounts[3] || 0,
+        twoStarCount: ratingCounts[2] || 0,
+        oneStarCount: ratingCounts[1] || 0,
+        latestReviewDate: latestReviewDate
+      };
+    }
+    
     const reviewsLink = business.reviews_link || '';
     
     // Filter for 5-star reviews if needed
@@ -129,36 +170,17 @@ app.get('/api/reviews/:slug', (req, res) => {
 // Ensure axios is imported (imported again later in the file)
 
 // API endpoint to get weather data
-app.get('/api/weather/:businessSlug', async (req, res) => {
+app.get('/api/weather', async (req, res) => {
   try {
-    const { businessSlug } = req.params;
+    // Use user's coordinates from query parameters
+    const { lat, lon } = req.query;
     
-    if (!businessSlug) {
-      return res.status(400).json({ error: 'Business slug is required' });
+    if (!lat || !lon) {
+      return res.status(400).json({ error: 'Latitude and longitude are required' });
     }
     
-    // Get the business location information
-    const businessesPath = path.join(__dirname, 'public', 'businesses.json');
-    const businessesData = fs.readFileSync(businessesPath, 'utf8');
-    const businesses = JSON.parse(businessesData);
-    
-    // Find the business with the matching slug
-    const business = businesses.find(b => b.slug === businessSlug);
-    
-    if (!business) {
-      return res.status(404).json({ error: 'Business not found' });
-    }
-    
-    // Extract location - use zipcode, city, or coordinates if available
-    let location = '';
-    if (business.zipcode) {
-      location = business.zipcode;
-    } else if (business.city && business.state) {
-      location = `${business.city},${business.state}`;
-    } else {
-      // Default to Birmingham if nothing is available
-      location = 'Birmingham,AL';
-    }
+    // Format location as lat,lon for the API
+    let location = `${lat},${lon}`;
     
     // WeatherAPI key - in production this would come from environment variables
     const apiKey = '05f05658f4f54131a0f05505252303';
@@ -199,24 +221,37 @@ app.get('/api/weather/:businessSlug', async (req, res) => {
             index: getAirQualityIndex(apiData.current.air_quality)
           } : null
         },
-        daily: apiData.forecast.forecastday.map(day => ({
-          dt: new Date(day.date).getTime() / 1000,
-          temp: { 
-            min: day.day.mintemp_f, 
-            max: day.day.maxtemp_f 
-          },
-          weather: [{ 
-            main: day.day.condition.text, 
-            description: day.day.condition.text, 
-            icon: day.day.condition.icon
-          }],
-          humidity: day.day.avghumidity,
-          wind_speed: day.day.maxwind_mph,
-          // Additional fields useful for HVAC
-          uv_index: day.day.uv,
-          rain_chance: day.day.daily_chance_of_rain,
-          snow_chance: day.day.daily_chance_of_snow
-        })),
+        daily: apiData.forecast.forecastday.map(day => {
+          // Parse the date and get formatted values
+          const date = new Date(day.date);
+          const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+          const dayOfMonth = date.getDate();
+          const month = date.toLocaleDateString('en-US', { month: 'short' });
+          
+          return {
+            dt: date.getTime() / 1000,
+            date: day.date,
+            day_of_week: dayOfWeek,
+            day_of_month: dayOfMonth,
+            month: month,
+            formatted_date: `${month} ${dayOfMonth}`,
+            temp: { 
+              min: day.day.mintemp_f, 
+              max: day.day.maxtemp_f 
+            },
+            weather: [{ 
+              main: day.day.condition.text, 
+              description: day.day.condition.text, 
+              icon: day.day.condition.icon
+            }],
+            humidity: day.day.avghumidity,
+            wind_speed: day.day.maxwind_mph,
+            // Additional fields useful for HVAC
+            uv_index: day.day.uv,
+            rain_chance: day.day.daily_chance_of_rain,
+            snow_chance: day.day.daily_chance_of_snow
+          };
+        }),
         alerts: apiData.alerts?.alert ? apiData.alerts.alert.map(alert => ({
           event: alert.headline || alert.desc,
           description: alert.desc,
@@ -235,6 +270,42 @@ app.get('/api/weather/:businessSlug', async (req, res) => {
       console.log('Falling back to mock data since API error occurred');
       
       // If the API call fails, fall back to mock data
+      const now = new Date();
+      
+      // Generate mock daily data with formatted dates
+      const mockDailyData = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(now);
+        date.setDate(date.getDate() + i);
+        
+        const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+        const dayOfMonth = date.getDate();
+        const month = date.toLocaleDateString('en-US', { month: 'short' });
+        const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+        
+        return {
+          dt: date.getTime() / 1000,
+          date: dateStr,
+          day_of_week: dayOfWeek,
+          day_of_month: dayOfMonth,
+          month: month,
+          formatted_date: `${month} ${dayOfMonth}`,
+          temp: { 
+            min: 60 + Math.floor(Math.random() * 10), 
+            max: 70 + Math.floor(Math.random() * 15) 
+          },
+          weather: [{ 
+            main: i % 2 === 0 ? 'Clear' : (i % 3 === 0 ? 'Rain' : 'Clouds'), 
+            description: i % 2 === 0 ? 'clear sky' : (i % 3 === 0 ? 'light rain' : 'scattered clouds'), 
+            icon: i % 2 === 0 ? '01d' : (i % 3 === 0 ? '10d' : '03d') 
+          }],
+          humidity: 60 + Math.floor(Math.random() * 30),
+          wind_speed: 4 + Math.floor(Math.random() * 7),
+          uv_index: Math.floor(Math.random() * 10),
+          rain_chance: i % 3 === 0 ? 70 : 20,
+          snow_chance: 0
+        };
+      });
+      
       const mockWeatherData = {
         current: {
           temp: 72,
@@ -243,57 +314,7 @@ app.get('/api/weather/:businessSlug', async (req, res) => {
           wind_speed: 5,
           weather: [{ main: 'Clear', description: 'clear sky', icon: '01d' }]
         },
-        daily: [
-          {
-            dt: Date.now() / 1000,
-            temp: { min: 65, max: 78 },
-            weather: [{ main: 'Clear', description: 'clear sky', icon: '01d' }],
-            humidity: 65,
-            wind_speed: 5
-          },
-          {
-            dt: Date.now() / 1000 + 86400,
-            temp: { min: 63, max: 75 },
-            weather: [{ main: 'Clouds', description: 'scattered clouds', icon: '03d' }],
-            humidity: 70,
-            wind_speed: 6
-          },
-          {
-            dt: Date.now() / 1000 + 172800,
-            temp: { min: 62, max: 73 },
-            weather: [{ main: 'Rain', description: 'light rain', icon: '10d' }],
-            humidity: 80,
-            wind_speed: 8
-          },
-          {
-            dt: Date.now() / 1000 + 259200,
-            temp: { min: 60, max: 70 },
-            weather: [{ main: 'Rain', description: 'moderate rain', icon: '10d' }],
-            humidity: 85,
-            wind_speed: 10
-          },
-          {
-            dt: Date.now() / 1000 + 345600,
-            temp: { min: 58, max: 68 },
-            weather: [{ main: 'Clouds', description: 'broken clouds', icon: '04d' }],
-            humidity: 75,
-            wind_speed: 7
-          },
-          {
-            dt: Date.now() / 1000 + 432000,
-            temp: { min: 60, max: 72 },
-            weather: [{ main: 'Clear', description: 'clear sky', icon: '01d' }],
-            humidity: 65,
-            wind_speed: 5
-          },
-          {
-            dt: Date.now() / 1000 + 518400,
-            temp: { min: 63, max: 76 },
-            weather: [{ main: 'Clear', description: 'clear sky', icon: '01d' }],
-            humidity: 60,
-            wind_speed: 4
-          }
-        ],
+        daily: mockDailyData,
         alerts: [
           {
             event: 'Heat Advisory',
@@ -474,6 +495,248 @@ function getAirQualityIndex(airQuality) {
   return Math.max(pm25 * 4, pm10 * 2);
 }
 
+// API endpoints for jobs management
+app.get('/api/jobs', requireAuth, (req, res) => {
+  try {
+    const businessSlug = req.session.businessSlug;
+    
+    // Create jobs directory if it doesn't exist
+    const jobsDir = path.join(__dirname, 'data', 'jobs');
+    if (!fs.existsSync(jobsDir)) {
+      fs.mkdirSync(jobsDir, { recursive: true });
+    }
+    
+    // Path to the jobs file
+    const jobsPath = path.join(jobsDir, 'jobs.json');
+    
+    // Check if the file exists, if not create it
+    if (!fs.existsSync(jobsPath)) {
+      fs.writeFileSync(jobsPath, JSON.stringify({ jobs: [] }), 'utf8');
+    }
+    
+    // Read the jobs data
+    const jobsData = JSON.parse(fs.readFileSync(jobsPath, 'utf8'));
+    
+    // Filter jobs by business slug if provided
+    const businessJobs = businessSlug 
+      ? jobsData.jobs.filter(job => job.businessSlug === businessSlug)
+      : jobsData.jobs;
+    
+    // Calculate job statistics
+    const stats = calculateJobStats(businessJobs);
+    
+    res.json({
+      jobs: businessJobs,
+      stats: stats
+    });
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({ error: 'Failed to fetch jobs' });
+  }
+});
+
+app.post('/api/jobs', requireAuth, (req, res) => {
+  try {
+    const { customer, description, status, cost, charge, technician, date, notes } = req.body;
+    const businessSlug = req.session.businessSlug;
+    
+    if (!customer || !description || !status) {
+      return res.status(400).json({ error: 'Customer, description and status are required' });
+    }
+    
+    // Create jobs directory if it doesn't exist
+    const jobsDir = path.join(__dirname, 'data', 'jobs');
+    if (!fs.existsSync(jobsDir)) {
+      fs.mkdirSync(jobsDir, { recursive: true });
+    }
+    
+    // Path to the jobs file
+    const jobsPath = path.join(jobsDir, 'jobs.json');
+    
+    // Check if the file exists, if not create it
+    if (!fs.existsSync(jobsPath)) {
+      fs.writeFileSync(jobsPath, JSON.stringify({ jobs: [] }), 'utf8');
+    }
+    
+    // Read the jobs data
+    const jobsData = JSON.parse(fs.readFileSync(jobsPath, 'utf8'));
+    
+    // Create a new job with unique ID
+    const newJob = {
+      id: Date.now().toString(),
+      businessSlug,
+      customer,
+      description,
+      status,
+      cost: cost || 0,
+      charge: charge || 0,
+      technician,
+      date: date || new Date().toISOString().split('T')[0],
+      notes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Calculate profit
+    newJob.profit = newJob.charge - newJob.cost;
+    
+    // Add the new job
+    jobsData.jobs.push(newJob);
+    
+    // Write the updated jobs back to the file
+    fs.writeFileSync(jobsPath, JSON.stringify(jobsData, null, 2));
+    
+    res.json({
+      success: true,
+      job: newJob
+    });
+  } catch (error) {
+    console.error('Error creating job:', error);
+    res.status(500).json({ error: 'Failed to create job' });
+  }
+});
+
+app.put('/api/jobs/:id', requireAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { customer, description, status, cost, charge, technician, date, notes } = req.body;
+    const businessSlug = req.session.businessSlug;
+    
+    // Path to the jobs file
+    const jobsPath = path.join(__dirname, 'data', 'jobs', 'jobs.json');
+    
+    // Check if the file exists
+    if (!fs.existsSync(jobsPath)) {
+      return res.status(404).json({ error: 'Jobs file not found' });
+    }
+    
+    // Read the jobs data
+    const jobsData = JSON.parse(fs.readFileSync(jobsPath, 'utf8'));
+    
+    // Find the job with the matching ID
+    const jobIndex = jobsData.jobs.findIndex(job => job.id === id && job.businessSlug === businessSlug);
+    
+    if (jobIndex === -1) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+    
+    // Update the job
+    jobsData.jobs[jobIndex] = {
+      ...jobsData.jobs[jobIndex],
+      customer: customer || jobsData.jobs[jobIndex].customer,
+      description: description || jobsData.jobs[jobIndex].description,
+      status: status || jobsData.jobs[jobIndex].status,
+      cost: cost !== undefined ? cost : jobsData.jobs[jobIndex].cost,
+      charge: charge !== undefined ? charge : jobsData.jobs[jobIndex].charge,
+      technician: technician !== undefined ? technician : jobsData.jobs[jobIndex].technician,
+      date: date || jobsData.jobs[jobIndex].date,
+      notes: notes !== undefined ? notes : jobsData.jobs[jobIndex].notes,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Calculate profit
+    jobsData.jobs[jobIndex].profit = jobsData.jobs[jobIndex].charge - jobsData.jobs[jobIndex].cost;
+    
+    // Write the updated jobs back to the file
+    fs.writeFileSync(jobsPath, JSON.stringify(jobsData, null, 2));
+    
+    res.json({
+      success: true,
+      job: jobsData.jobs[jobIndex]
+    });
+  } catch (error) {
+    console.error('Error updating job:', error);
+    res.status(500).json({ error: 'Failed to update job' });
+  }
+});
+
+app.delete('/api/jobs/:id', requireAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const businessSlug = req.session.businessSlug;
+    
+    // Path to the jobs file
+    const jobsPath = path.join(__dirname, 'data', 'jobs', 'jobs.json');
+    
+    // Check if the file exists
+    if (!fs.existsSync(jobsPath)) {
+      return res.status(404).json({ error: 'Jobs file not found' });
+    }
+    
+    // Read the jobs data
+    const jobsData = JSON.parse(fs.readFileSync(jobsPath, 'utf8'));
+    
+    // Filter out the job with the matching ID
+    const initialLength = jobsData.jobs.length;
+    jobsData.jobs = jobsData.jobs.filter(job => !(job.id === id && job.businessSlug === businessSlug));
+    
+    if (jobsData.jobs.length === initialLength) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+    
+    // Write the updated jobs back to the file
+    fs.writeFileSync(jobsPath, JSON.stringify(jobsData, null, 2));
+    
+    res.json({
+      success: true,
+      message: 'Job deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting job:', error);
+    res.status(500).json({ error: 'Failed to delete job' });
+  }
+});
+
+// Helper function to calculate job statistics
+function calculateJobStats(jobs) {
+  // Initialize stats
+  const stats = {
+    totalRevenue: 0,
+    totalCost: 0,
+    totalProfit: 0,
+    profitMargin: 0,
+    jobCounts: {
+      total: jobs.length,
+      completed: 0,
+      inProgress: 0,
+      scheduled: 0,
+      cancelled: 0
+    },
+    recentJobs: []
+  };
+  
+  // Process each job
+  jobs.forEach(job => {
+    // Add to revenue, cost and profit
+    stats.totalRevenue += parseFloat(job.charge || 0);
+    stats.totalCost += parseFloat(job.cost || 0);
+    stats.totalProfit += parseFloat(job.profit || 0);
+    
+    // Count by status
+    if (job.status === 'completed') {
+      stats.jobCounts.completed++;
+    } else if (job.status === 'in-progress') {
+      stats.jobCounts.inProgress++;
+    } else if (job.status === 'scheduled') {
+      stats.jobCounts.scheduled++;
+    } else if (job.status === 'cancelled') {
+      stats.jobCounts.cancelled++;
+    }
+  });
+  
+  // Calculate profit margin
+  if (stats.totalRevenue > 0) {
+    stats.profitMargin = (stats.totalProfit / stats.totalRevenue) * 100;
+  }
+  
+  // Get 5 most recent jobs
+  stats.recentJobs = [...jobs]
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    .slice(0, 5);
+  
+  return stats;
+}
+
 // API endpoint to save maintenance reminders
 app.post('/api/maintenance-reminders', requireAuth, (req, res) => {
   try {
@@ -522,6 +785,280 @@ app.post('/api/maintenance-reminders', requireAuth, (req, res) => {
   }
 });
 
+// API endpoint to save/update jobs
+app.post('/api/jobs', requireAuth, (req, res) => {
+  try {
+    const job = req.body;
+    const slug = req.session.businessSlug;
+    
+    if (!job.customerId || !job.serviceType || !job.date || !job.status || job.cost === undefined || job.charge === undefined) {
+      return res.status(400).json({ error: 'Customer, service type, date, status, cost and charge are required' });
+    }
+    
+    // Create jobs directory if it doesn't exist
+    const jobsDir = path.join(__dirname, 'data', 'jobs');
+    if (!fs.existsSync(jobsDir)) {
+      fs.mkdirSync(jobsDir);
+    }
+    
+    // Create jobs file for the business if it doesn't exist
+    const jobsFilePath = path.join(jobsDir, `${slug}-jobs.json`);
+    let jobs = [];
+    
+    if (fs.existsSync(jobsFilePath)) {
+      const jobsData = fs.readFileSync(jobsFilePath, 'utf8');
+      jobs = JSON.parse(jobsData);
+    }
+    
+    // Calculate profit
+    const cost = parseFloat(job.cost) || 0;
+    const charge = parseFloat(job.charge) || 0;
+    const profit = charge - cost;
+    
+    // Check if we're updating an existing job or adding a new one
+    if (job.id) {
+      // Find and update existing job
+      const index = jobs.findIndex(j => j.id === job.id);
+      if (index !== -1) {
+        jobs[index] = {
+          ...jobs[index],
+          ...job,
+          profit,
+          updatedAt: new Date().toISOString()
+        };
+      } else {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+    } else {
+      // Add new job
+      const newJob = {
+        id: Date.now().toString(),
+        customerId: job.customerId,
+        customerName: job.customerName,
+        serviceType: job.serviceType,
+        date: job.date,
+        status: job.status,
+        cost,
+        charge,
+        profit,
+        description: job.description || '',
+        notes: job.notes || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      jobs.push(newJob);
+      job.id = newJob.id; // Return the new ID
+    }
+    
+    // Write back to the file
+    fs.writeFileSync(jobsFilePath, JSON.stringify(jobs, null, 2));
+    
+    res.json({ success: true, job });
+  } catch (error) {
+    console.error('Error saving job:', error);
+    res.status(500).json({ error: 'Failed to save job' });
+  }
+});
+
+// API endpoint to get jobs
+app.get('/api/jobs', requireAuth, (req, res) => {
+  try {
+    const slug = req.session.businessSlug;
+    
+    // Check if jobs file exists
+    const jobsFilePath = path.join(__dirname, 'data', 'jobs', `${slug}-jobs.json`);
+    
+    if (!fs.existsSync(jobsFilePath)) {
+      return res.json({ jobs: [] });
+    }
+    
+    // Read and parse the jobs file
+    const jobsData = fs.readFileSync(jobsFilePath, 'utf8');
+    const jobs = JSON.parse(jobsData);
+    
+    // Sort jobs by date (newest first)
+    jobs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // Calculate summary statistics
+    const stats = calculateJobStats(jobs);
+    
+    res.json({ 
+      jobs,
+      stats
+    });
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({ error: 'Failed to fetch jobs' });
+  }
+});
+
+// API endpoint to delete a job
+app.delete('/api/jobs/:id', requireAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const slug = req.session.businessSlug;
+    
+    // Check if jobs file exists
+    const jobsFilePath = path.join(__dirname, 'data', 'jobs', `${slug}-jobs.json`);
+    
+    if (!fs.existsSync(jobsFilePath)) {
+      return res.status(404).json({ error: 'Jobs file not found' });
+    }
+    
+    // Read and parse the jobs file
+    const jobsData = fs.readFileSync(jobsFilePath, 'utf8');
+    let jobs = JSON.parse(jobsData);
+    
+    // Remove the job
+    const initialCount = jobs.length;
+    jobs = jobs.filter(job => job.id !== id);
+    
+    if (jobs.length === initialCount) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+    
+    // Write back to the file
+    fs.writeFileSync(jobsFilePath, JSON.stringify(jobs, null, 2));
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting job:', error);
+    res.status(500).json({ error: 'Failed to delete job' });
+  }
+});
+
+// API endpoint to get job report
+app.get('/api/jobs/report', requireAuth, (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const slug = req.session.businessSlug;
+    
+    // Check if jobs file exists
+    const jobsFilePath = path.join(__dirname, 'data', 'jobs', `${slug}-jobs.json`);
+    
+    if (!fs.existsSync(jobsFilePath)) {
+      return res.json({ 
+        jobs: [],
+        stats: {
+          totalRevenue: 0,
+          totalCost: 0,
+          totalProfit: 0,
+          marginPercentage: 0,
+          jobCount: 0,
+          completedCount: 0,
+          pendingCount: 0,
+          serviceBreakdown: []
+        }
+      });
+    }
+    
+    // Read and parse the jobs file
+    const jobsData = fs.readFileSync(jobsFilePath, 'utf8');
+    const allJobs = JSON.parse(jobsData);
+    
+    // Filter jobs by date range if provided
+    let filteredJobs = allJobs;
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // Include the entire end day
+      
+      filteredJobs = allJobs.filter(job => {
+        const jobDate = new Date(job.date);
+        return jobDate >= start && jobDate <= end;
+      });
+    }
+    
+    // Sort jobs by date
+    filteredJobs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // Calculate report statistics
+    const stats = calculateJobStats(filteredJobs);
+    
+    res.json({ 
+      jobs: filteredJobs,
+      stats
+    });
+  } catch (error) {
+    console.error('Error generating job report:', error);
+    res.status(500).json({ error: 'Failed to generate job report' });
+  }
+});
+
+// Function to calculate job statistics
+function calculateJobStats(jobs) {
+  // Initialize statistics
+  let totalRevenue = 0;
+  let totalCost = 0;
+  let totalProfit = 0;
+  let completedCount = 0;
+  let pendingCount = 0;
+  let inProgressCount = 0;
+  
+  // Initialize service type breakdown
+  const serviceTypes = {};
+  
+  // Process each job
+  jobs.forEach(job => {
+    // Sum up financial values for completed jobs
+    if (job.status === 'completed') {
+      totalRevenue += parseFloat(job.charge) || 0;
+      totalCost += parseFloat(job.cost) || 0;
+      totalProfit += parseFloat(job.profit) || 0;
+      completedCount++;
+    } else if (job.status === 'pending') {
+      pendingCount++;
+    } else if (job.status === 'in-progress') {
+      inProgressCount++;
+    }
+    
+    // Track service type breakdown
+    if (job.serviceType) {
+      if (!serviceTypes[job.serviceType]) {
+        serviceTypes[job.serviceType] = {
+          count: 0,
+          revenue: 0,
+          profit: 0
+        };
+      }
+      
+      serviceTypes[job.serviceType].count++;
+      
+      if (job.status === 'completed') {
+        serviceTypes[job.serviceType].revenue += parseFloat(job.charge) || 0;
+        serviceTypes[job.serviceType].profit += parseFloat(job.profit) || 0;
+      }
+    }
+  });
+  
+  // Calculate margin percentage
+  const marginPercentage = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+  
+  // Convert service types to array for easier consumption by the client
+  const serviceBreakdown = Object.keys(serviceTypes).map(type => ({
+    name: type,
+    count: serviceTypes[type].count,
+    revenue: serviceTypes[type].revenue,
+    profit: serviceTypes[type].profit
+  }));
+  
+  // Sort by revenue (highest first)
+  serviceBreakdown.sort((a, b) => b.revenue - a.revenue);
+  
+  return {
+    totalRevenue,
+    totalCost,
+    totalProfit,
+    marginPercentage,
+    jobCount: jobs.length,
+    completedCount,
+    pendingCount,
+    inProgressCount,
+    serviceBreakdown
+  };
+}
+
 // API endpoint to get maintenance reminders
 app.get('/api/maintenance-reminders', requireAuth, (req, res) => {
   try {
@@ -545,6 +1082,218 @@ app.get('/api/maintenance-reminders', requireAuth, (req, res) => {
   } catch (error) {
     console.error('Error fetching reminders:', error);
     res.status(500).json({ error: 'Failed to fetch reminders' });
+  }
+});
+
+// API endpoint to create/update contacts
+app.post('/api/contacts', requireAuth, (req, res) => {
+  try {
+    const contact = req.body;
+    const slug = req.session.businessSlug;
+    
+    if (!contact.name || !contact.phone) {
+      return res.status(400).json({ error: 'Name and phone are required' });
+    }
+    
+    // Create contacts directory if it doesn't exist
+    const contactsDir = path.join(__dirname, 'data', 'contacts');
+    if (!fs.existsSync(contactsDir)) {
+      fs.mkdirSync(contactsDir);
+    }
+    
+    // Create contacts file for the business if it doesn't exist
+    const contactsFilePath = path.join(contactsDir, `${slug}-contacts.json`);
+    let contacts = [];
+    
+    if (fs.existsSync(contactsFilePath)) {
+      const contactsData = fs.readFileSync(contactsFilePath, 'utf8');
+      contacts = JSON.parse(contactsData);
+    }
+    
+    // Check if we're updating an existing contact or adding a new one
+    if (contact.id) {
+      // Find and update existing contact
+      const index = contacts.findIndex(c => c.id === contact.id);
+      if (index !== -1) {
+        contacts[index] = {
+          ...contacts[index],
+          ...contact,
+          updatedAt: new Date().toISOString()
+        };
+      } else {
+        return res.status(404).json({ error: 'Contact not found' });
+      }
+    } else {
+      // Add new contact
+      const newContact = {
+        id: Date.now().toString(),
+        name: contact.name,
+        email: contact.email || '',
+        phone: contact.phone,
+        address: contact.address || '',
+        lastServiceDate: contact.lastServiceDate || null,
+        nextServiceDate: contact.nextServiceDate || null,
+        systemType: contact.systemType || '',
+        notes: contact.notes || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts.push(newContact);
+      contact.id = newContact.id; // Return the new ID
+    }
+    
+    // Write back to the file
+    fs.writeFileSync(contactsFilePath, JSON.stringify(contacts, null, 2));
+    
+    res.json({ success: true, contact });
+  } catch (error) {
+    console.error('Error saving contact:', error);
+    res.status(500).json({ error: 'Failed to save contact' });
+  }
+});
+
+// API endpoint to get contacts
+app.get('/api/contacts', requireAuth, (req, res) => {
+  try {
+    const slug = req.session.businessSlug;
+    
+    // Check if contacts file exists
+    const contactsFilePath = path.join(__dirname, 'data', 'contacts', `${slug}-contacts.json`);
+    
+    if (!fs.existsSync(contactsFilePath)) {
+      return res.json({ contacts: [] });
+    }
+    
+    // Read and parse the contacts file
+    const contactsData = fs.readFileSync(contactsFilePath, 'utf8');
+    const contacts = JSON.parse(contactsData);
+    
+    // Sort contacts by name
+    contacts.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Get current date for calculating maintenance due
+    const currentDate = new Date();
+    
+    // Calculate how many contacts are due for maintenance
+    const maintenanceDue = contacts.filter(contact => {
+      if (!contact.nextServiceDate) return false;
+      const nextService = new Date(contact.nextServiceDate);
+      const daysUntilService = Math.floor((nextService - currentDate) / (1000 * 60 * 60 * 24));
+      return daysUntilService <= 30 && daysUntilService >= -15; // Due within 30 days or overdue by 15 days
+    });
+    
+    // Calculate new contacts this month
+    const newThisMonth = contacts.filter(contact => {
+      const createdDate = new Date(contact.createdAt);
+      return createdDate.getMonth() === currentDate.getMonth() && 
+             createdDate.getFullYear() === currentDate.getFullYear();
+    });
+    
+    res.json({ 
+      contacts, 
+      stats: {
+        total: contacts.length,
+        maintenanceDue: maintenanceDue.length,
+        newThisMonth: newThisMonth.length
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+    res.status(500).json({ error: 'Failed to fetch contacts' });
+  }
+});
+
+// API endpoint to delete a contact
+app.delete('/api/contacts/:id', requireAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const slug = req.session.businessSlug;
+    
+    // Check if contacts file exists
+    const contactsFilePath = path.join(__dirname, 'data', 'contacts', `${slug}-contacts.json`);
+    
+    if (!fs.existsSync(contactsFilePath)) {
+      return res.status(404).json({ error: 'Contacts file not found' });
+    }
+    
+    // Read and parse the contacts file
+    const contactsData = fs.readFileSync(contactsFilePath, 'utf8');
+    let contacts = JSON.parse(contactsData);
+    
+    // Remove the contact
+    const initialCount = contacts.length;
+    contacts = contacts.filter(contact => contact.id !== id);
+    
+    if (contacts.length === initialCount) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+    
+    // Write back to the file
+    fs.writeFileSync(contactsFilePath, JSON.stringify(contacts, null, 2));
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting contact:', error);
+    res.status(500).json({ error: 'Failed to delete contact' });
+  }
+});
+
+// API endpoint to import contacts from CSV
+app.post('/api/contacts/import', requireAuth, (req, res) => {
+  try {
+    const { contacts } = req.body;
+    const slug = req.session.businessSlug;
+    
+    if (!Array.isArray(contacts) || contacts.length === 0) {
+      return res.status(400).json({ error: 'Contacts array is required' });
+    }
+    
+    // Create contacts directory if it doesn't exist
+    const contactsDir = path.join(__dirname, 'data', 'contacts');
+    if (!fs.existsSync(contactsDir)) {
+      fs.mkdirSync(contactsDir);
+    }
+    
+    // Create contacts file for the business if it doesn't exist
+    const contactsFilePath = path.join(contactsDir, `${slug}-contacts.json`);
+    let existingContacts = [];
+    
+    if (fs.existsSync(contactsFilePath)) {
+      const contactsData = fs.readFileSync(contactsFilePath, 'utf8');
+      existingContacts = JSON.parse(contactsData);
+    }
+    
+    // Process new contacts
+    const timestamp = new Date().toISOString();
+    const newContacts = contacts.map(contact => ({
+      id: Date.now().toString() + Math.floor(Math.random() * 1000),
+      name: contact.name || 'Unknown',
+      email: contact.email || '',
+      phone: contact.phone || '',
+      address: contact.address || '',
+      lastServiceDate: contact.lastServiceDate || null,
+      nextServiceDate: contact.nextServiceDate || null,
+      systemType: contact.systemType || '',
+      notes: contact.notes || '',
+      createdAt: timestamp,
+      updatedAt: timestamp
+    }));
+    
+    // Add new contacts to existing ones
+    const allContacts = [...existingContacts, ...newContacts];
+    
+    // Write back to the file
+    fs.writeFileSync(contactsFilePath, JSON.stringify(allContacts, null, 2));
+    
+    res.json({ 
+      success: true, 
+      importedCount: newContacts.length,
+      totalCount: allContacts.length
+    });
+  } catch (error) {
+    console.error('Error importing contacts:', error);
+    res.status(500).json({ error: 'Failed to import contacts' });
   }
 });
 

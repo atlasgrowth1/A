@@ -6,6 +6,49 @@
   <title>Business Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="description" content="Weather data based on your current location and HVAC service suggestions">
+  <!-- Add cookie consent notification CSS -->
+  <style>
+    .cookie-consent {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .cookie-consent-content {
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .cookie-btn {
+      background: #0072CE;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 4px;
+      margin-left: 1rem;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .cookie-consent-content {
+        flex-direction: column;
+      }
+      .cookie-btn {
+        margin-top: 1rem;
+        margin-left: 0;
+      }
+    }
+  </style>
   <style>
     body {
       background-color: #f8f9fa;
@@ -403,6 +446,16 @@
               </a>
             </li>
             <li class="sidebar-item">
+              <a href="#" class="sidebar-link" data-section="contacts">
+                <i class="fas fa-address-book sidebar-icon"></i> Contacts
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link" data-section="jobs">
+                <i class="fas fa-briefcase sidebar-icon"></i> Jobs
+              </a>
+            </li>
+            <li class="sidebar-item">
               <a href="#" class="sidebar-link disabled" data-section="invoices" style="opacity: 0.5; pointer-events: none;">
                 <i class="fas fa-file-invoice-dollar sidebar-icon"></i> Invoices <span class="badge bg-secondary">Coming Soon</span>
               </a>
@@ -576,6 +629,248 @@
           
           <!-- Weather Section -->
           <div id="weather-section" class="content-section" style="display: none;">
+  <script>
+  // Add function to get accurate day names and dates for weather forecast
+  async function loadWeatherData() {
+    try {
+      // Show loading state
+      document.getElementById('forecast-container').innerHTML = '<div class="text-center p-3">Loading weather data...</div>';
+      
+      // Function to fetch weather with specific coordinates
+      async function fetchWeatherData(lat, lon) {
+        try {
+          const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+          if (!response.ok) throw new Error('Weather API error');
+          return await response.json();
+        } catch (error) {
+          console.error('Error fetching weather:', error);
+          throw error;
+        }
+      }
+      
+      // Try to get user location silently first
+      let weatherData;
+      try {
+        // Use IP-based geolocation fallback (approximate location)
+        // This ensures we always have some location data
+        const response = await fetch('https://ipapi.co/json/');
+        const ipData = await response.json();
+        
+        // Default coordinates from IP geolocation
+        let lat = ipData.latitude;
+        let lon = ipData.longitude;
+        
+        // Try for more precise browser geolocation
+        if (navigator.geolocation) {
+          // Only wait 3 seconds for permission to avoid blocking
+          const geoPosition = await new Promise((resolve, reject) => {
+            const geoTimeout = setTimeout(() => {
+              console.log('Geolocation timed out, using IP geolocation');
+              reject(new Error('Geolocation timeout'));
+            }, 3000);
+            
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                clearTimeout(geoTimeout);
+                resolve(position);
+              },
+              (error) => {
+                clearTimeout(geoTimeout);
+                console.log('Geolocation error, using IP geolocation');
+                reject(error);
+              },
+              { timeout: 3000, maximumAge: 60000 }
+            );
+          }).catch(err => {
+            console.log('Using IP geolocation fallback');
+            return null; // Fallback to IP geolocation
+          });
+          
+          // If we got precise location, use it
+          if (geoPosition) {
+            lat = geoPosition.coords.latitude;
+            lon = geoPosition.coords.longitude;
+            console.log('Using precise browser geolocation');
+          }
+        }
+        
+        // Fetch weather with whatever location we have
+        weatherData = await fetchWeatherData(lat, lon);
+          
+        // Clear container
+        const forecastContainer = document.getElementById('forecast-container');
+        forecastContainer.innerHTML = '';
+          
+        // Loop through daily forecast data
+        weatherData.daily.forEach((day, index) => {
+            // Create elements for each day
+            const dayCard = document.createElement('div');
+            dayCard.className = 'weather-day p-3 m-2 bg-white shadow-sm rounded';
+            
+            // Format date properly
+            const date = new Date(day.dt * 1000);
+            const today = new Date();
+            
+            // Get day name (using API data if available)
+            let dayName;
+            if (day.day_of_week) {
+              // Use server-provided day name
+              dayName = index === 0 ? `Today (${day.day_of_week})` : day.day_of_week;
+            } else {
+              // Fallback to calculated day name
+              const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+              dayName = index === 0 ? 'Today' : days[date.getDay()];
+            }
+            
+            // Format date as Month Day
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const formattedDate = day.formatted_date || `${monthNames[date.getMonth()]} ${date.getDate()}`;
+            
+            // Weather icon
+            const weatherIcons = {
+              'Clear': '<i class="fas fa-sun text-warning"></i>',
+              'Clouds': '<i class="fas fa-cloud text-secondary"></i>',
+              'Rain': '<i class="fas fa-cloud-rain text-primary"></i>',
+              'Snow': '<i class="fas fa-snowflake text-info"></i>',
+              'Thunderstorm': '<i class="fas fa-bolt text-warning"></i>',
+              'Drizzle': '<i class="fas fa-cloud-rain text-info"></i>',
+              'Mist': '<i class="fas fa-smog text-secondary"></i>',
+              'Smoke': '<i class="fas fa-smog text-secondary"></i>',
+              'Haze': '<i class="fas fa-smog text-secondary"></i>',
+              'Dust': '<i class="fas fa-smog text-secondary"></i>',
+              'Fog': '<i class="fas fa-smog text-secondary"></i>',
+              'Sand': '<i class="fas fa-wind text-warning"></i>',
+              'Ash': '<i class="fas fa-wind text-dark"></i>',
+              'Squall': '<i class="fas fa-wind text-primary"></i>',
+              'Tornado': '<i class="fas fa-wind text-danger"></i>'
+            };
+            const weatherIcon = weatherIcons[day.weather[0].main] || '<i class="fas fa-cloud-sun text-primary"></i>';
+            
+            // Populate day card
+            dayCard.innerHTML = `
+              <div class="text-center">
+                <div class="fs-5 fw-bold">${dayName}</div>
+                <div class="text-muted mb-2">${formattedDate}</div>
+                <div class="weather-icon fs-1 my-3">${weatherIcon}</div>
+                <div class="fs-4">${Math.round(day.temp.max)}° / ${Math.round(day.temp.min)}°</div>
+                <div class="mt-2">${day.weather[0].description}</div>
+                <div class="mt-1"><i class="fas fa-tint text-primary me-1"></i> ${day.humidity}%</div>
+              </div>
+            `;
+            
+            forecastContainer.appendChild(dayCard);
+          });
+          
+        });
+      } catch (locationError) {
+        console.error("Location error:", locationError);
+        
+        // If IP geolocation fails, use default coordinates
+        try {
+          console.log('Using default location (Birmingham, AL)');
+          const defaultLat = 33.5186;
+          const defaultLon = -86.8104;
+          weatherData = await fetchWeatherData(defaultLat, defaultLon);
+          
+          // Display notice about using default location
+          const forecastContainer = document.getElementById('forecast-container');
+          forecastContainer.innerHTML = '';
+          
+          // Add notice at top
+          const notice = document.createElement('div');
+          notice.className = 'alert alert-info mb-3';
+          notice.innerHTML = 'Using default location. Refresh to try again with your location.';
+          forecastContainer.appendChild(notice);
+          
+          // Display forecast with default location
+          weatherData.daily.forEach((day, index) => {
+            // (rest of the code for creating weather cards - same as above)
+            // Create elements for each day
+            const dayCard = document.createElement('div');
+            dayCard.className = 'weather-day p-3 m-2 bg-white shadow-sm rounded';
+            
+            // Format date properly
+            const date = new Date(day.dt * 1000);
+            const today = new Date();
+            
+            // Get day name (using API data if available)
+            let dayName;
+            if (day.day_of_week) {
+              dayName = index === 0 ? `Today (${day.day_of_week})` : day.day_of_week;
+            } else {
+              const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+              dayName = index === 0 ? 'Today' : days[date.getDay()];
+            }
+            
+            // Format date as Month Day
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const formattedDate = day.formatted_date || `${monthNames[date.getMonth()]} ${date.getDate()}`;
+            
+            // Weather icon
+            const weatherIcons = {
+              'Clear': '<i class="fas fa-sun text-warning"></i>',
+              'Clouds': '<i class="fas fa-cloud text-secondary"></i>',
+              'Rain': '<i class="fas fa-cloud-rain text-primary"></i>',
+              'Snow': '<i class="fas fa-snowflake text-info"></i>',
+              'Thunderstorm': '<i class="fas fa-bolt text-warning"></i>',
+              'Drizzle': '<i class="fas fa-cloud-rain text-info"></i>',
+              'Mist': '<i class="fas fa-smog text-secondary"></i>',
+              'Smoke': '<i class="fas fa-smog text-secondary"></i>',
+              'Haze': '<i class="fas fa-smog text-secondary"></i>',
+              'Dust': '<i class="fas fa-smog text-secondary"></i>',
+              'Fog': '<i class="fas fa-smog text-secondary"></i>',
+              'Sand': '<i class="fas fa-wind text-warning"></i>',
+              'Ash': '<i class="fas fa-wind text-dark"></i>',
+              'Squall': '<i class="fas fa-wind text-primary"></i>',
+              'Tornado': '<i class="fas fa-wind text-danger"></i>'
+            };
+            const weatherIcon = weatherIcons[day.weather[0].main] || '<i class="fas fa-cloud-sun text-primary"></i>';
+            
+            // Populate day card
+            dayCard.innerHTML = `
+              <div class="text-center">
+                <div class="fs-5 fw-bold">${dayName}</div>
+                <div class="text-muted mb-2">${formattedDate}</div>
+                <div class="weather-icon fs-1 my-3">${weatherIcon}</div>
+                <div class="fs-4">${Math.round(day.temp.max)}° / ${Math.round(day.temp.min)}°</div>
+                <div class="mt-2">${day.weather[0].description}</div>
+                <div class="mt-1"><i class="fas fa-tint text-primary me-1"></i> ${day.humidity}%</div>
+              </div>
+            `;
+            
+            forecastContainer.appendChild(dayCard);
+          });
+        } catch (defaultLocationError) {
+          console.error("Default location error:", defaultLocationError);
+          document.getElementById('forecast-container').innerHTML = 
+            '<div class="alert alert-danger">Error loading weather data. Please try again later.</div>';
+        }
+      }
+    } catch (error) {
+      console.error("Weather data error:", error);
+      document.getElementById('forecast-container').innerHTML = 
+        '<div class="alert alert-danger">Error loading weather data. Please try again later.</div>';
+    }
+  }
+  
+  // Load weather data when this section becomes visible
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add listener for the weather section tab
+    const weatherTab = document.querySelector('a[href="#weather-section"]');
+    if (weatherTab) {
+      weatherTab.addEventListener('click', function() {
+        // Load weather data when tab is clicked
+        loadWeatherData();
+      });
+    }
+    
+    // Also add refresh button functionality
+    const refreshBtn = document.getElementById('refresh-weather');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', loadWeatherData);
+    }
+  });
+  </script>
             <div class="content-header">
               <h2>Weather Forecast</h2>
               <div>
@@ -817,8 +1112,444 @@
               </div>
             </div>
           </div>
+          
+          <!-- Jobs Section -->
+          <div id="jobs-section" class="content-section" style="display: none;">
+            <div class="content-header">
+              <h2>Jobs & Revenue Tracking</h2>
+              <div>
+                <button id="job-report" class="btn btn-outline-success me-2">
+                  <i class="fas fa-chart-line"></i> Revenue Report
+                </button>
+                <button id="add-job" class="btn btn-primary">
+                  <i class="fas fa-plus"></i> Add Job
+                </button>
+              </div>
+            </div>
+            
+            <!-- Revenue Overview -->
+            <div class="row mb-4">
+              <div class="col-md-3">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <div class="display-4 fw-bold text-success" id="total-revenue">$0</div>
+                    <div class="mt-2">
+                      <select id="revenue-time-range" class="form-select form-select-sm">
+                        <option value="week">This Week</option>
+                        <option value="month" selected>This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                        <option value="all">All Time</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">Total Costs</h5>
+                    <div class="display-4 fw-bold text-danger" id="total-costs">$0</div>
+                    <div class="small text-muted mt-2">
+                      Materials, labor, and overhead
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">Profit</h5>
+                    <div class="display-4 fw-bold text-primary" id="total-profit">$0</div>
+                    <div id="profit-percentage" class="small text-success mt-2">
+                      0% margin
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">Job Count</h5>
+                    <div class="display-4 fw-bold text-info" id="job-count">0</div>
+                    <div class="small text-muted mt-2">
+                      <span id="completed-count">0</span> completed, 
+                      <span id="pending-count">0</span> pending
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Revenue Chart -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Revenue & Profit Trends</h5>
+                    <div id="revenue-chart" style="height: 250px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Job List -->
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="card-title mb-0">Jobs</h5>
+                  <div class="input-group" style="max-width: 300px;">
+                    <select id="job-filter" class="form-select">
+                      <option value="all">All Jobs</option>
+                      <option value="pending">Pending</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    <input type="text" id="job-search" class="form-control" placeholder="Search jobs...">
+                  </div>
+                </div>
+                
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Service Type</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Cost</th>
+                        <th>Charge</th>
+                        <th>Profit</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="jobs-list">
+                      <!-- Jobs will be loaded here -->
+                      <tr>
+                        <td colspan="9" class="text-center p-4">
+                          <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                          </div>
+                          <p class="mt-2">Loading jobs...</p>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Contacts Section -->
+          <div id="contacts-section" class="content-section" style="display: none;">
+            <div class="content-header">
+              <h2>Customer Contacts</h2>
+              <div>
+                <button id="import-contacts" class="btn btn-outline-primary me-2">
+                  <i class="fas fa-file-import"></i> Import Contacts
+                </button>
+                <button id="add-contact" class="btn btn-primary">
+                  <i class="fas fa-plus"></i> Add Contact
+                </button>
+              </div>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h5 class="card-title mb-0">Contact Management</h5>
+                      <div class="input-group" style="max-width: 300px;">
+                        <input type="text" id="contact-search" class="form-control" placeholder="Search contacts...">
+                        <button class="btn btn-outline-secondary" type="button">
+                          <i class="fas fa-search"></i>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <ul class="nav nav-tabs mb-3" id="contactTabs" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-contacts-tab" data-bs-toggle="tab" data-bs-target="#all-contacts" type="button" role="tab">
+                          All Contacts
+                        </button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="recent-customers-tab" data-bs-toggle="tab" data-bs-target="#recent-customers" type="button" role="tab">
+                          Recent Customers
+                        </button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="maintenance-due-tab" data-bs-toggle="tab" data-bs-target="#maintenance-due" type="button" role="tab">
+                          Maintenance Due
+                        </button>
+                      </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                      <div class="tab-pane fade show active" id="all-contacts" role="tabpanel">
+                        <div class="table-responsive">
+                          <table class="table table-hover" id="contacts-table">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Last Service</th>
+                                <th>Next Service</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody id="contacts-list">
+                              <!-- Contacts will be loaded here -->
+                              <tr>
+                                <td colspan="7" class="text-center p-4">
+                                  <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                  </div>
+                                  <p class="mt-2">Loading contacts...</p>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      
+                      <div class="tab-pane fade" id="recent-customers" role="tabpanel">
+                        <div class="table-responsive">
+                          <table class="table table-hover">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Service Date</th>
+                                <th>Service Type</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody id="recent-customers-list">
+                              <!-- Recent customers will be loaded here -->
+                              <tr>
+                                <td colspan="6" class="text-center p-4">
+                                  <p>No recent customers found</p>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      
+                      <div class="tab-pane fade" id="maintenance-due" role="tabpanel">
+                        <div class="table-responsive">
+                          <table class="table table-hover">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Last Service</th>
+                                <th>Service Due</th>
+                                <th>System Type</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody id="maintenance-due-list">
+                              <!-- Maintenance due contacts will be loaded here -->
+                              <tr>
+                                <td colspan="6" class="text-center p-4">
+                                  <p>No maintenance due found</p>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Contact Statistics -->
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">Total Contacts</h5>
+                    <div class="display-4 fw-bold text-primary mb-2" id="total-contacts-count">0</div>
+                    <p class="text-muted mb-0">Customer contacts in database</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">Maintenance Due</h5>
+                    <div class="display-4 fw-bold text-warning mb-2" id="maintenance-due-count">0</div>
+                    <p class="text-muted mb-0">Contacts due for service</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">New This Month</h5>
+                    <div class="display-4 fw-bold text-success mb-2" id="new-contacts-count">0</div>
+                    <p class="text-muted mb-0">New contacts this month</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+  
+  <!-- Contact Modals -->
+  <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="contact-modal-title">Add New Contact</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="contact-form">
+            <input type="hidden" id="contact-id">
+            
+            <div class="mb-3">
+              <label for="contact-name" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="contact-name" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="contact-email" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="contact-email">
+            </div>
+            
+            <div class="mb-3">
+              <label for="contact-phone" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="contact-phone" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="contact-address" class="form-label">Address</label>
+              <input type="text" class="form-control" id="contact-address">
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="last-service-date" class="form-label">Last Service Date</label>
+                  <input type="date" class="form-control" id="last-service-date">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="next-service-date" class="form-label">Next Service Date</label>
+                  <input type="date" class="form-control" id="next-service-date">
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="system-type" class="form-label">System Type</label>
+              <select class="form-select" id="system-type">
+                <option value="">Select System Type</option>
+                <option value="Central AC">Central AC</option>
+                <option value="Heat Pump">Heat Pump</option>
+                <option value="Gas Furnace">Gas Furnace</option>
+                <option value="Ductless Mini-Split">Ductless Mini-Split</option>
+                <option value="Boiler">Boiler</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="contact-notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="contact-notes" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="save-contact">Save Contact</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- CSV Import Modal -->
+  <div class="modal fade" id="importContactsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Import Contacts</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Upload a CSV file with your contacts. The file should include columns for name, email, phone, and address.
+          </div>
+          
+          <form id="import-contacts-form">
+            <div class="mb-3">
+              <label for="csv-file" class="form-label">Select CSV File</label>
+              <input class="form-control" type="file" id="csv-file" accept=".csv">
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Sample Format:</label>
+              <div class="border p-2 bg-light">
+                <code>Name,Email,Phone,Address,Last Service Date,System Type</code><br>
+                <code>John Smith,john@example.com,555-123-4567,123 Main St,2023-01-15,Heat Pump</code>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="has-header" checked>
+                <label class="form-check-label" for="has-header">
+                  First row contains column headers
+                </label>
+              </div>
+            </div>
+          </form>
+          
+          <div id="csv-preview" style="display: none;">
+            <h6>Preview:</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered">
+                <thead id="csv-preview-header">
+                  <!-- CSV header preview -->
+                </thead>
+                <tbody id="csv-preview-body">
+                  <!-- CSV data preview -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirm-import">Import Contacts</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookie Consent Banner -->
+  <div class="cookie-consent" id="cookie-consent">
+    <div class="cookie-consent-content">
+      <p class="mb-0">This site uses cookies and collects your location data to provide personalized weather forecasts and HVAC recommendations.</p>
+      <button class="cookie-btn" id="accept-cookies">Accept</button>
     </div>
   </div>
 
@@ -827,6 +1558,23 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Cookie consent handling
+      const cookieConsent = document.getElementById('cookie-consent');
+      const acceptBtn = document.getElementById('accept-cookies');
+      
+      // Check if user has already accepted cookies
+      if (!localStorage.getItem('cookiesAccepted')) {
+        cookieConsent.style.display = 'flex';
+      } else {
+        cookieConsent.style.display = 'none';
+      }
+      
+      // Add event listener to accept button
+      acceptBtn.addEventListener('click', function() {
+        localStorage.setItem('cookiesAccepted', 'true');
+        cookieConsent.style.display = 'none';
+      });
+      
       // Get DOM elements
       const businessNameNav = document.getElementById('business-name-nav');
       const viewWebsiteLink = document.getElementById('view-website-link');
@@ -1633,40 +2381,68 @@
           document.getElementById('weather-alerts').innerHTML = '';
           document.getElementById('weather-tips-list').innerHTML = '<li class="list-group-item">Loading tips...</li>';
           
-          // Fetch weather data
-          const response = await fetch(`/api/weather/${businessInfo.slug}`);
+          // Get user's location using browser geolocation API
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              // Get coordinates
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              
+              // Fetch weather data with coordinates
+              const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
           
-          if (response.ok) {
-            const data = await response.json();
-            
-            // Render current weather
-            renderCurrentWeather(data.current);
-            
-            // Render 7-day forecast
-            renderForecast(data.daily);
-            
-            // Render HVAC demand chart
-            renderHVACDemand(data.hvac_demand);
-            
-            // Render weather alerts
-            renderWeatherAlerts(data.alerts);
-            
-            // Render HVAC tips
-            renderHVACTips(data.hvac_demand.maintenance_tips);
-          } else {
-            // Show error state
-            document.getElementById('current-weather').innerHTML = `
-              <div class="alert alert-danger">Failed to load weather data. Please try again later.</div>
-            `;
-            
-            document.getElementById('forecast-container').innerHTML = `
-              <div class="alert alert-danger w-100">Failed to load forecast data. Please try again later.</div>
-            `;
-            
-            document.getElementById('hvac-demand-chart').innerHTML = `
-              <div class="alert alert-danger">Failed to load HVAC demand forecast. Please try again later.</div>
-            `;
-          }
+              if (response.ok) {
+                const data = await response.json();
+                
+                // Render current weather
+                renderCurrentWeather(data.current);
+                
+                // Render 7-day forecast
+                renderForecast(data.daily);
+                
+                // Render HVAC demand chart
+                renderHVACDemand(data.hvac_demand);
+                
+                // Render weather alerts
+                renderWeatherAlerts(data.alerts);
+                
+                // Render HVAC tips
+                renderHVACTips(data.hvac_demand.maintenance_tips);
+              } else {
+                // Show error state
+                document.getElementById('current-weather').innerHTML = `
+                  <div class="alert alert-danger">Failed to load weather data. Please try again later.</div>
+                `;
+                
+                document.getElementById('forecast-container').innerHTML = `
+                  <div class="alert alert-danger w-100">Failed to load forecast data. Please try again later.</div>
+                `;
+                
+                document.getElementById('hvac-demand-chart').innerHTML = `
+                  <div class="alert alert-danger">Failed to load HVAC demand forecast. Please try again later.</div>
+                `;
+              }
+            },
+            (error) => {
+              // Handle geolocation error
+              console.error('Error getting user location:', error);
+              document.getElementById('current-weather').innerHTML = `
+                <div class="alert alert-warning">
+                  <h5><i class="fas fa-exclamation-triangle me-2"></i> Location access required</h5>
+                  <p>Please allow access to your location to see weather data for your area.</p>
+                  <button onclick="loadWeather()" class="btn btn-sm btn-primary mt-2">Try Again</button>
+                </div>
+              `;
+              
+              document.getElementById('forecast-container').innerHTML = `
+                <div class="alert alert-warning w-100">Location access required for weather forecast.</div>
+              `;
+              
+              document.getElementById('hvac-demand-chart').innerHTML = `
+                <div class="alert alert-warning">Location access required for HVAC demand forecast.</div>
+              `;
+            }
+          );
         } catch (error) {
           console.error('Error loading weather:', error);
           
@@ -2025,6 +2801,1574 @@
         });
       });
     });
+  </script>
+  
+  <!-- Contacts JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize contacts section
+      const addContactBtn = document.getElementById('add-contact');
+      const importContactsBtn = document.getElementById('import-contacts');
+      const saveContactBtn = document.getElementById('save-contact');
+      const confirmImportBtn = document.getElementById('confirm-import');
+      const contactSearch = document.getElementById('contact-search');
+      
+      // Show contact add/edit modal
+      if (addContactBtn) {
+        addContactBtn.addEventListener('click', function() {
+          // Clear form
+          document.getElementById('contact-form').reset();
+          document.getElementById('contact-id').value = '';
+          document.getElementById('contact-modal-title').textContent = 'Add New Contact';
+          
+          // Show modal
+          const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
+          contactModal.show();
+        });
+      }
+      
+      // Show import contacts modal
+      if (importContactsBtn) {
+        importContactsBtn.addEventListener('click', function() {
+          // Clear form
+          document.getElementById('import-contacts-form').reset();
+          document.getElementById('csv-preview').style.display = 'none';
+          
+          // Show modal
+          const importModal = new bootstrap.Modal(document.getElementById('importContactsModal'));
+          importModal.show();
+        });
+      }
+      
+      // Handle CSV file upload
+      const csvFileInput = document.getElementById('csv-file');
+      if (csvFileInput) {
+        csvFileInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const contents = e.target.result;
+            
+            // Parse CSV
+            const hasHeader = document.getElementById('has-header').checked;
+            const lines = contents.split('\n');
+            const headers = hasHeader ? parseCSVLine(lines[0]) : ['Name', 'Email', 'Phone', 'Address', 'Last Service Date', 'System Type'];
+            
+            // Show preview
+            const previewHeader = document.getElementById('csv-preview-header');
+            const previewBody = document.getElementById('csv-preview-body');
+            
+            previewHeader.innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+            
+            previewBody.innerHTML = '';
+            const startRow = hasHeader ? 1 : 0;
+            const endRow = Math.min(startRow + 5, lines.length); // Show at most 5 rows
+            
+            for (let i = startRow; i < endRow; i++) {
+              if (!lines[i].trim()) continue;
+              
+              const cells = parseCSVLine(lines[i]);
+              previewBody.innerHTML += '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+            }
+            
+            document.getElementById('csv-preview').style.display = 'block';
+          };
+          
+          reader.readAsText(file);
+        });
+      }
+      
+      // Parse CSV line, handling quoted values
+      function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        
+        result.push(current.trim());
+        return result;
+      }
+      
+      // Save contact
+      if (saveContactBtn) {
+        saveContactBtn.addEventListener('click', async function() {
+          // Validate form
+          const form = document.getElementById('contact-form');
+          if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+          }
+          
+          // Get form data
+          const contact = {
+            id: document.getElementById('contact-id').value || null,
+            name: document.getElementById('contact-name').value,
+            email: document.getElementById('contact-email').value,
+            phone: document.getElementById('contact-phone').value,
+            address: document.getElementById('contact-address').value,
+            lastServiceDate: document.getElementById('last-service-date').value || null,
+            nextServiceDate: document.getElementById('next-service-date').value || null,
+            systemType: document.getElementById('system-type').value,
+            notes: document.getElementById('contact-notes').value
+          };
+          
+          try {
+            // Save contact
+            const response = await fetch('/api/contacts', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(contact)
+            });
+            
+            if (response.ok) {
+              // Close modal
+              bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
+              
+              // Refresh contacts
+              loadContacts();
+              
+              // Show success message
+              alert('Contact saved successfully');
+            } else {
+              const error = await response.json();
+              alert(`Error: ${error.error || 'Failed to save contact'}`);
+            }
+          } catch (error) {
+            console.error('Error saving contact:', error);
+            alert('Error saving contact. Please try again.');
+          }
+        });
+      }
+      
+      // Import contacts
+      if (confirmImportBtn) {
+        confirmImportBtn.addEventListener('click', async function() {
+          const file = document.getElementById('csv-file').files[0];
+          if (!file) {
+            alert('Please select a CSV file');
+            return;
+          }
+          
+          try {
+            const hasHeader = document.getElementById('has-header').checked;
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
+              const contents = e.target.result;
+              const lines = contents.split('\n').filter(line => line.trim());
+              
+              const startRow = hasHeader ? 1 : 0;
+              const contacts = [];
+              
+              for (let i = startRow; i < lines.length; i++) {
+                const cells = parseCSVLine(lines[i]);
+                
+                if (cells.length >= 3) { // Require at least name and phone
+                  contacts.push({
+                    name: cells[0],
+                    email: cells[1] || '',
+                    phone: cells[2] || '',
+                    address: cells[3] || '',
+                    lastServiceDate: cells[4] || null,
+                    systemType: cells[5] || ''
+                  });
+                }
+              }
+              
+              if (contacts.length === 0) {
+                alert('No valid contacts found in CSV');
+                return;
+              }
+              
+              // Import contacts
+              const response = await fetch('/api/contacts/import', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ contacts })
+              });
+              
+              if (response.ok) {
+                const result = await response.json();
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('importContactsModal')).hide();
+                
+                // Refresh contacts
+                loadContacts();
+                
+                // Show success message
+                alert(`Successfully imported ${result.importedCount} contacts`);
+              } else {
+                const error = await response.json();
+                alert(`Error: ${error.error || 'Failed to import contacts'}`);
+              }
+            };
+            
+            reader.readAsText(file);
+          } catch (error) {
+            console.error('Error importing contacts:', error);
+            alert('Error importing contacts. Please try again.');
+          }
+        });
+      }
+      
+      // Load contacts when the tab is clicked
+      const contactsTab = document.querySelector('a[data-section="contacts"]');
+      if (contactsTab) {
+        contactsTab.addEventListener('click', function() {
+          loadContacts();
+        });
+      }
+      
+      // Search contacts
+      if (contactSearch) {
+        contactSearch.addEventListener('input', function() {
+          filterContacts(this.value);
+        });
+      }
+      
+      // Function to filter contacts
+      function filterContacts(query) {
+        query = query.toLowerCase();
+        const rows = document.querySelectorAll('#contacts-list tr.contact-row');
+        
+        rows.forEach(row => {
+          const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+          const phone = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+          const email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+          const address = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+          
+          if (name.includes(query) || phone.includes(query) || email.includes(query) || address.includes(query)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      }
+      
+      // Load contacts from API
+      window.loadContacts = async function() {
+        try {
+          const response = await fetch('/api/contacts');
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Update stats
+            document.getElementById('total-contacts-count').textContent = data.stats.total;
+            document.getElementById('maintenance-due-count').textContent = data.stats.maintenanceDue;
+            document.getElementById('new-contacts-count').textContent = data.stats.newThisMonth;
+            
+            // Render contacts
+            renderContacts(data.contacts);
+          } else {
+            const error = await response.json();
+            console.error('Error loading contacts:', error);
+          }
+        } catch (error) {
+          console.error('Error loading contacts:', error);
+        }
+      };
+      
+      // Render contacts in the table
+      function renderContacts(contacts) {
+        const contactsList = document.getElementById('contacts-list');
+        contactsList.innerHTML = '';
+        
+        if (contacts.length === 0) {
+          contactsList.innerHTML = `
+            <tr>
+              <td colspan="7" class="text-center p-4">
+                <p>No contacts found. Add a new contact or import from CSV.</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        // Filter for maintenance due contacts
+        const currentDate = new Date();
+        const maintenanceDue = contacts.filter(contact => {
+          if (!contact.nextServiceDate) return false;
+          const nextService = new Date(contact.nextServiceDate);
+          const daysUntilService = Math.floor((nextService - currentDate) / (1000 * 60 * 60 * 24));
+          return daysUntilService <= 30 && daysUntilService >= -15;
+        });
+        
+        // Render maintenance due contacts
+        const maintenanceDueList = document.getElementById('maintenance-due-list');
+        if (maintenanceDueList) {
+          maintenanceDueList.innerHTML = '';
+          
+          if (maintenanceDue.length === 0) {
+            maintenanceDueList.innerHTML = `
+              <tr>
+                <td colspan="6" class="text-center p-4">
+                  <p>No maintenance due found</p>
+                </td>
+              </tr>
+            `;
+          } else {
+            maintenanceDue.forEach(contact => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>${contact.name}</td>
+                <td>${contact.phone}</td>
+                <td>${contact.lastServiceDate ? new Date(contact.lastServiceDate).toLocaleDateString() : 'N/A'}</td>
+                <td>${contact.nextServiceDate ? new Date(contact.nextServiceDate).toLocaleDateString() : 'N/A'}</td>
+                <td>${contact.systemType || 'N/A'}</td>
+                <td>
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary" onclick="scheduleReminder('${contact.id}')">
+                      <i class="fas fa-calendar-plus"></i> Schedule
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="showContactActions('${contact.id}')">
+                      <i class="fas fa-comment-dots"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="editContact('${contact.id}')">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                  </div>
+                </td>
+              `;
+              maintenanceDueList.appendChild(tr);
+            });
+          }
+        }
+        
+        // Render all contacts
+        contacts.forEach(contact => {
+          const tr = document.createElement('tr');
+          tr.className = 'contact-row';
+          tr.innerHTML = `
+            <td>${contact.name}</td>
+            <td>${contact.phone}</td>
+            <td>${contact.email || 'N/A'}</td>
+            <td>${contact.address || 'N/A'}</td>
+            <td>${contact.lastServiceDate ? new Date(contact.lastServiceDate).toLocaleDateString() : 'N/A'}</td>
+            <td>${contact.nextServiceDate ? new Date(contact.nextServiceDate).toLocaleDateString() : 'N/A'}</td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editContact('${contact.id}')">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-success me-1" onclick="showContactActions('${contact.id}')">
+                  <i class="fas fa-comment-dots"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteContact('${contact.id}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          `;
+          contactsList.appendChild(tr);
+        });
+      }
+      
+      // Edit contact function
+      window.editContact = async function(id) {
+        try {
+          const response = await fetch('/api/contacts');
+          if (response.ok) {
+            const data = await response.json();
+            const contact = data.contacts.find(c => c.id === id);
+            
+            if (contact) {
+              // Fill form
+              document.getElementById('contact-id').value = contact.id;
+              document.getElementById('contact-name').value = contact.name;
+              document.getElementById('contact-email').value = contact.email || '';
+              document.getElementById('contact-phone').value = contact.phone;
+              document.getElementById('contact-address').value = contact.address || '';
+              document.getElementById('last-service-date').value = contact.lastServiceDate || '';
+              document.getElementById('next-service-date').value = contact.nextServiceDate || '';
+              document.getElementById('system-type').value = contact.systemType || '';
+              document.getElementById('contact-notes').value = contact.notes || '';
+              
+              // Update modal title
+              document.getElementById('contact-modal-title').textContent = 'Edit Contact';
+              
+              // Show modal
+              const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
+              contactModal.show();
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching contact:', error);
+        }
+      };
+      
+      // Delete contact function
+      window.deleteContact = async function(id) {
+        if (!confirm('Are you sure you want to delete this contact?')) {
+          return;
+        }
+        
+        try {
+          const response = await fetch(`/api/contacts/${id}`, {
+            method: 'DELETE'
+          });
+          
+          if (response.ok) {
+            // Refresh contacts
+            loadContacts();
+            
+            // Show success message
+            alert('Contact deleted successfully');
+          } else {
+            const error = await response.json();
+            alert(`Error: ${error.error || 'Failed to delete contact'}`);
+          }
+        } catch (error) {
+          console.error('Error deleting contact:', error);
+          alert('Error deleting contact. Please try again.');
+        }
+      };
+      
+      // Schedule reminder function
+      window.scheduleReminder = function(id) {
+        // Get contact
+        fetch('/api/contacts')
+          .then(response => response.json())
+          .then(data => {
+            const contact = data.contacts.find(c => c.id === id);
+            
+            if (contact) {
+              // Create reminder modal (this uses maintenance reminder functionality)
+              const reminderModal = new bootstrap.Modal(document.getElementById('reminderModal') || document.getElementById('create-reminder-modal'));
+              
+              // Fill reminder form if it exists
+              const nameField = document.getElementById('reminder-customer-name');
+              if (nameField) nameField.value = contact.name;
+              
+              const phoneField = document.getElementById('reminder-customer-phone');
+              if (phoneField) phoneField.value = contact.phone;
+              
+              const emailField = document.getElementById('reminder-customer-email');
+              if (emailField) emailField.value = contact.email || '';
+              
+              const typeField = document.getElementById('reminder-type');
+              if (typeField) typeField.value = 'Maintenance';
+              
+              // Show modal
+              reminderModal.show();
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching contact for reminder:', error);
+          });
+      };
+      
+      // Show contact actions modal
+      window.showContactActions = function(id) {
+        // Get contact from local storage
+        fetch('/api/contacts')
+          .then(response => response.json())
+          .then(data => {
+            const contact = data.contacts.find(c => c.id === id);
+            
+            if (contact) {
+              // Store contact data for use in message templates
+              window.currentContact = contact;
+              
+              // Set contact info in modal
+              document.getElementById('contact-name-display').textContent = contact.name;
+              document.getElementById('contact-phone-display').textContent = contact.phone;
+              
+              // Initialize modal
+              const actionModal = new bootstrap.Modal(document.getElementById('contactActionModal'));
+              actionModal.show();
+              
+              // Set up action buttons
+              setupActionButtons(contact);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching contact:', error);
+            alert('Error loading contact information. Please try again.');
+          });
+      };
+      
+      // Set up action buttons
+      function setupActionButtons(contact) {
+        // Get business info for review link
+        const businessSlug = window.businessInfo ? window.businessInfo.slug : '';
+        let reviewsLink = '';
+        
+        // Fetch business info to get the review link
+        fetch(`/api/reviews/${businessSlug}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.reviewsLink) {
+              reviewsLink = data.reviewsLink;
+              
+              // Update the review template with the actual link
+              const reviewTemplate = `Hi ${contact.name}, thank you for choosing us for your HVAC needs! We'd appreciate if you could take a moment to share your experience: ${reviewsLink}`;
+              messageTemplates['request-review'] = reviewTemplate;
+              
+              // If current action is review request, update the preview
+              if (document.querySelector('.tag-action[data-action="request-review"]').classList.contains('active')) {
+                messagePreview.value = reviewTemplate;
+                updateSmsLink(contact.phone, messagePreview.value);
+              }
+            }
+          })
+          .catch(err => console.error('Error fetching reviews link:', err));
+        
+        // Reference to message preview element
+        const messagePreview = document.getElementById('message-preview');
+        const smsLink = document.getElementById('prepare-sms-link');
+        
+        // Message templates
+        const messageTemplates = {
+          'request-review': `Hi ${contact.name}, thank you for choosing us for your HVAC needs! We'd appreciate if you could take a moment to share your experience: ${reviewsLink}`,
+          'schedule-service': `Hi ${contact.name}, it's time to schedule your next HVAC service. Would you like us to come by next week? Reply with your preferred day and time.`,
+          'maintenance-reminder': `Hi ${contact.name}, just a friendly reminder that your system is due for maintenance soon. Regular maintenance helps prevent breakdowns and extends the life of your equipment.`,
+          'payment-reminder': `Hi ${contact.name}, this is a reminder about your outstanding payment. Please let us know if you have any questions about your invoice.`,
+          'seasonal-promotion': `Hi ${contact.name}, we're running a special seasonal promotion! Get 15% off your next HVAC service when you schedule in the next two weeks.`,
+          'custom-message': `Hi ${contact.name}, `
+        };
+        
+        // Set up action button clicks
+        document.querySelectorAll('.tag-action').forEach(button => {
+          button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            document.querySelectorAll('.tag-action').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            
+            // Add active class to this button
+            this.classList.add('active');
+            
+            const action = this.dataset.action;
+            const message = messageTemplates[action] || '';
+            
+            // Set message in preview
+            messagePreview.value = message;
+            
+            // If it's custom message, focus and place cursor at the end
+            if (action === 'custom-message') {
+              messagePreview.focus();
+              messagePreview.setSelectionRange(message.length, message.length);
+            }
+            
+            // Update SMS link
+            updateSmsLink(contact.phone, message);
+          });
+        });
+        
+        // Update message preview on input
+        messagePreview.addEventListener('input', function() {
+          updateSmsLink(contact.phone, this.value);
+        });
+        
+        // Initial message - set to review request by default
+        messagePreview.value = messageTemplates['request-review'];
+        updateSmsLink(contact.phone, messagePreview.value);
+        
+        // Set request-review button as active by default
+        document.querySelector('.tag-action[data-action="request-review"]').classList.add('active');
+      }
+      
+      // Update SMS link
+      function updateSmsLink(phone, message) {
+        const smsLink = document.getElementById('prepare-sms-link');
+        const cleanPhone = phone.replace(/\D/g, ''); // Remove non-numeric characters
+        
+        // Create SMS link - works on both mobile and desktop
+        const encodedMessage = encodeURIComponent(message);
+        smsLink.href = `sms:${cleanPhone}?body=${encodedMessage}`;
+      }
+    });
+  </script>
+  
+  <!-- Job Modal -->
+  <div class="modal fade" id="jobModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="job-modal-title">Add New Job</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="job-form" class="needs-validation" novalidate>
+            <input type="hidden" id="job-id">
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="job-customer" class="form-label">Customer</label>
+                  <select class="form-select" id="job-customer" required>
+                    <option value="">Select Customer</option>
+                    <!-- Contacts will be loaded here -->
+                  </select>
+                  <div class="invalid-feedback">
+                    Please select a customer
+                  </div>
+                  <div class="mt-2">
+                    <a href="#" id="add-new-customer" class="small">
+                      <i class="fas fa-plus-circle"></i> Add New Customer
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="job-service-type" class="form-label">Service Type</label>
+                  <select class="form-select" id="job-service-type" required>
+                    <option value="">Select Service Type</option>
+                    <option value="AC Installation">AC Installation</option>
+                    <option value="AC Repair">AC Repair</option>
+                    <option value="AC Maintenance">AC Maintenance</option>
+                    <option value="Furnace Installation">Furnace Installation</option>
+                    <option value="Furnace Repair">Furnace Repair</option>
+                    <option value="Furnace Maintenance">Furnace Maintenance</option>
+                    <option value="Ductwork">Ductwork</option>
+                    <option value="Air Quality">Air Quality</option>
+                    <option value="Other HVAC">Other HVAC</option>
+                  </select>
+                  <div class="invalid-feedback">
+                    Please select a service type
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="job-date" class="form-label">Job Date</label>
+                  <input type="date" class="form-control" id="job-date" required>
+                  <div class="invalid-feedback">
+                    Please provide a job date
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="job-status" class="form-label">Status</label>
+                  <select class="form-select" id="job-status" required>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                  <div class="invalid-feedback">
+                    Please select a status
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="job-cost" class="form-label">Cost ($)</label>
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="job-cost" min="0" step="0.01" required>
+                    <div class="invalid-feedback">
+                      Please enter a valid cost
+                    </div>
+                  </div>
+                  <small class="form-text text-muted">Materials, labor & overhead</small>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="job-charge" class="form-label">Charge ($)</label>
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="job-charge" min="0" step="0.01" required>
+                    <div class="invalid-feedback">
+                      Please enter a valid charge amount
+                    </div>
+                  </div>
+                  <small class="form-text text-muted">Amount charged to customer</small>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="job-profit" class="form-label">Profit ($)</label>
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="job-profit" readonly>
+                  </div>
+                  <div class="form-text" id="job-profit-percentage">0% margin</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="job-description" class="form-label">Description</label>
+              <textarea class="form-control" id="job-description" rows="3"></textarea>
+            </div>
+            
+            <div class="mb-3">
+              <label for="job-notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="job-notes" rows="2"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="save-job">Save Job</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Job Detail Modal -->
+  <div class="modal fade" id="jobDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="job-detail-title">Job Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="job-detail-content">
+          <!-- Job details will be loaded here -->
+          <div class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading job details...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="edit-job-btn">Edit Job</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Revenue Report Modal -->
+  <div class="modal fade" id="revenueReportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Revenue Report</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text">From</span>
+                <input type="date" id="report-start-date" class="form-control">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text">To</span>
+                <input type="date" id="report-end-date" class="form-control">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">Total Revenue</h6>
+                  <div class="h3 fw-bold text-success" id="report-revenue">$0</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">Total Profit</h6>
+                  <div class="h3 fw-bold text-primary" id="report-profit">$0</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">Margin</h6>
+                  <div class="h3 fw-bold" id="report-margin">0%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-4">
+            <div class="card-body">
+              <h6 class="card-title">Service Type Breakdown</h6>
+              <div id="service-breakdown-chart" style="height: 250px;"></div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-title">Jobs In Report Period</h6>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Customer</th>
+                      <th>Service</th>
+                      <th>Charge</th>
+                      <th>Cost</th>
+                      <th>Profit</th>
+                    </tr>
+                  </thead>
+                  <tbody id="report-jobs-list">
+                    <!-- Report jobs will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="export-report">
+            <i class="fas fa-file-export"></i> Export
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Contact Action Modal (for tags and messages) -->
+  <div class="modal fade" id="contactActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="contact-action-title">Contact Actions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="contact-action-content">
+            <div class="contact-details mb-3 p-3 bg-light rounded">
+              <h6><span id="contact-name-display">Customer Name</span></h6>
+              <div id="contact-phone-display" class="text-muted">Phone Number</div>
+            </div>
+            
+            <div class="contact-tags mb-4">
+              <h6 class="mb-3">Quick Actions:</h6>
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <button class="btn btn-sm btn-outline-primary tag-action" data-action="request-review">
+                  <i class="fas fa-star me-1"></i> Request Review
+                </button>
+                <button class="btn btn-sm btn-outline-primary tag-action" data-action="schedule-service">
+                  <i class="fas fa-calendar-check me-1"></i> Schedule Service
+                </button>
+                <button class="btn btn-sm btn-outline-primary tag-action" data-action="maintenance-reminder">
+                  <i class="fas fa-tools me-1"></i> Maintenance Reminder
+                </button>
+                <button class="btn btn-sm btn-outline-primary tag-action" data-action="payment-reminder">
+                  <i class="fas fa-money-bill-wave me-1"></i> Payment Reminder
+                </button>
+                <button class="btn btn-sm btn-outline-primary tag-action" data-action="seasonal-promotion">
+                  <i class="fas fa-gift me-1"></i> Seasonal Promotion
+                </button>
+                <button class="btn btn-sm btn-outline-primary tag-action" data-action="custom-message">
+                  <i class="fas fa-edit me-1"></i> Custom Message
+                </button>
+              </div>
+            </div>
+            
+            <div id="message-preview-container">
+              <h6>Message Preview:</h6>
+              <div class="p-3 border rounded mb-3">
+                <textarea id="message-preview" class="form-control" rows="5"></textarea>
+              </div>
+              
+              <div class="text-muted small mb-3">
+                <p><i class="fas fa-info-circle me-2"></i> This message will be ready to send via SMS when you click "Prepare Message".</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a href="#" id="prepare-sms-link" class="btn btn-primary" target="_blank">
+            <i class="fas fa-sms me-1"></i> Prepare Message
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Jobs Section JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize event listeners for jobs section
+      const addJobButton = document.getElementById('add-job');
+      const saveJobButton = document.getElementById('save-job');
+      const jobReportButton = document.getElementById('job-report');
+      const exportReportButton = document.getElementById('export-report');
+      const jobFilterSelect = document.getElementById('job-filter');
+      const jobSearchInput = document.getElementById('job-search');
+      const jobCostInput = document.getElementById('job-cost');
+      const jobChargeInput = document.getElementById('job-charge');
+      
+      // Jobs section tab listener
+      const jobsTab = document.querySelector('.sidebar-link[data-section="jobs"]');
+      if (jobsTab) {
+        jobsTab.addEventListener('click', loadJobs);
+      }
+      
+      // Job action event listeners
+      if (addJobButton) addJobButton.addEventListener('click', showAddJobModal);
+      if (saveJobButton) saveJobButton.addEventListener('click', saveJob);
+      if (jobReportButton) jobReportButton.addEventListener('click', showRevenueReportModal);
+      if (exportReportButton) exportReportButton.addEventListener('click', exportRevenueReport);
+      if (jobFilterSelect) jobFilterSelect.addEventListener('change', filterJobs);
+      if (jobSearchInput) jobSearchInput.addEventListener('input', filterJobs);
+      
+      // Calculate profit when cost or charge changes
+      if (jobCostInput) jobCostInput.addEventListener('input', calculateProfit);
+      if (jobChargeInput) jobChargeInput.addEventListener('input', calculateProfit);
+    });
+    
+    // Global variables for jobs
+    let currentJobs = [];
+    
+    // Function to load jobs
+    function loadJobs() {
+      const jobsList = document.getElementById('jobs-list');
+      if (!jobsList) return;
+      
+      // Show loading state
+      jobsList.innerHTML = `
+        <tr>
+          <td colspan="9" class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading jobs...</p>
+          </td>
+        </tr>
+      `;
+      
+      // Fetch jobs from API
+      fetch('/api/jobs')
+        .then(response => response.json())
+        .then(data => {
+          // Store jobs for filtering
+          currentJobs = data.jobs || [];
+          
+          // Update stats
+          updateJobStats(data.stats);
+          
+          // Display jobs
+          displayJobs(currentJobs);
+          
+          // Load customer data for the job modal
+          loadCustomersForJobModal();
+        })
+        .catch(error => {
+          console.error('Error loading jobs:', error);
+          if (jobsList) {
+            jobsList.innerHTML = `
+              <tr>
+                <td colspan="9" class="text-center text-danger p-4">
+                  <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                  <p>Error loading jobs. Please try again later.</p>
+                </td>
+              </tr>
+            `;
+          }
+        });
+    }
+    
+    // Function to display jobs in the table
+    function displayJobs(jobs) {
+      const jobsList = document.getElementById('jobs-list');
+      if (!jobsList) return;
+      
+      // Clear previous content
+      jobsList.innerHTML = '';
+      
+      // Check if there are any jobs
+      if (!jobs || jobs.length === 0) {
+        jobsList.innerHTML = `
+          <tr>
+            <td colspan="9" class="text-center p-4">
+              <div class="empty-state">
+                <div class="empty-icon">
+                  <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h4>No jobs found</h4>
+                <p>Add your first job to start tracking revenue.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      // Sort jobs by date (newest first)
+      const sortedJobs = [...jobs].sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      // Add each job to the table
+      sortedJobs.forEach(job => {
+        const row = document.createElement('tr');
+        
+        // Format the date
+        const jobDate = new Date(job.date);
+        const formattedDate = jobDate.toLocaleDateString();
+        
+        // Format currency values
+        const cost = parseFloat(job.cost || 0).toFixed(2);
+        const charge = parseFloat(job.charge || 0).toFixed(2);
+        const profit = parseFloat(job.profit || 0).toFixed(2);
+        
+        // Set status class
+        let statusClass = '';
+        if (job.status === 'completed') {
+          statusClass = 'bg-success';
+        } else if (job.status === 'in-progress') {
+          statusClass = 'bg-primary';
+        } else if (job.status === 'scheduled') {
+          statusClass = 'bg-info';
+        } else if (job.status === 'cancelled') {
+          statusClass = 'bg-secondary';
+        }
+        
+        // Create row content
+        row.innerHTML = `
+          <td>${job.id.slice(-6)}</td>
+          <td>${job.customer}</td>
+          <td>${job.description}</td>
+          <td>${formattedDate}</td>
+          <td><span class="badge ${statusClass}">${job.status}</span></td>
+          <td>$${cost}</td>
+          <td>$${charge}</td>
+          <td>$${profit}</td>
+          <td>
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-primary" onclick="editJob('${job.id}')">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-danger" onclick="deleteJob('${job.id}')">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        
+        jobsList.appendChild(row);
+      });
+    }
+    
+    // Function to update job statistics
+    function updateJobStats(stats) {
+      if (!stats) return;
+      
+      // Update overview cards
+      const totalRevenue = document.getElementById('total-revenue');
+      const totalCosts = document.getElementById('total-costs');
+      const totalProfit = document.getElementById('total-profit');
+      const profitPercentage = document.getElementById('profit-percentage');
+      const jobCount = document.getElementById('job-count');
+      const completedCount = document.getElementById('completed-count');
+      const pendingCount = document.getElementById('pending-count');
+      
+      if (totalRevenue) totalRevenue.textContent = `$${stats.totalRevenue.toFixed(2)}`;
+      if (totalCosts) totalCosts.textContent = `$${stats.totalCost.toFixed(2)}`;
+      if (totalProfit) totalProfit.textContent = `$${stats.totalProfit.toFixed(2)}`;
+      if (profitPercentage) profitPercentage.textContent = `${stats.profitMargin.toFixed(1)}% margin`;
+      
+      // Update job counts
+      if (jobCount) jobCount.textContent = stats.jobCounts.total;
+      if (completedCount) completedCount.textContent = stats.jobCounts.completed;
+      if (pendingCount) pendingCount.textContent = 
+        (stats.jobCounts.scheduled || 0) + (stats.jobCounts.inProgress || 0);
+      
+      // Update charts
+      // updateRevenueChart(stats); // This would be implemented with Chart.js
+    }
+    
+    // Function to filter jobs
+    function filterJobs() {
+      const filterSelect = document.getElementById('job-filter');
+      const searchInput = document.getElementById('job-search');
+      
+      if (!filterSelect || !searchInput || !Array.isArray(currentJobs)) return;
+      
+      const filterValue = filterSelect.value;
+      const searchTerm = searchInput.value.toLowerCase();
+      
+      let filteredJobs = [...currentJobs];
+      
+      // Filter by status
+      if (filterValue !== 'all') {
+        filteredJobs = filteredJobs.filter(job => job.status === filterValue);
+      }
+      
+      // Filter by search term
+      if (searchTerm) {
+        filteredJobs = filteredJobs.filter(job => 
+          (job.customer && job.customer.toLowerCase().includes(searchTerm)) ||
+          (job.description && job.description.toLowerCase().includes(searchTerm)) ||
+          (job.technician && job.technician.toLowerCase().includes(searchTerm))
+        );
+      }
+      
+      // Display filtered jobs
+      displayJobs(filteredJobs);
+    }
+    
+    // Function to load customers for job modal dropdown
+    function loadCustomersForJobModal() {
+      const customerSelect = document.getElementById('job-customer');
+      if (!customerSelect) return;
+      
+      // Keep existing options
+      const existingOptions = Array.from(customerSelect.options);
+      const defaultOption = existingOptions.find(opt => opt.value === '');
+      
+      // Clear dropdown
+      customerSelect.innerHTML = '';
+      
+      // Add default option
+      if (defaultOption) {
+        customerSelect.appendChild(defaultOption);
+      } else {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Select Customer';
+        customerSelect.appendChild(option);
+      }
+      
+      // Fetch customers
+      fetch('/api/contacts')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.contacts && Array.isArray(data.contacts)) {
+            // Add customer options
+            data.contacts.forEach(contact => {
+              const option = document.createElement('option');
+              option.value = contact.name;
+              option.textContent = contact.name;
+              customerSelect.appendChild(option);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error loading customers:', error);
+        });
+    }
+    
+    // Function to show add job modal
+    function showAddJobModal() {
+      const jobModal = document.getElementById('jobModal');
+      if (!jobModal) return;
+      
+      // Reset form
+      const jobForm = document.getElementById('job-form');
+      if (jobForm) jobForm.reset();
+      
+      // Hide any validation messages
+      clearValidationErrors();
+      
+      // Set default values
+      const jobIdInput = document.getElementById('job-id');
+      const jobDateInput = document.getElementById('job-date');
+      const jobModalTitle = document.getElementById('job-modal-title');
+      
+      if (jobIdInput) jobIdInput.value = '';
+      if (jobModalTitle) jobModalTitle.textContent = 'Add New Job';
+      
+      // Set default date to today
+      if (jobDateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        jobDateInput.value = today;
+      }
+      
+      // Make sure customer dropdown is populated
+      loadCustomersForJobModal();
+      
+      // Initialize profit calculation
+      calculateProfit();
+      
+      // Show modal
+      const modal = new bootstrap.Modal(jobModal);
+      modal.show();
+    }
+    
+    // Function to edit existing job
+    function editJob(jobId) {
+      if (!jobId || !Array.isArray(currentJobs)) return;
+      
+      // Find the job
+      const job = currentJobs.find(j => j.id === jobId);
+      if (!job) {
+        alert('Job not found');
+        return;
+      }
+      
+      // Get form elements
+      const jobIdInput = document.getElementById('job-id');
+      const jobCustomerSelect = document.getElementById('job-customer');
+      const jobServiceTypeSelect = document.getElementById('job-service-type');
+      const jobDateInput = document.getElementById('job-date');
+      const jobStatusSelect = document.getElementById('job-status');
+      const jobCostInput = document.getElementById('job-cost');
+      const jobChargeInput = document.getElementById('job-charge');
+      const jobDescriptionTextarea = document.getElementById('job-description');
+      const jobNotesTextarea = document.getElementById('job-notes');
+      const jobModalTitle = document.getElementById('job-modal-title');
+      
+      // Update form fields
+      if (jobIdInput) jobIdInput.value = job.id;
+      if (jobCustomerSelect) jobCustomerSelect.value = job.customer || '';
+      if (jobServiceTypeSelect) jobServiceTypeSelect.value = job.description || '';
+      if (jobDateInput) jobDateInput.value = job.date || '';
+      if (jobStatusSelect) jobStatusSelect.value = job.status || 'pending';
+      if (jobCostInput) jobCostInput.value = job.cost || '';
+      if (jobChargeInput) jobChargeInput.value = job.charge || '';
+      if (jobDescriptionTextarea) jobDescriptionTextarea.value = job.description || '';
+      if (jobNotesTextarea) jobNotesTextarea.value = job.notes || '';
+      
+      // Update modal title
+      if (jobModalTitle) jobModalTitle.textContent = 'Edit Job';
+      
+      // Clear validation errors
+      clearValidationErrors();
+      
+      // Calculate profit
+      calculateProfit();
+      
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('jobModal'));
+      modal.show();
+    }
+    
+    // Function to save job (create or update)
+    function saveJob() {
+      // Get form elements
+      const jobForm = document.getElementById('job-form');
+      const jobIdInput = document.getElementById('job-id');
+      const jobCustomerSelect = document.getElementById('job-customer');
+      const jobServiceTypeSelect = document.getElementById('job-service-type');
+      const jobDateInput = document.getElementById('job-date');
+      const jobStatusSelect = document.getElementById('job-status');
+      const jobCostInput = document.getElementById('job-cost');
+      const jobChargeInput = document.getElementById('job-charge');
+      const jobDescriptionTextarea = document.getElementById('job-description');
+      const jobNotesTextarea = document.getElementById('job-notes');
+      
+      // Basic validation
+      if (!jobCustomerSelect || !jobServiceTypeSelect || !jobDateInput || !jobStatusSelect) {
+        alert('Form elements not found');
+        return;
+      }
+      
+      // Check required fields
+      if (!jobCustomerSelect.value) {
+        alert('Please select a customer');
+        jobCustomerSelect.focus();
+        return;
+      }
+      
+      if (!jobServiceTypeSelect.value) {
+        alert('Please select a service type');
+        jobServiceTypeSelect.focus();
+        return;
+      }
+      
+      if (!jobDateInput.value) {
+        alert('Please enter a job date');
+        jobDateInput.focus();
+        return;
+      }
+      
+      // Prepare job data
+      const jobData = {
+        customer: jobCustomerSelect.value,
+        description: jobServiceTypeSelect.value,
+        date: jobDateInput.value,
+        status: jobStatusSelect.value,
+        cost: parseFloat(jobCostInput.value || 0),
+        charge: parseFloat(jobChargeInput.value || 0),
+        notes: jobNotesTextarea ? jobNotesTextarea.value : ''
+      };
+      
+      // Determine if creating or updating
+      const jobId = jobIdInput ? jobIdInput.value : '';
+      let url = '/api/jobs';
+      let method = 'POST';
+      
+      if (jobId) {
+        url = `/api/jobs/${jobId}`;
+        method = 'PUT';
+      }
+      
+      // Send request to API
+      fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jobData)
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Close modal
+            const jobModal = bootstrap.Modal.getInstance(document.getElementById('jobModal'));
+            if (jobModal) jobModal.hide();
+            
+            // Reload jobs
+            loadJobs();
+            
+            // Show success message
+            showAlert('success', `Job ${jobId ? 'updated' : 'created'} successfully`);
+          } else {
+            alert(data.error || 'Error saving job');
+          }
+        })
+        .catch(error => {
+          console.error('Error saving job:', error);
+          alert('Error saving job. Please try again.');
+        });
+    }
+    
+    // Function to delete job
+    function deleteJob(jobId) {
+      if (!jobId) return;
+      
+      if (confirm('Are you sure you want to delete this job?')) {
+        fetch(`/api/jobs/${jobId}`, {
+          method: 'DELETE'
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Reload jobs
+              loadJobs();
+              
+              // Show success message
+              showAlert('success', 'Job deleted successfully');
+            } else {
+              alert(data.error || 'Error deleting job');
+            }
+          })
+          .catch(error => {
+            console.error('Error deleting job:', error);
+            alert('Error deleting job. Please try again.');
+          });
+      }
+    }
+    
+    // Function to calculate profit and margin
+    function calculateProfit() {
+      const costInput = document.getElementById('job-cost');
+      const chargeInput = document.getElementById('job-charge');
+      const profitInput = document.getElementById('job-profit');
+      const profitPercentageElem = document.getElementById('job-profit-percentage');
+      
+      if (!costInput || !chargeInput || !profitInput || !profitPercentageElem) return;
+      
+      const cost = parseFloat(costInput.value) || 0;
+      const charge = parseFloat(chargeInput.value) || 0;
+      const profit = charge - cost;
+      
+      // Update profit field
+      profitInput.value = profit.toFixed(2);
+      
+      // Calculate and update margin
+      let margin = 0;
+      if (charge > 0) {
+        margin = (profit / charge) * 100;
+      }
+      
+      // Update margin text with color coding
+      profitPercentageElem.textContent = `${margin.toFixed(1)}% margin`;
+      
+      if (margin >= 30) {
+        profitPercentageElem.className = 'form-text text-success';
+      } else if (margin >= 15) {
+        profitPercentageElem.className = 'form-text text-primary';
+      } else if (margin >= 0) {
+        profitPercentageElem.className = 'form-text text-warning';
+      } else {
+        profitPercentageElem.className = 'form-text text-danger';
+      }
+    }
+    
+    // Function to show revenue report modal
+    function showRevenueReportModal() {
+      // Initialize default dates (this month)
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      
+      const startDateInput = document.getElementById('report-start-date');
+      const endDateInput = document.getElementById('report-end-date');
+      
+      if (startDateInput) startDateInput.value = firstDay.toISOString().split('T')[0];
+      if (endDateInput) endDateInput.value = lastDay.toISOString().split('T')[0];
+      
+      // Generate report data
+      generateRevenueReport();
+      
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('revenueReportModal'));
+      modal.show();
+    }
+    
+    // Function to generate revenue report
+    function generateRevenueReport() {
+      // This would filter jobs based on date range and generate report data
+      // For now, we'll just use all jobs
+      if (!Array.isArray(currentJobs) || currentJobs.length === 0) {
+        showReportEmptyState();
+        return;
+      }
+      
+      // Calculate totals
+      let totalRevenue = 0;
+      let totalCost = 0;
+      let totalProfit = 0;
+      
+      currentJobs.forEach(job => {
+        totalRevenue += parseFloat(job.charge || 0);
+        totalCost += parseFloat(job.cost || 0);
+        totalProfit += parseFloat(job.profit || 0);
+      });
+      
+      // Calculate margin
+      const margin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+      
+      // Update report summary
+      const revenueElem = document.getElementById('report-revenue');
+      const profitElem = document.getElementById('report-profit');
+      const marginElem = document.getElementById('report-margin');
+      
+      if (revenueElem) revenueElem.textContent = `$${totalRevenue.toFixed(2)}`;
+      if (profitElem) profitElem.textContent = `$${totalProfit.toFixed(2)}`;
+      if (marginElem) marginElem.textContent = `${margin.toFixed(1)}%`;
+      
+      // Update jobs list
+      const reportJobsList = document.getElementById('report-jobs-list');
+      if (reportJobsList) {
+        reportJobsList.innerHTML = '';
+        
+        // Sort jobs by date (newest first)
+        const sortedJobs = [...currentJobs].sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // Add each job to the table
+        sortedJobs.forEach(job => {
+          const row = document.createElement('tr');
+          
+          // Format the date
+          const jobDate = new Date(job.date);
+          const formattedDate = jobDate.toLocaleDateString();
+          
+          // Format currency values
+          const cost = parseFloat(job.cost || 0).toFixed(2);
+          const charge = parseFloat(job.charge || 0).toFixed(2);
+          const profit = parseFloat(job.profit || 0).toFixed(2);
+          
+          row.innerHTML = `
+            <td>${formattedDate}</td>
+            <td>${job.customer}</td>
+            <td>${job.description}</td>
+            <td>$${charge}</td>
+            <td>$${cost}</td>
+            <td>$${profit}</td>
+          `;
+          
+          reportJobsList.appendChild(row);
+        });
+      }
+      
+      // Update charts
+      // This would use Chart.js to create charts
+    }
+    
+    // Function to show empty state for report
+    function showReportEmptyState() {
+      const revenueElem = document.getElementById('report-revenue');
+      const profitElem = document.getElementById('report-profit');
+      const marginElem = document.getElementById('report-margin');
+      
+      if (revenueElem) revenueElem.textContent = '$0';
+      if (profitElem) profitElem.textContent = '$0';
+      if (marginElem) marginElem.textContent = '0%';
+      
+      const reportJobsList = document.getElementById('report-jobs-list');
+      if (reportJobsList) {
+        reportJobsList.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center p-3">No jobs found in the selected date range</td>
+          </tr>
+        `;
+      }
+    }
+    
+    // Function to export revenue report
+    function exportRevenueReport() {
+      alert('Export feature coming soon!');
+      // This would generate a CSV or PDF file with the report data
+    }
+    
+    // Function to clear validation errors
+    function clearValidationErrors() {
+      const invalidFields = document.querySelectorAll('.is-invalid');
+      invalidFields.forEach(field => {
+        field.classList.remove('is-invalid');
+      });
+    }
+    
+    // Function to show alert
+    function showAlert(type, message) {
+      // Create alert element
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show fixed-bottom m-3`;
+      alertDiv.style.width = 'auto';
+      alertDiv.style.right = '1rem';
+      alertDiv.style.bottom = '1rem';
+      alertDiv.style.left = 'auto';
+      alertDiv.style.maxWidth = '400px';
+      
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      // Add to document
+      document.body.appendChild(alertDiv);
+      
+      // Remove after 5 seconds
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          const bsAlert = new bootstrap.Alert(alertDiv);
+          bsAlert.close();
+        }
+      }, 5000);
+    }
   </script>
 </body>
 </html>

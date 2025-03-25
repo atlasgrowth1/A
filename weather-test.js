@@ -1,15 +1,16 @@
 const axios = require('axios');
 
-// The business slug to test with
-const businessSlug = 'stegallheatingairconditioningandplumbing';
+// Test coordinates (Birmingham, AL)
+const lat = 33.5186;
+const lon = -86.8104;
 
 // Function to test the weather API
 async function testWeatherAPI() {
   try {
-    console.log(`Testing weather API for business slug: ${businessSlug}`);
+    console.log(`Testing weather API for coordinates: ${lat}, ${lon}`);
     
-    // Make request to the weather API endpoint
-    const response = await axios.get(`http://localhost:3000/api/weather/${businessSlug}`);
+    // Make request to the weather API endpoint with coordinates
+    const response = await axios.get(`http://localhost:3000/api/weather?lat=${lat}&lon=${lon}`);
     
     // Log the basic structure of the response (not the entire data which could be large)
     console.log('API Response Status:', response.status);
